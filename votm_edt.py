@@ -721,7 +721,7 @@ class Settings(tk.Frame):
                              command=lambda: self.tkn_gen(ent_tkn))
         gen_tkn.pack(side='left', fill='x', expand=1)
 
-        vw_tkn = ttk.Button(lbfrm_tkn_btm, text='View Tokens')
+        vw_tkn = ttk.Button(lbfrm_tkn_btm, text='View Tokens', command=lambda: Token_Show())
         vw_tkn.pack(side='left', padx=(0, 10))
 
         del_tkn = ttk.Button(lbfrm_tkn_btm, text='Delete Tokens', command=lambda: self.tkn_del())
@@ -968,6 +968,86 @@ class Result_Show_Sep(tk.Tk):
                 else:
                     wrksht.write(row, i, '-', val_format)
             wrkbk.close()
+            mg.showinfo('Info', 'File Saved.', parent=self)
+
+    def flscrn(self):
+        """Toggles b/w Fullscreen mode."""
+        if self.flval == 0:
+            self.flval = 1
+            self.attributes('-fullscreen', True)
+        else:
+            self.flval = 0
+            self.attributes('-fullscreen', False)
+
+    def r_navbar(self):
+        """Bottom sided navbar for Result Window"""
+        navbar = tk.Frame(self)
+        navbar.pack(side='bottom', expand=0, fill='x')
+
+        navx = tk.Button(navbar, text='X', highlightthickness=0, bg='#FF3232', activebackground='#FF4C4C', takefocus=0,
+                         relief='groove', bd=1, fg='#EFEFEF', height=2, command=self.destroy, font=('Segoe UI', 10, 'bold'))
+        navx.pack(side='left', fill='x', expand=1, anchor='s')
+
+        navhlp = tk.Button(navbar, text='≡', highlightthickness=0, bg='#303030', activebackground='#6D6D6D', takefocus=0,
+                           relief='groove', bd=1, fg='#EFEFEF', height=2, command=lambda: self.flscrn(), font=('Segoe UI', 10, 'bold'))
+        navhlp.pack(side='left', fill='x', expand=1, anchor='s')
+
+class Token_Show(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        x = self.winfo_screenwidth()/2 - 400
+        y = self.winfo_screenheight()/2 - 300 - 40
+        self.title('Tokens')
+        self.geometry('800x600+%d+%d' % (x, y))
+        self.iconbitmap(Root.DATAFILE[0])
+        self.minsize(800, 600)
+
+        menu_bar = tk.Menu(self)
+        self.configure(menu=menu_bar)
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label='File', menu=file_menu)
+        file_menu.add_command(label='Save as Text',
+                              command=lambda: self.save())
+        file_menu.add_separator()
+        file_menu.add_command(label='Exit', command=self.destroy)
+        self.flval = 0
+        self.r_navbar()
+
+        h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
+        h_scrlbar.pack(side='bottom', fill='x')
+        self.res_tbl = ScrolledText(self, font=(
+            'Consolas', 14), wrap=tk.NONE, xscrollcommand=h_scrlbar.set)
+        self.res_tbl.pack(fill='both', expand=1)
+        h_scrlbar.config(command=self.res_tbl.xview)
+
+        with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
+            tkns = ''
+            try:
+                tkn_lst = eval(f.read())
+                line = len(tkn_lst)//7
+                if (len(tkn_lst)/7)-line > 0:
+                    line += 1
+                for _ in range(line):
+                    tkn_tab = tabulate([tkn_lst[:7]],
+                            tablefmt='fancy_grid', numalign='center', stralign='center')
+                    tkns += tkn_tab+'\n'
+            except:
+                pass
+
+        self.res_tbl.insert(0.0, tkns)
+        self.res_tbl.config(state='disabled')
+
+    def save(self):
+        """Saves the fetched data through a dialog box."""
+        fdir = path.dirname(__file__)
+        fname = asksaveasfilename(
+            parent=self, initialdir=fdir, filetypes=(('Text Documents', '*.txt'),))
+        if fname != '':
+            dir_fle = f'{fname}'
+            if not dir_fle.endswith('.txt'):
+                dir_fle += '.txt'
+            with open(f'{dir_fle}', 'w', encoding='utf-8') as f:
+                f.write(self.res_tbl.get(1.0, tk.END))
             mg.showinfo('Info', 'File Saved.', parent=self)
 
     def flscrn(self):
