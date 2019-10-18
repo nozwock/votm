@@ -10,7 +10,7 @@ from string import digits
 from random import choice
 
 __author__ = 'Sagar Kumar'
-__version__ = '0.9.68'
+__version__ = '0.9.7'
 
 
 class Sql_init:

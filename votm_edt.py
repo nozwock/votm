@@ -834,9 +834,9 @@ class Settings(tk.Frame):
 class Result_Show_Sep(tk.Tk):
     """Constructs a Result window to the show the fetched data and to save it."""
 
-    def __init__(self, yr: str, *args: '(String of fields to be shown)'):
+    def __init__(self, __yr: str, *__args: '(String of fields to be shown)', key=1):
         super().__init__()
-        args = str(args).lstrip("('").rstrip("',)")
+        __args = str(__args).lstrip("('").rstrip("',)")
         x = self.winfo_screenwidth()/2 - 400
         y = self.winfo_screenheight()/2 - 300 - 40
         self.title('Result')
@@ -850,16 +850,17 @@ class Result_Show_Sep(tk.Tk):
         menu_bar.add_cascade(label='File', menu=file_menu)
         file_menu.add_command(label='Save as Text',
                               command=lambda: self.save())
-        file_menu.add_command(label='Export to Excel',
-                              command=lambda: self.exp_exl(res, col))
+        if key == 1:
+            file_menu.add_command(label='Export to Excel',
+                                  command=lambda: self._exp_exl(res, col))
         file_menu.add_separator()
         file_menu.add_command(label='Exit', command=self.destroy)
 
-        hedbar = tk.Frame(self)
-        hedbar.pack(side='top', fill='x')
-        lblres = tk.Label(hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
+        __hedbar = tk.Frame(self)
+        __hedbar.pack(side='top', fill='x')
+        __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
                           fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
-        lblres.pack(fill='x', ipady=10)
+        __lblres.pack(fill='x', ipady=10)
         self.flval = 0
         self.r_navbar()
         h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
@@ -869,26 +870,26 @@ class Result_Show_Sep(tk.Tk):
             'Consolas', 14), wrap=tk.NONE, xscrollcommand=h_scrlbar.set)
         self.res_tbl.pack(fill='both', expand=1)
         h_scrlbar.config(command=self.res_tbl.xview)
+        if key == 1:
+            if __yr != 'merged':
+                res, col = Sql_init(0, yr=__yr).result(__args)
+            else:
+                res, col = Sql_init(0, dtb=1).result(__args)
+            _pr = tabulate(res, col, tablefmt='fancy_grid',
+                          missingval='-', numalign='center', stralign='center')
+            _total = self._total(['STAFF', 'STUDENT', 'CLASS', 'SEC'], res, col)
+            if self._ttl != []:
+                _pr += '\n'+tabulate([['TOTAL']], tablefmt='fancy_grid')
+            _pr += '\n'+tabulate(_total, headers='firstrow',
+                                tablefmt='fancy_grid', numalign='center', stralign='center')
+            self.res_tbl.insert(0.0, _pr)
+            self.res_tbl.config(state='disabled')
 
-        if yr != 'merged':
-            res, col = Sql_init(0, yr=yr).result(args)
-        else:
-            res, col = Sql_init(0, dtb=1).result(args)
-        pr = tabulate(res, col, tablefmt='fancy_grid',
-                      missingval='-', numalign='center', stralign='center')
-        total = self.total(['STAFF', 'STUDENT', 'CLASS', 'SEC'], res, col)
-        if self.ttl != []:
-            pr += '\n'+tabulate([['TOTAL']], tablefmt='fancy_grid')
-        pr += '\n'+tabulate(total, headers='firstrow',
-                            tablefmt='fancy_grid', numalign='center', stralign='center')
-        self.res_tbl.insert(0.0, pr)
-        self.res_tbl.config(state='disabled')
-
-    def total(self, expt: list, *args: '(list, list)'):
+    def _total(self, expt: list, *args: '(list, list)'):
         """To get total of result."""
         res, col = args
         ind = [i for i in range(len(list(col))) if col[i] not in expt]
-        self.ttl = []
+        self._ttl = []
         for i in ind:
             _ = 0
             for j in range(len([list(i) for i in res])):
@@ -896,9 +897,9 @@ class Result_Show_Sep(tk.Tk):
                     _ += [list(i) for i in res][j][i]
                 except:
                     continue
-            self.ttl.append(_)
+            self._ttl.append(_)
         col = [col[i] for i in range(len(col)) if i in ind]
-        return col, self.ttl if self.ttl != [] else ''
+        return col, self._ttl if self._ttl != [] else ''
 
     def save(self):
         """Saves the fetched data through a dialog box."""
@@ -913,7 +914,7 @@ class Result_Show_Sep(tk.Tk):
                 f.write(self.res_tbl.get(1.0, tk.END))
             mg.showinfo('Info', 'File Saved.', parent=self)
 
-    def exp_exl(self, *args: '(list, list)'):
+    def _exp_exl(self, *args: '(list, list)'):
         """Exports the fetched data in a XLSX format."""
         val, col, = args
         fdir = path.dirname(__file__)
@@ -958,7 +959,7 @@ class Result_Show_Sep(tk.Tk):
             # Writing Total
             ind = [i for i in range(len(col)) if col[i]
                    not in ['CLASS', 'SEC']]
-            ttl = self.total(['CLASS', 'SEC'], val, col)
+            ttl = self._total(['CLASS', 'SEC'], val, col)
             _ = 0
             wrksht.write(row-1, 0, 'Total:', head_format)
             for i in range(len(col)):
@@ -992,34 +993,10 @@ class Result_Show_Sep(tk.Tk):
                            relief='groove', bd=1, fg='#EFEFEF', height=2, command=lambda: self.flscrn(), font=('Segoe UI', 10, 'bold'))
         navhlp.pack(side='left', fill='x', expand=1, anchor='s')
 
-class Token_Show(tk.Tk):
+class Token_Show(Result_Show_Sep):
     def __init__(self):
-        super().__init__()
-        x = self.winfo_screenwidth()/2 - 400
-        y = self.winfo_screenheight()/2 - 300 - 40
+        super().__init__(None, None, key=0)
         self.title('Tokens')
-        self.geometry('800x600+%d+%d' % (x, y))
-        self.iconbitmap(Root.DATAFILE[0])
-        self.minsize(800, 600)
-
-        menu_bar = tk.Menu(self)
-        self.configure(menu=menu_bar)
-        file_menu = tk.Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label='File', menu=file_menu)
-        file_menu.add_command(label='Save as Text',
-                              command=lambda: self.save())
-        file_menu.add_separator()
-        file_menu.add_command(label='Exit', command=self.destroy)
-        self.flval = 0
-        self.r_navbar()
-
-        h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
-        h_scrlbar.pack(side='bottom', fill='x')
-        self.res_tbl = ScrolledText(self, font=(
-            'Consolas', 14), wrap=tk.NONE, xscrollcommand=h_scrlbar.set)
-        self.res_tbl.pack(fill='both', expand=1)
-        h_scrlbar.config(command=self.res_tbl.xview)
-
         with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
             tkns = ''
             try:
@@ -1027,8 +1004,10 @@ class Token_Show(tk.Tk):
                 line = len(tkn_lst)//7
                 if (len(tkn_lst)/7)-line > 0:
                     line += 1
+                n = 0
                 for _ in range(line):
-                    tkn_tab = tabulate([tkn_lst[:7]],
+                    n += 7
+                    tkn_tab = tabulate([tkn_lst[n-7:n]],
                             tablefmt='fancy_grid', numalign='center', stralign='center')
                     tkns += tkn_tab+'\n'
             except:
@@ -1036,42 +1015,6 @@ class Token_Show(tk.Tk):
 
         self.res_tbl.insert(0.0, tkns)
         self.res_tbl.config(state='disabled')
-
-    def save(self):
-        """Saves the fetched data through a dialog box."""
-        fdir = path.dirname(__file__)
-        fname = asksaveasfilename(
-            parent=self, initialdir=fdir, filetypes=(('Text Documents', '*.txt'),))
-        if fname != '':
-            dir_fle = f'{fname}'
-            if not dir_fle.endswith('.txt'):
-                dir_fle += '.txt'
-            with open(f'{dir_fle}', 'w', encoding='utf-8') as f:
-                f.write(self.res_tbl.get(1.0, tk.END))
-            mg.showinfo('Info', 'File Saved.', parent=self)
-
-    def flscrn(self):
-        """Toggles b/w Fullscreen mode."""
-        if self.flval == 0:
-            self.flval = 1
-            self.attributes('-fullscreen', True)
-        else:
-            self.flval = 0
-            self.attributes('-fullscreen', False)
-
-    def r_navbar(self):
-        """Bottom sided navbar for Result Window"""
-        navbar = tk.Frame(self)
-        navbar.pack(side='bottom', expand=0, fill='x')
-
-        navx = tk.Button(navbar, text='X', highlightthickness=0, bg='#FF3232', activebackground='#FF4C4C', takefocus=0,
-                         relief='groove', bd=1, fg='#EFEFEF', height=2, command=self.destroy, font=('Segoe UI', 10, 'bold'))
-        navx.pack(side='left', fill='x', expand=1, anchor='s')
-
-        navhlp = tk.Button(navbar, text='≡', highlightthickness=0, bg='#303030', activebackground='#6D6D6D', takefocus=0,
-                           relief='groove', bd=1, fg='#EFEFEF', height=2, command=lambda: self.flscrn(), font=('Segoe UI', 10, 'bold'))
-        navhlp.pack(side='left', fill='x', expand=1, anchor='s')
-
 
 if __name__ == '__main__':
     root = Root()
