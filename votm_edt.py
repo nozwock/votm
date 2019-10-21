@@ -9,9 +9,10 @@ from ttkthemes import ThemedTk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
-from tkinter.filedialog import asksaveasfilename, askopenfilenames
-from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Ent_Box, Tokens, __author__, __version__
+from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
+from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
 from tabulate import tabulate
+from shutil import copyfile
 import xlsxwriter
 
 
@@ -47,6 +48,7 @@ class Win(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
         self.overrideredirect(1)
+        Write_Default()
 
         self.config(bg=Win.SM_BG_HEX, relief='groove',
                     highlightbackground='#000000', highlightcolor='#000000', highlightthickness=1)
@@ -87,7 +89,6 @@ class Win(tk.Toplevel):
             self.master.destroy()
             exit()
 
-        Write_Default()
         if Write_Default.exist is 1:
             mg.showinfo('One-Time Process',
                         'Some default configuration files has been saved.', parent=self)
@@ -239,7 +240,7 @@ class Edit(tk.Frame):
         tab.add(clss, text='Class & Sec')
         tab.pack(side='right', expand=True, fill='both')
         # Cand Frame__________________________
-        post = list(Access_Config().cand_config.keys())
+        post = [eval(i)[0] for i in list(Access_Config().cand_config.keys())]
         cand_vw_ed = ttk.LabelFrame(cand, text='View/Edit', padding=10)
         cand_vw_ed.pack(pady=(48, 10))
         cand_vw_ed_top = tk.Frame(cand_vw_ed, bg=Win.SM_BG_HEX)
@@ -290,14 +291,14 @@ class Edit(tk.Frame):
         cand_clr = ttk.Button(cand, text='Clear', padding=10, style='m.TButton', command=lambda: (
             self.wrt(1, Default_Config.candidate_config), mg.showinfo('Candidancy', 'Cleared!', parent=self)), takefocus=0)
         cand_clr.pack()
-        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[cand_vw_ed_pst.get(
-        )]), cand_vw_ed_cand.set(''), self.cur(cand_vw_ed_cand), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
+        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[Cand_Check(cand_vw_ed_pst.get(
+        )).get()]), cand_vw_ed_cand.set(''), self.cur(cand_vw_ed_cand), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
         cand_vw_ed_cand.bind('<<ComboboxSelected>>', lambda event: (
             cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
         cand_add_pst.bind('<<ComboboxSelected>>',
                           lambda event: cand_add_ent.delete(0, tk.END))
         cand_del_pst.bind('<<ComboboxSelected>>', lambda event: (cand_del_cand.config(
-            values=Access_Config().cand_config[cand_del_pst.get()]), cand_del_cand.set(''), self.cur(cand_del_cand)))
+            values=Access_Config().cand_config[Cand_Check(cand_del_pst.get()).get()]), cand_del_cand.set(''), self.cur(cand_del_cand)))
         # Clss&Sec Frame__________________________
         clss_lst = list(Access_Config().clss_config.keys())
 
@@ -376,7 +377,8 @@ class Edit(tk.Frame):
     def wrt(fle: int, cfg: str):
         """Writes Default config. files."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[fle]}', 'w') as f:
-            f.write(str(cfg))
+            cfg = Crypt().encrypt(str(cfg), SECRET_KEY)
+            f.write(cfg)
             f.flush()
 
     def wrt_edt(self, key: ttk.Combobox, pos: ttk.Combobox, val: tk.Entry):
@@ -384,11 +386,12 @@ class Edit(tk.Frame):
         cfg = Access_Config().cand_config
         if val.get().strip() != '':
             try:
-                cfg[key.get()][cfg[key.get()].index(
+                cfg[Cand_Check(key.get()).get()][cfg[Cand_Check(key.get()).get()].index(
                     pos.get())] = val.get().strip()
                 self.wrt(1, cfg)
                 pos.set(val.get())
-                pos.config(values=Access_Config().cand_config[key.get()])
+                pos.config(values=Access_Config(
+                ).cand_config[Cand_Check(key.get()).get()])
             except:
                 mg.showerror('Error', 'No Canidate was selected.', parent=self)
         else:
@@ -399,7 +402,7 @@ class Edit(tk.Frame):
         cfg = Access_Config().cand_config
         if val.get().strip() != '':
             try:
-                cfg[key.get()].append(val.get().strip())
+                cfg[Cand_Check(key.get()).get()].append(val.get().strip())
                 self.wrt(1, cfg)
             except:
                 mg.showerror('Error', 'Select a Post first.', parent=self)
@@ -410,10 +413,11 @@ class Edit(tk.Frame):
         """Deletes value from candidate file."""
         cfg = Access_Config().cand_config
         try:
-            cfg[key.get()].remove(val.get())
+            cfg[Cand_Check(key.get()).get()].remove(val.get())
             self.wrt(1, cfg)
             val.set('')
-            val.config(values=Access_Config().cand_config[key.get()])
+            val.config(values=Access_Config(
+            ).cand_config[Cand_Check(key.get()).get()])
             val.current(0)
         except (ValueError, KeyError):
             val.set('')
@@ -573,8 +577,13 @@ class Result(tk.Frame):
                         f.write(f'{str(i)},\n')
                         f.flush()
                     f.write('))')
+                with open(dir_fle, 'r') as f:
+                    rd = Crypt().encrypt(str(f.read()), SECRET_KEY)
+                with open(dir_fle, 'w') as f:
+                    f.write(rd)
                     mg.showinfo(
                         'Info', 'Merge file has been generated.', parent=self)
+
         except:
             mg.showerror(
                 'Error', 'No Data exists to create Merge file from.', parent=self)
@@ -607,7 +616,8 @@ class Result(tk.Frame):
                 mrg_tbl_data = []
                 for dirc in mrg:
                     with open(dirc, 'r') as f:
-                        mrg_tbl_data.append(eval(f.read()))
+                        mrg_tbl_data.append(
+                            eval(Crypt().decrypt(str(f.read()), SECRET_KEY)))
                 Sql_init(0, dtb=1).mrg_dtb_res(mrg_tbl_n, mrg_tbl_data)
         else:
             mg.showwarning('Alert', 'No Merge file is selected!', parent=self)
@@ -616,18 +626,29 @@ class Result(tk.Frame):
         """Creates a string from a list of columns to be shown and it is passed to the Result window."""
         try:
             if self.shw_db.get() != 'merged':
-                pst_cand, _ = Sql_init(0).cols(self.shw_db.get())
+                pst_cand = Sql_init(0).cols(self.shw_db.get())[0][4:]
             else:
-                pst_cand, _ = Sql_init(0, dtb=1).cols(self.shw_db.get())
-            hb = (str([i for i in pst_cand if i.startswith('HB')]
-                      ).lstrip('[').rstrip(']')).replace("'", "")
-            vhb = (str([i for i in pst_cand if i.startswith('VHB')]
-                       ).lstrip('[').rstrip(']')).replace("'", "")
-            hg = (str([i for i in pst_cand if i.startswith('HG')]
-                      ).lstrip('[').rstrip(']')).replace("'", "")
-            vhg = (str([i for i in pst_cand if i.startswith('VHG')]
-                       ).lstrip('[').rstrip(']')).replace("'", "")
-            vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
+                pst_cand = Sql_init(0, dtb=1).cols(self.shw_db.get())[0][4:]
+            shrt = [i[:3].strip('_') for i in pst_cand]
+            count = []
+            for i in shrt:
+                if i not in count:
+                    count.append(i)
+            vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC']
+            for i in range(len(count)):
+                exec(
+                    f"{shrt[i].lower()}=(str([i for i in pst_cand if i.startswith('{shrt[i]}')]).lstrip('[').rstrip(']')).replace(\"'\", \"\")")
+                exec(f'vals.append({shrt[i].lower()})')
+
+            # hb = (str([i for i in pst_cand if i.startswith('HB')]
+            #          ).lstrip('[').rstrip(']')).replace("'", "")
+            # vhb = (str([i for i in pst_cand if i.startswith('VHB')]
+            #           ).lstrip('[').rstrip(']')).replace("'", "")
+            # hg = (str([i for i in pst_cand if i.startswith('HG')]
+            #          ).lstrip('[').rstrip(']')).replace("'", "")
+            # vhg = (str([i for i in pst_cand if i.startswith('VHG')]
+            #           ).lstrip('[').rstrip(']')).replace("'", "")
+            #vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
             args = []
             for i in range(len(self.var_val_lst)):
                 if self.var_val_lst[i] == 1:
@@ -694,8 +715,20 @@ class Settings(tk.Frame):
         lbl_hed_dtb = ttk.LabelFrame(
             frm_top, text='Delete Database', padding=10)
         lbl_hed_dtb.pack(side='left', padx=(0, 40))
+
+        # Import/Export_______________________________
+        lbl_hed_imp_exp = ttk.LabelFrame(
+            frm_btm, text='Import/Export', padding=10)
+        lbl_hed_imp_exp.pack(side='left', padx=(0, 20), fill='both')
+        imp_btn = ttk.Button(
+            lbl_hed_imp_exp, text='Import Settings', command=lambda: self.imp_set())
+        exp_btn = ttk.Button(
+            lbl_hed_imp_exp, text='Export Settings', command=lambda: self.exp_set())
+        imp_btn.pack(pady=(0, 20), fill='both', expand=1)
+        exp_btn.pack(fill='both', expand=1)
+
         lbl_hed_bse = ttk.LabelFrame(frm_btm, text='Advanced', padding=10)
-        lbl_hed_bse.pack()
+        lbl_hed_bse.pack(side='left')
         # Database Settings_______________________________
         dtb_yr = ttk.Combobox(
             lbl_hed_dtb, values=Yr_fle().yr, state='readonly')
@@ -707,9 +740,9 @@ class Settings(tk.Frame):
         # Tokens Settings_______________________________
         lbfrm_tkn = ttk.LabelFrame(frm_top, text='Tokens', padding=10)
         lbfrm_tkn.pack(side='left')
-        lbfrm_tkn_top = tk.Frame(lbfrm_tkn)
+        lbfrm_tkn_top = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
         lbfrm_tkn_top.pack(side='top', pady=(0, 10), fill='x')
-        lbfrm_tkn_btm = tk.Frame(lbfrm_tkn)
+        lbfrm_tkn_btm = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
         lbfrm_tkn_btm.pack(side='top')
 
         tkn_reg = self.register(self.tkn_check)
@@ -721,15 +754,17 @@ class Settings(tk.Frame):
                              command=lambda: self.tkn_gen(ent_tkn))
         gen_tkn.pack(side='left', fill='x', expand=1)
 
-        vw_tkn = ttk.Button(lbfrm_tkn_btm, text='View Tokens', command=lambda: Token_Show())
+        vw_tkn = ttk.Button(lbfrm_tkn_btm, text='View Tokens',
+                            command=lambda: Token_Show())
         vw_tkn.pack(side='left', padx=(0, 10))
 
-        del_tkn = ttk.Button(lbfrm_tkn_btm, text='Delete Tokens', command=lambda: self.tkn_del())
+        del_tkn = ttk.Button(
+            lbfrm_tkn_btm, text='Delete Tokens', command=lambda: self.tkn_del())
         del_tkn.pack(side='left')
         # Base Settings_______________________________
         lbfrm_bse_passwd = ttk.LabelFrame(
             lbl_hed_bse, text='Password', padding=10)
-        lbfrm_bse_passwd.pack(side='top', pady=(0, 10))
+        lbfrm_bse_passwd.pack(side='top')
         spc_reg = self.register(self.spc_check)
         bse_passwd = ttk.Entry(lbfrm_bse_passwd, validate='key',
                                validatecommand=(spc_reg, '%S'))
@@ -774,6 +809,40 @@ class Settings(tk.Frame):
         if Ent_Box(self, 'Enter SuperKey & Confirm to Continue.', Root.DATAFILE[0], 'key').get():
             Tokens(app, ent.get()).gen()
 
+    def exp_set(self):
+        fdir = path.dirname(__file__)
+        dest = askdirectory(parent=self, initialdir=fdir)
+        if dest != '':
+            try:
+                src = rf'{Write_Default.loc}/'
+                fles = Write_Default.fles[1:3]
+                for i in fles:
+                    fsrc = src+i
+                    copyfile(fsrc, dest+f'/{i}')
+                mg.showinfo(
+                    'Info', f'Settings Exported successfuly to-\n{dest}', parent=self)
+            except:
+                mg.showerror(
+                    'Error', 'Can\'t export! File doesn\'t exist', parent=self)
+
+    def imp_set(self):
+        fdir = path.dirname(__file__)
+        fnmes = askopenfilenames(
+            parent=self, initialdir=fdir, filetypes=(('Settings Files', '*.md'),))
+        if fnmes != '':
+            try:
+                dest = rf'{Write_Default.loc}/'
+                fsrc = [i for i in fnmes if i.split(
+                    '/')[-1] in Write_Default.fles[1:3]]
+                for i in fsrc:
+                    copyfile(i, dest+(i.split('/')[-1]))
+                repr_dir = ''.join(fsrc[0].split('/')[:-1])+'/'
+                if fsrc != []:
+                    mg.showinfo(
+                        'Info', f'Settings Imported successfuly from-\n{repr_dir}', parent=self)
+            except:
+                pass
+
     def dtb_del(self, *args: '(str, ttk.Combobox, ttk.Button)'):
         """Deletes the selected database."""
         sel_yr, bx_up, btn, = args
@@ -786,7 +855,7 @@ class Settings(tk.Frame):
             fl_dl = fle[ind]
             remove(rf'{Write_Default.loc}\{fl_dl}')
             bx_up.config(values=Yr_fle().yr)
-    
+
     def tkn_del(self):
         if mg.askokcancel('Attention', 'You are about to delete the Token file!', parent=self):
             remove(rf'{Tokens.LOC}\{Tokens.FL}')
@@ -798,7 +867,7 @@ class Settings(tk.Frame):
             try:
                 cfg['passwd'] = pswd.get().strip()
                 with open(f'{Write_Default.loc}\\{Write_Default.fles[0]}', 'w') as f:
-                    f.write(str(cfg))
+                    f.write(Crypt().encrypt(str(cfg), SECRET_KEY))
                 pswd.delete(0, tk.END)
                 pswd.insert(0, Access_Config().bse_config['passwd'])
                 mg.showinfo('Settings', 'Password Changed!', parent=self)
@@ -818,12 +887,12 @@ class Settings(tk.Frame):
                 try:
                     cfg['key'] = pswd.get().strip()
                     with open(f'{Write_Default.loc}\\{Write_Default.fles[0]}', 'w') as f:
-                        f.write(str(cfg))
+                        f.write(Crypt().encrypt(str(cfg), SECRET_KEY))
                     pswd.delete(0, tk.END)
                     pswd.insert(0, Access_Config().bse_config['key'])
                     mg.showinfo('Settings', 'Key Changed!', parent=self)
                 except:
-                    raise
+                    pass
             else:
                 if pswd.get().strip() == '':
                     pswd.delete(0, tk.END)
@@ -856,11 +925,12 @@ class Result_Show_Sep(tk.Tk):
         file_menu.add_separator()
         file_menu.add_command(label='Exit', command=self.destroy)
 
-        __hedbar = tk.Frame(self)
-        __hedbar.pack(side='top', fill='x')
-        __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
-                          fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
-        __lblres.pack(fill='x', ipady=10)
+        if key == 1:
+            __hedbar = tk.Frame(self)
+            __hedbar.pack(side='top', fill='x')
+            __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
+                                fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
+            __lblres.pack(fill='x', ipady=10)
         self.flval = 0
         self.r_navbar()
         h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
@@ -876,12 +946,13 @@ class Result_Show_Sep(tk.Tk):
             else:
                 res, col = Sql_init(0, dtb=1).result(__args)
             _pr = tabulate(res, col, tablefmt='fancy_grid',
-                          missingval='-', numalign='center', stralign='center')
-            _total = self._total(['STAFF', 'STUDENT', 'CLASS', 'SEC'], res, col)
+                           missingval='-', numalign='center', stralign='center')
+            _total = self._total(
+                ['STAFF', 'STUDENT', 'CLASS', 'SEC'], res, col)
             if self._ttl != []:
                 _pr += '\n'+tabulate([['TOTAL']], tablefmt='fancy_grid')
             _pr += '\n'+tabulate(_total, headers='firstrow',
-                                tablefmt='fancy_grid', numalign='center', stralign='center')
+                                 tablefmt='fancy_grid', numalign='center', stralign='center')
             self.res_tbl.insert(0.0, _pr)
             self.res_tbl.config(state='disabled')
 
@@ -993,28 +1064,33 @@ class Result_Show_Sep(tk.Tk):
                            relief='groove', bd=1, fg='#EFEFEF', height=2, command=lambda: self.flscrn(), font=('Segoe UI', 10, 'bold'))
         navhlp.pack(side='left', fill='x', expand=1, anchor='s')
 
+
 class Token_Show(Result_Show_Sep):
     def __init__(self):
         super().__init__(None, None, key=0)
         self.title('Tokens')
-        with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-            tkns = ''
-            try:
-                tkn_lst = eval(f.read())
-                line = len(tkn_lst)//7
-                if (len(tkn_lst)/7)-line > 0:
-                    line += 1
-                n = 0
-                for _ in range(line):
-                    n += 7
-                    tkn_tab = tabulate([tkn_lst[n-7:n]],
-                            tablefmt='fancy_grid', numalign='center', stralign='center')
-                    tkns += tkn_tab+'\n'
-            except:
-                pass
+        try:
+            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
+                tkns = ''
+                try:
+                    tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
+                    line = len(tkn_lst)//7
+                    if (len(tkn_lst)/7)-line > 0:
+                        line += 1
+                    n = 0
+                    for _ in range(line):
+                        n += 7
+                        tkn_tab = tabulate([tkn_lst[n-7:n]],
+                                           tablefmt='fancy_grid', numalign='center', stralign='center')
+                        tkns += tkn_tab+'\n'
+                except:
+                    pass
+        except FileNotFoundError:
+            mg.showerror('Error', 'Token file doesn\'t exists.')
 
         self.res_tbl.insert(0.0, tkns)
         self.res_tbl.config(state='disabled')
+
 
 if __name__ == '__main__':
     root = Root()

@@ -325,7 +325,7 @@ class Vote(tk.Frame):
         self.chk_val = 0
         tkn_reg = self.register(self.tkn_check)
         self.tkn_ent = ttk.Entry(tkn_frm, validate='key',
-                               validatecommand=(tkn_reg, '%P'))
+                                 validatecommand=(tkn_reg, '%P'))
         self.tkn_ent.pack()
 
         bhead = ttk.LabelFrame(uppr, text='HeadBoy', padding=10)
@@ -360,16 +360,20 @@ class Vote(tk.Frame):
         self.btnvt = ttk.Button(self, text='Vote', style='1.TButton', state='disabled', command=lambda: (
             self.mv_Done(self.btnvt, self.bhead_ch.get(), self.vbhead_ch.get(), self.ghead_ch.get(), self.vghead_ch.get())))
         self.btnvt.pack(side='bottom', pady=(0, 10))
-        self.bhead_ch.bind('<<ComboboxSelected>>', lambda event: self.chk_vote())
-        self.vbhead_ch.bind('<<ComboboxSelected>>', lambda event: self.chk_vote())
-        self.ghead_ch.bind('<<ComboboxSelected>>', lambda event: self.chk_vote())
-        self.vghead_ch.bind('<<ComboboxSelected>>', lambda event: self.chk_vote())
+        self.bhead_ch.bind('<<ComboboxSelected>>',
+                           lambda event: self.chk_vote())
+        self.vbhead_ch.bind('<<ComboboxSelected>>',
+                            lambda event: self.chk_vote())
+        self.ghead_ch.bind('<<ComboboxSelected>>',
+                           lambda event: self.chk_vote())
+        self.vghead_ch.bind('<<ComboboxSelected>>',
+                            lambda event: self.chk_vote())
 
     def tkn_check(self, inp: str) -> bool:
         """Restricts all but numbers and that too upto 5 digits only."""
         self.chk_val = 1
         self.chk_vote()
-        if (inp.isalnum() or inp is '') and len(inp) <= 8:
+        if (inp.isdigit() or inp is '') and len(inp) <= 8:
             return True
         else:
             return False
@@ -377,10 +381,10 @@ class Vote(tk.Frame):
     def chk_vote(self):
         """Makes sure Vote button stays disabled untill a candidate has been selected in each menu."""
         btn = self.btnvt
-        args=(self.bhead_ch.get(), self.vbhead_ch.get(),
-              self.ghead_ch.get(), self.vghead_ch.get())
-        n=0
-        m=0
+        args = (self.bhead_ch.get(), self.vbhead_ch.get(),
+                self.ghead_ch.get(), self.vghead_ch.get())
+        n = 0
+        m = 0
         for j in [Sql_init(0).db_cands()[x] for x in list(Sql_init(0).db_cands().keys())]:
             if args[m] in j:
                 n += 1
@@ -393,9 +397,12 @@ class Vote(tk.Frame):
         global vte_lst  # Votes of 1 turn
         if Tokens(self).get(self.tkn_ent.get()):
             if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
-                vte_lst=list(args)
-                vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
-                    3]=f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
+                vte_lst = list(args)
+                x = [eval(i) for i in list(Access_Config().cand_config.keys())]
+                for i in range(len(vte_lst)):
+                    vte_lst[i] = f'{x[i][-1]}_{vte_lst[i]}'
+                # vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
+                #    3] = f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
                 if sel == 0:  # Staff
                     btnvt.config(state='disabled')
                     Sql_init(0).tchr_vte(vte_lst)
@@ -414,7 +421,7 @@ class Done(tk.Frame):
         ttk.Style().configure('1.TButton', font=('Segoe UI', 15))
         self.config(background=Win.SM_BG_HEX)
 
-        cls_txt=tk.Label(self, text='', font=(
+        cls_txt = tk.Label(self, text='', font=(
             'Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')
         cls_txt.pack(side='top', anchor='n', fill='x')
         if sel == 1:
@@ -422,11 +429,11 @@ class Done(tk.Frame):
         else:
             cls_txt.config(text='Staff')
 
-        botmos=tk.Frame(self, background=Win.SM_BG_HEX)
+        botmos = tk.Frame(self, background=Win.SM_BG_HEX)
         botmos.pack(fill='x', pady=(170, 100))
-        self.lowos=tk.Frame(self, background=Win.SM_BG_HEX)
+        self.lowos = tk.Frame(self, background=Win.SM_BG_HEX)
         self.lowos.pack(side='bottom', pady=(0, 30))
-        klb=tk.Label(botmos, text='Done', font=(
+        klb = tk.Label(botmos, text='Done', font=(
             'Segoe UI', 35, 'bold'), background='#29B539', foreground='#FFFFFF')
         klb.pack(fill='x')
 
@@ -446,7 +453,7 @@ class Done_0(Done):
 
     def __init__(self, parent: Win):
         Done.__init__(self, parent)
-        bcktovote=ttk.Button(self.lowos, text='Next',
+        bcktovote = ttk.Button(self.lowos, text='Next',
                                style='1.TButton', command=self.bck_vote_next)
         bcktovote.pack(side='left')
 
@@ -457,18 +464,18 @@ class Done_1(Done):
 
     def __init__(self, parent: Win):
         Done.__init__(self, parent)
-        bcktovote=ttk.Button(self.lowos, text='Next',
+        bcktovote = ttk.Button(self.lowos, text='Next',
                                style='1.TButton', command=self.bck_vote_next)
         bcktovote.pack(side='left', padx=(0, 40))
-        bcktoclss=ttk.Button(self.lowos, text='Change Class*',
+        bcktoclss = ttk.Button(self.lowos, text='Change Class*',
                                style='1.TButton', command=self.bck_chng_clss_save)
         bcktoclss.pack(side='left')
 
 
 if __name__ == '__main__':
-    root=Root()
+    root = Root()
     root.lower()
     root.iconify()
 
-    app=Win(root)
+    app = Win(root)
     app.mainloop()

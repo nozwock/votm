@@ -8,9 +8,12 @@ from os import getenv, path, walk
 from tkinter import messagebox as mg
 from string import digits
 from random import choice
+from Crypto.Cipher import AES
+from base64 import b64encode, b64decode
 
 __author__ = 'Sagar Kumar'
-__version__ = '0.9.7'
+__version__ = '0.9.8-b'
+SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 
 class Sql_init:
@@ -45,10 +48,9 @@ class Sql_init:
                 SEC VARCHAR(1) DEFAULT(NULL),
                 STUDENT INT DEFAULT(NULL))"""
             self.cur.execute(__tbl_sy)
-            cand_lst = [[x, Access_Config().cand_config[x]]
+            cand_lst = [[eval(x)[-1], Access_Config().cand_config[x]]
                         for x in list(Access_Config().cand_config.keys())]
-            cand_lst[0][0], cand_lst[1][0], cand_lst[2][0], cand_lst[3][0] = 'HB', 'VHB', 'HG', 'VHG'
-            tbl_cand, _ = Sql_init(0).cols(self.yr)
+            tbl_cand = Sql_init(0).cols(self.yr)[0]
             tbl_cand = tbl_cand[4:len(tbl_cand)]
             if tbl_cand == []:
                 pass
@@ -163,6 +165,7 @@ class Sql_init:
             __res_sel_sy = f"""
             SELECT {args} FROM {Sql_init.TBL_NM}
             WHERE STAFF IS NOT NULL
+            ORDER BY CLASS
             """
         elif args.find('CLASS', 0, len(args)) == -1 and args.find('SEC', 0, len(args)) == -1 and args.find('STUDENT', 0, len(args)) != -1:
             if args.find('STAFF', 0, len(args)) == -1:
@@ -171,6 +174,7 @@ class Sql_init:
                 __res_sel_sy = f"""
                 SELECT {args} FROM {Sql_init.TBL_NM}
                 WHERE STUDENT IS NOT NULL
+                ORDER BY CLASS
                 """
             else:
                 args = str([f'SUM({i}) AS {i}' for i in [i for i in [i.strip() for i in args.split(
@@ -178,6 +182,7 @@ class Sql_init:
                 __res_sel_sy = f"""
                 SELECT STAFF, {args} FROM {Sql_init.TBL_NM}
                 GROUP BY STAFF
+                ORDER BY CLASS
                 """
         elif args.find('SEC', 0, len(args)) == -1 and args.find('CLASS', 0, len(args)) != -1:
             if args.find('STAFF', 0, len(args)) == -1:
@@ -187,6 +192,7 @@ class Sql_init:
                 SELECT CLASS, {args} FROM {Sql_init.TBL_NM}
                 WHERE STUDENT IS NOT NULL
                 GROUP BY CLASS
+                ORDER BY CLASS
                 """
             else:
                 args = str([f'SUM({i}) AS {i}' for i in [i for i in [i.strip() for i in args.split(
@@ -194,15 +200,18 @@ class Sql_init:
                 __res_sel_sy = f"""
                 SELECT STAFF ,CLASS, {args} FROM {Sql_init.TBL_NM}
                 GROUP BY CLASS
+                ORDER BY CLASS
                 """
         elif (args.find('CLASS', 0, len(args)) != -1 or args.find('SEC', 0, len(args)) != -1 or args.find('STUDENT', 0, len(args)) != -1) and args.find('STAFF', 0, len(args)) == -1:
             __res_sel_sy = f"""
             SELECT {args} FROM {Sql_init.TBL_NM}
             WHERE STUDENT IS NOT NULL
+            ORDER BY CLASS
             """
         else:
             __res_sel_sy = f"""
             SELECT {args} FROM {Sql_init.TBL_NM}
+            ORDER BY CLASS
             """
         self.cur.execute(__res_sel_sy)
         res = self.cur.fetchall()
@@ -229,7 +238,14 @@ class Sql_init:
         cols = [tup[1] for tup in desc if tup[1] not in [
             'STAFF', 'CLASS', 'SEC', 'STUDENT']]
         cols = [i.split('_') for i in cols]
-        dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
+        #dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
+        dfl = {}
+        _ = []
+        for i in range(len(cols)):
+            if cols[i][0] not in _:
+                _.append(cols[i][0])
+                dfl[cols[i][0]] = []
+
         for i in range(len(cols)):
             for j in range(1, len(cols[i])):
                 dfl[cols[i][0]].append(cols[i][j])
@@ -308,6 +324,7 @@ class Tokens:
 
     def __init__(self, master, entries=None):
         self.master = master
+        self.crypt = Crypt()
 
         if entries != None:
             try:
@@ -318,11 +335,13 @@ class Tokens:
                 mg.showerror('Error', 'Incorrect Value.', parent=master)
 
     def gen(self):
-        #def key_gen(size=8, chars=ascii_letters + digits):
+        # def key_gen(size=8, chars=ascii_letters + digits):
         def key_gen(size=8, chars=digits):
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
                 try:
                     self.tkn_read = eval(f.read())
+                    self.tkn_read = self.crypt.decrypt(
+                        str(self.tkn_read), SECRET_KEY)
                 except:
                     self.tkn_read = []
 
@@ -339,6 +358,7 @@ class Tokens:
                     val = key_gen()
                     if val is not None:
                         tkn.append(val)
+                tkn = self.crypt.encrypt(str(tkn), SECRET_KEY)
                 f.write(f'{tkn}')
             mg.showinfo(
                 'Info', f'{self.entries} Token(s) Generated.', parent=self.master)
@@ -347,11 +367,12 @@ class Tokens:
 
     def get(self, val: str):
         with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-            tkn_lst = eval(f.read())
+            tkn_lst = eval(self.crypt.decrypt(str(f.read()), SECRET_KEY))
         try:
             ind = tkn_lst.index(val)
             del tkn_lst[ind]
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'w') as f:
+                tkn_lst = self.crypt.encrypt(str(tkn_lst), SECRET_KEY)
                 f.write(str(tkn_lst))
             return True
         except:
@@ -362,7 +383,8 @@ class Tokens:
     def check(self):
         try:
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-                tkn_lst = eval(f.read())
+                tkn_lst = f.read()
+                tkn_lst = eval(self.crypt.decrypt(str(tkn_lst), SECRET_KEY))
             if len(tkn_lst) == 0:
                 mg.showerror('Error', 'No Tokens in the Token file.',
                              parent=self.master)
@@ -371,6 +393,31 @@ class Tokens:
             mg.showerror('Error', 'Token file doesn\'t exists!',
                          parent=self.master)
             return False
+
+
+class Crypt:
+    def __init__(self, salt='SlTKeYOpHygTYkP3'):
+        self.salt = salt
+        self.enc_dec_method = 'utf-8'
+
+    def encrypt(self, str_to_enc, str_key):
+        try:
+            aes_obj = AES.new(str_key, AES.MODE_CFB, self.salt)
+            hx_enc = aes_obj.encrypt(str_to_enc)
+            mret = b64encode(hx_enc).decode(self.enc_dec_method)
+            return mret
+        except:
+            pass
+
+    def decrypt(self, enc_str, str_key):
+        try:
+            aes_obj = AES.new(str_key, AES.MODE_CFB, self.salt)
+            str_tmp = b64decode(enc_str.encode(self.enc_dec_method))
+            str_dec = aes_obj.decrypt(str_tmp)
+            mret = str_dec.decode(self.enc_dec_method)
+            return mret
+        except:
+            pass
 
 
 class Ent_Box(tk.Toplevel):
@@ -467,10 +514,20 @@ class Yr_fle:
         Yr_fle.fle = fle
 
 
+class Cand_Check:
+    def __init__(self, key):
+        self.key = key
+        self.cand = [eval(i) for i in list(Access_Config().cand_config.keys())]
+        self.ind = [i[0] for i in self.cand].index(self.key)
+
+    def get(self):
+        return str(self.cand[self.ind])
+
+
 class Default_Config:
     """Contains Default configurations for the application."""
     base_config = "{'passwd' : '', 'key': ''}"
-    candidate_config = "{'HeadBoy' : [], 'ViceHeadBoy' : [], 'HeadGirl' : [], 'ViceHeadGirl' : []}"
+    candidate_config = "{\"['HeadBoy', 'HB']\" : [], \"['ViceHeadBoy', 'VHB']\" : [], \"['HeadGirl', 'HG']\" : [], \"['ViceHeadGirl', 'VHG']\" : []}"
     clss_config = "{6 : ['A', 'B', 'C', 'D'], 7 : ['A', 'B', 'C', 'D'], 8 : ['A', 'B', 'C', 'D'], 9 : ['A', 'B', 'C', 'D'], 10 : ['A', 'B', 'C', 'D'], 11 : ['A', 'B', 'C', 'D'], 12 : ['A', 'B', 'C', 'D']}"
 
 
@@ -478,11 +535,12 @@ class Write_Default:
     """Writes Default config file which doesn't exist already, in the /roaming directory."""
     exist = 0
     loc = getenv('ALLUSERSPROFILE')
-    fles = ['base.votmconfig', 'cand.votmconfig',
-            'clss.votmconfig']
+    fles = ['base.md', 'cand.md',
+            'clss.md']
 
     def __init__(self):
         Write_Default.exist = 0
+        self.crypt = Crypt()
         eval_lst = [path.exists(rf'{Write_Default.loc}\{f}')
                     == False for f in Write_Default.fles]
         if any(eval_lst):
@@ -498,23 +556,21 @@ class Write_Default:
                         self.wrt_clss()
                 j += 1
 
-    @staticmethod
-    def wrt_base():
+    def wrt_base(self):
         """Writes Base file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[0]}', 'w') as f:
-            f.write(Default_Config.base_config)
+            f.write(self.crypt.encrypt(Default_Config.base_config, SECRET_KEY))
 
-    @staticmethod
-    def wrt_cand():
+    def wrt_cand(self):
         """Writes Candidate file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[1]}', 'w') as f:
-            f.write(Default_Config.candidate_config)
+            f.write(self.crypt.encrypt(
+                Default_Config.candidate_config, SECRET_KEY))
 
-    @staticmethod
-    def wrt_clss():
+    def wrt_clss(self):
         """Writes Class&Sec file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[2]}', 'w') as f:
-            f.write(Default_Config.clss_config)
+            f.write(self.crypt.encrypt(Default_Config.clss_config, SECRET_KEY))
 
 
 class Access_Config:
@@ -523,12 +579,16 @@ class Access_Config:
     def __init__(self):
         loc = Write_Default.loc
         fles = Write_Default.fles
+        self.crypt = Crypt()
         with open(rf'{loc}\{fles[0]}', 'r') as f:
             bse_str = f.read()
+            bse_str = self.crypt.decrypt(bse_str, SECRET_KEY)
         with open(rf'{loc}\{fles[1]}', 'r') as f:
             cand_str = f.read()
+            cand_str = self.crypt.decrypt(cand_str, SECRET_KEY)
         with open(rf'{loc}\{fles[2]}', 'r') as f:
             clss_str = f.read()
+            clss_str = self.crypt.decrypt(clss_str, SECRET_KEY)
 
         self.bse_config = eval(bse_str)
         self.cand_config = eval(cand_str)
