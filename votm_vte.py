@@ -398,11 +398,8 @@ class Vote(tk.Frame):
         if Tokens(self).get(self.tkn_ent.get()):
             if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
                 vte_lst = list(args)
-                x = [eval(i) for i in list(Access_Config().cand_config.keys())]
-                for i in range(len(vte_lst)):
-                    vte_lst[i] = f'{x[i][-1]}_{vte_lst[i]}'
-                # vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
-                #    3] = f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
+                vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
+                    3] = f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
                 if sel == 0:  # Staff
                     btnvt.config(state='disabled')
                     Sql_init(0).tchr_vte(vte_lst)

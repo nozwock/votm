@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
+from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
 from tabulate import tabulate
 from shutil import copyfile
 import xlsxwriter
@@ -240,7 +240,7 @@ class Edit(tk.Frame):
         tab.add(clss, text='Class & Sec')
         tab.pack(side='right', expand=True, fill='both')
         # Cand Frame__________________________
-        post = [eval(i)[0] for i in list(Access_Config().cand_config.keys())]
+        post = list(Access_Config().cand_config.keys())
         cand_vw_ed = ttk.LabelFrame(cand, text='View/Edit', padding=10)
         cand_vw_ed.pack(pady=(48, 10))
         cand_vw_ed_top = tk.Frame(cand_vw_ed, bg=Win.SM_BG_HEX)
@@ -291,14 +291,14 @@ class Edit(tk.Frame):
         cand_clr = ttk.Button(cand, text='Clear', padding=10, style='m.TButton', command=lambda: (
             self.wrt(1, Default_Config.candidate_config), mg.showinfo('Candidancy', 'Cleared!', parent=self)), takefocus=0)
         cand_clr.pack()
-        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[Cand_Check(cand_vw_ed_pst.get(
-        )).get()]), cand_vw_ed_cand.set(''), self.cur(cand_vw_ed_cand), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
+        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[cand_vw_ed_pst.get(
+        )]), cand_vw_ed_cand.set(''), self.cur(cand_vw_ed_cand), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
         cand_vw_ed_cand.bind('<<ComboboxSelected>>', lambda event: (
             cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
         cand_add_pst.bind('<<ComboboxSelected>>',
                           lambda event: cand_add_ent.delete(0, tk.END))
         cand_del_pst.bind('<<ComboboxSelected>>', lambda event: (cand_del_cand.config(
-            values=Access_Config().cand_config[Cand_Check(cand_del_pst.get()).get()]), cand_del_cand.set(''), self.cur(cand_del_cand)))
+            values=Access_Config().cand_config[cand_del_pst.get()]), cand_del_cand.set(''), self.cur(cand_del_cand)))
         # Clss&Sec Frame__________________________
         clss_lst = list(Access_Config().clss_config.keys())
 
@@ -386,12 +386,11 @@ class Edit(tk.Frame):
         cfg = Access_Config().cand_config
         if val.get().strip() != '':
             try:
-                cfg[Cand_Check(key.get()).get()][cfg[Cand_Check(key.get()).get()].index(
+                cfg[key.get()][cfg[key.get()].index(
                     pos.get())] = val.get().strip()
                 self.wrt(1, cfg)
                 pos.set(val.get())
-                pos.config(values=Access_Config(
-                ).cand_config[Cand_Check(key.get()).get()])
+                pos.config(values=Access_Config().cand_config[key.get()])
             except:
                 mg.showerror('Error', 'No Canidate was selected.', parent=self)
         else:
@@ -402,7 +401,7 @@ class Edit(tk.Frame):
         cfg = Access_Config().cand_config
         if val.get().strip() != '':
             try:
-                cfg[Cand_Check(key.get()).get()].append(val.get().strip())
+                cfg[key.get()].append(val.get().strip())
                 self.wrt(1, cfg)
             except:
                 mg.showerror('Error', 'Select a Post first.', parent=self)
@@ -413,11 +412,10 @@ class Edit(tk.Frame):
         """Deletes value from candidate file."""
         cfg = Access_Config().cand_config
         try:
-            cfg[Cand_Check(key.get()).get()].remove(val.get())
+            cfg[key.get()].remove(val.get())
             self.wrt(1, cfg)
             val.set('')
-            val.config(values=Access_Config(
-            ).cand_config[Cand_Check(key.get()).get()])
+            val.config(values=Access_Config().cand_config[key.get()])
             val.current(0)
         except (ValueError, KeyError):
             val.set('')
@@ -626,29 +624,18 @@ class Result(tk.Frame):
         """Creates a string from a list of columns to be shown and it is passed to the Result window."""
         try:
             if self.shw_db.get() != 'merged':
-                pst_cand = Sql_init(0).cols(self.shw_db.get())[0][4:]
+                pst_cand, _ = Sql_init(0).cols(self.shw_db.get())
             else:
-                pst_cand = Sql_init(0, dtb=1).cols(self.shw_db.get())[0][4:]
-            shrt = [i[:3].strip('_') for i in pst_cand]
-            count = []
-            for i in shrt:
-                if i not in count:
-                    count.append(i)
-            vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC']
-            for i in range(len(count)):
-                exec(
-                    f"{shrt[i].lower()}=(str([i for i in pst_cand if i.startswith('{shrt[i]}')]).lstrip('[').rstrip(']')).replace(\"'\", \"\")")
-                exec(f'vals.append({shrt[i].lower()})')
-
-            # hb = (str([i for i in pst_cand if i.startswith('HB')]
-            #          ).lstrip('[').rstrip(']')).replace("'", "")
-            # vhb = (str([i for i in pst_cand if i.startswith('VHB')]
-            #           ).lstrip('[').rstrip(']')).replace("'", "")
-            # hg = (str([i for i in pst_cand if i.startswith('HG')]
-            #          ).lstrip('[').rstrip(']')).replace("'", "")
-            # vhg = (str([i for i in pst_cand if i.startswith('VHG')]
-            #           ).lstrip('[').rstrip(']')).replace("'", "")
-            #vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
+                pst_cand, _ = Sql_init(0, dtb=1).cols(self.shw_db.get())
+            hb = (str([i for i in pst_cand if i.startswith('HB')]
+                      ).lstrip('[').rstrip(']')).replace("'", "")
+            vhb = (str([i for i in pst_cand if i.startswith('VHB')]
+                       ).lstrip('[').rstrip(']')).replace("'", "")
+            hg = (str([i for i in pst_cand if i.startswith('HG')]
+                      ).lstrip('[').rstrip(']')).replace("'", "")
+            vhg = (str([i for i in pst_cand if i.startswith('VHG')]
+                       ).lstrip('[').rstrip(']')).replace("'", "")
+            vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
             args = []
             for i in range(len(self.var_val_lst)):
                 if self.var_val_lst[i] == 1:
@@ -717,13 +704,10 @@ class Settings(tk.Frame):
         lbl_hed_dtb.pack(side='left', padx=(0, 40))
 
         # Import/Export_______________________________
-        lbl_hed_imp_exp = ttk.LabelFrame(
-            frm_btm, text='Import/Export', padding=10)
+        lbl_hed_imp_exp = ttk.LabelFrame(frm_btm, text='Import/Export', padding=10)
         lbl_hed_imp_exp.pack(side='left', padx=(0, 20), fill='both')
-        imp_btn = ttk.Button(
-            lbl_hed_imp_exp, text='Import Settings', command=lambda: self.imp_set())
-        exp_btn = ttk.Button(
-            lbl_hed_imp_exp, text='Export Settings', command=lambda: self.exp_set())
+        imp_btn = ttk.Button(lbl_hed_imp_exp, text='Import Settings', command=lambda: self.imp_set())
+        exp_btn = ttk.Button(lbl_hed_imp_exp, text='Export Settings', command=lambda: self.exp_set())
         imp_btn.pack(pady=(0, 20), fill='both', expand=1)
         exp_btn.pack(fill='both', expand=1)
 
@@ -740,9 +724,9 @@ class Settings(tk.Frame):
         # Tokens Settings_______________________________
         lbfrm_tkn = ttk.LabelFrame(frm_top, text='Tokens', padding=10)
         lbfrm_tkn.pack(side='left')
-        lbfrm_tkn_top = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
+        lbfrm_tkn_top = tk.Frame(lbfrm_tkn)
         lbfrm_tkn_top.pack(side='top', pady=(0, 10), fill='x')
-        lbfrm_tkn_btm = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
+        lbfrm_tkn_btm = tk.Frame(lbfrm_tkn)
         lbfrm_tkn_btm.pack(side='top')
 
         tkn_reg = self.register(self.tkn_check)
@@ -819,11 +803,9 @@ class Settings(tk.Frame):
                 for i in fles:
                     fsrc = src+i
                     copyfile(fsrc, dest+f'/{i}')
-                mg.showinfo(
-                    'Info', f'Settings Exported successfuly to-\n{dest}', parent=self)
+                mg.showinfo('Info', f'Settings Exported successfuly to-\n{dest}', parent=self)
             except:
-                mg.showerror(
-                    'Error', 'Can\'t export! File doesn\'t exist', parent=self)
+                mg.showerror('Error', 'Can\'t export! File doesn\'t exist', parent=self)
 
     def imp_set(self):
         fdir = path.dirname(__file__)
@@ -832,14 +814,12 @@ class Settings(tk.Frame):
         if fnmes != '':
             try:
                 dest = rf'{Write_Default.loc}/'
-                fsrc = [i for i in fnmes if i.split(
-                    '/')[-1] in Write_Default.fles[1:3]]
+                fsrc = [i for i in fnmes if i.split('/')[-1] in Write_Default.fles[1:3]]
                 for i in fsrc:
                     copyfile(i, dest+(i.split('/')[-1]))
-                repr_dir = ''.join(fsrc[0].split('/')[:-1])+'/'
+                repr_dir=''.join(fsrc[0].split('/')[:-1])+'/'
                 if fsrc != []:
-                    mg.showinfo(
-                        'Info', f'Settings Imported successfuly from-\n{repr_dir}', parent=self)
+                    mg.showinfo('Info', f'Settings Imported successfuly from-\n{repr_dir}', parent=self)
             except:
                 pass
 
@@ -892,7 +872,7 @@ class Settings(tk.Frame):
                     pswd.insert(0, Access_Config().bse_config['key'])
                     mg.showinfo('Settings', 'Key Changed!', parent=self)
                 except:
-                    pass
+                    raise
             else:
                 if pswd.get().strip() == '':
                     pswd.delete(0, tk.END)
@@ -925,12 +905,11 @@ class Result_Show_Sep(tk.Tk):
         file_menu.add_separator()
         file_menu.add_command(label='Exit', command=self.destroy)
 
-        if key == 1:
-            __hedbar = tk.Frame(self)
-            __hedbar.pack(side='top', fill='x')
-            __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
-                                fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
-            __lblres.pack(fill='x', ipady=10)
+        __hedbar = tk.Frame(self)
+        __hedbar.pack(side='top', fill='x')
+        __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
+                            fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
+        __lblres.pack(fill='x', ipady=10)
         self.flval = 0
         self.r_navbar()
         h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
@@ -1069,24 +1048,21 @@ class Token_Show(Result_Show_Sep):
     def __init__(self):
         super().__init__(None, None, key=0)
         self.title('Tokens')
-        try:
-            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-                tkns = ''
-                try:
-                    tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
-                    line = len(tkn_lst)//7
-                    if (len(tkn_lst)/7)-line > 0:
-                        line += 1
-                    n = 0
-                    for _ in range(line):
-                        n += 7
-                        tkn_tab = tabulate([tkn_lst[n-7:n]],
-                                           tablefmt='fancy_grid', numalign='center', stralign='center')
-                        tkns += tkn_tab+'\n'
-                except:
-                    pass
-        except FileNotFoundError:
-            mg.showerror('Error', 'Token file doesn\'t exists.')
+        with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
+            tkns = ''
+            try:
+                tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
+                line = len(tkn_lst)//7
+                if (len(tkn_lst)/7)-line > 0:
+                    line += 1
+                n = 0
+                for _ in range(line):
+                    n += 7
+                    tkn_tab = tabulate([tkn_lst[n-7:n]],
+                                       tablefmt='fancy_grid', numalign='center', stralign='center')
+                    tkns += tkn_tab+'\n'
+            except:
+                pass
 
         self.res_tbl.insert(0.0, tkns)
         self.res_tbl.config(state='disabled')

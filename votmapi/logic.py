@@ -12,7 +12,7 @@ from Crypto.Cipher import AES
 from base64 import b64encode, b64decode
 
 __author__ = 'Sagar Kumar'
-__version__ = '0.9.8-b'
+__version__ = '0.9.8'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 
@@ -48,9 +48,10 @@ class Sql_init:
                 SEC VARCHAR(1) DEFAULT(NULL),
                 STUDENT INT DEFAULT(NULL))"""
             self.cur.execute(__tbl_sy)
-            cand_lst = [[eval(x)[-1], Access_Config().cand_config[x]]
+            cand_lst = [[x, Access_Config().cand_config[x]]
                         for x in list(Access_Config().cand_config.keys())]
-            tbl_cand = Sql_init(0).cols(self.yr)[0]
+            cand_lst[0][0], cand_lst[1][0], cand_lst[2][0], cand_lst[3][0] = 'HB', 'VHB', 'HG', 'VHG'
+            tbl_cand, _ = Sql_init(0).cols(self.yr)
             tbl_cand = tbl_cand[4:len(tbl_cand)]
             if tbl_cand == []:
                 pass
@@ -238,14 +239,7 @@ class Sql_init:
         cols = [tup[1] for tup in desc if tup[1] not in [
             'STAFF', 'CLASS', 'SEC', 'STUDENT']]
         cols = [i.split('_') for i in cols]
-        #dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
-        dfl = {}
-        _ = []
-        for i in range(len(cols)):
-            if cols[i][0] not in _:
-                _.append(cols[i][0])
-                dfl[cols[i][0]] = []
-
+        dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
         for i in range(len(cols)):
             for j in range(1, len(cols[i])):
                 dfl[cols[i][0]].append(cols[i][j])
@@ -363,12 +357,13 @@ class Tokens:
             mg.showinfo(
                 'Info', f'{self.entries} Token(s) Generated.', parent=self.master)
         except:
-            pass
+            raise
 
     def get(self, val: str):
         with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
             tkn_lst = eval(self.crypt.decrypt(str(f.read()), SECRET_KEY))
         try:
+            print(tkn_lst)
             ind = tkn_lst.index(val)
             del tkn_lst[ind]
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'w') as f:
@@ -406,8 +401,15 @@ class Crypt:
             hx_enc = aes_obj.encrypt(str_to_enc)
             mret = b64encode(hx_enc).decode(self.enc_dec_method)
             return mret
-        except:
-            pass
+        except ValueError as value_error:
+            if value_error.args[0] == 'IV must be 16 bytes long':
+                raise ValueError(
+                    'Encryption Error: SALT must be 16 characters long')
+            elif value_error.args[0] == 'AES key must be either 16, 24, or 32 bytes long':
+                raise ValueError(
+                    'Encryption Error: Encryption key must be either 16, 24, or 32 characters long')
+            else:
+                raise ValueError(value_error)
 
     def decrypt(self, enc_str, str_key):
         try:
@@ -416,8 +418,15 @@ class Crypt:
             str_dec = aes_obj.decrypt(str_tmp)
             mret = str_dec.decode(self.enc_dec_method)
             return mret
-        except:
-            pass
+        except ValueError as value_error:
+            if value_error.args[0] == 'IV must be 16 bytes long':
+                raise ValueError(
+                    'Decryption Error: SALT must be 16 characters long')
+            elif value_error.args[0] == 'AES key must be either 16, 24, or 32 bytes long':
+                raise ValueError(
+                    'Decryption Error: Encryption key must be either 16, 24, or 32 characters long')
+            else:
+                raise ValueError(value_error)
 
 
 class Ent_Box(tk.Toplevel):
@@ -514,20 +523,10 @@ class Yr_fle:
         Yr_fle.fle = fle
 
 
-class Cand_Check:
-    def __init__(self, key):
-        self.key = key
-        self.cand = [eval(i) for i in list(Access_Config().cand_config.keys())]
-        self.ind = [i[0] for i in self.cand].index(self.key)
-
-    def get(self):
-        return str(self.cand[self.ind])
-
-
 class Default_Config:
     """Contains Default configurations for the application."""
     base_config = "{'passwd' : '', 'key': ''}"
-    candidate_config = "{\"['HeadBoy', 'HB']\" : [], \"['ViceHeadBoy', 'VHB']\" : [], \"['HeadGirl', 'HG']\" : [], \"['ViceHeadGirl', 'VHG']\" : []}"
+    candidate_config = "{'HeadBoy' : [], 'ViceHeadBoy' : [], 'HeadGirl' : [], 'ViceHeadGirl' : []}"
     clss_config = "{6 : ['A', 'B', 'C', 'D'], 7 : ['A', 'B', 'C', 'D'], 8 : ['A', 'B', 'C', 'D'], 9 : ['A', 'B', 'C', 'D'], 10 : ['A', 'B', 'C', 'D'], 11 : ['A', 'B', 'C', 'D'], 12 : ['A', 'B', 'C', 'D']}"
 
 
