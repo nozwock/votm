@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
+from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
 from tabulate import tabulate
 from shutil import copyfile
 import xlsxwriter
@@ -233,15 +233,63 @@ class Edit(tk.Frame):
         ttk.Style().configure('TNotebook.Tab', font=('Segoe UI', 14),
                               focuscolor=ttk.Style().configure('.')['background'])
 
-        tab = ttk.Notebook(self)
-        cand = tk.Frame(tab, bg=Win.SM_BG_HEX)
-        tab.add(cand, text='Candidancy')
-        clss = tk.Frame(tab, bg=Win.SM_BG_HEX)
-        tab.add(clss, text='Class & Sec')
-        tab.pack(side='right', expand=True, fill='both')
-        # Cand Frame__________________________
-        post = list(Access_Config().cand_config.keys())
-        cand_vw_ed = ttk.LabelFrame(cand, text='View/Edit', padding=10)
+        self.tab = ttk.Notebook(self)
+        cand = Candidates(self.tab)
+        #cand.bind('<Visibility>', lambda e: cand.update())
+        self.tab.add(cand, text='Candidates')
+        pst = Posts(self.tab)
+        self.tab.add(pst, text='Posts')
+        clss = Classes(self.tab)
+        self.tab.add(clss, text='Classes')
+        sec = Sections(self.tab)
+        self.tab.add(sec, text='Sections')
+        self.tab.pack(side='right', expand=1, fill='both')
+        #self.tab.bind('<<NotebookTabChanged>>', lambda event: self.updt(event))
+        self.tab.bind('<Button-1>', lambda event: self.updt(event))
+
+    @staticmethod
+    def wrt(fle: int, cfg: str):
+        """Writes Default config. files."""
+        with open(rf'{Write_Default.loc}\{Write_Default.fles[fle]}', 'w') as f:
+            cfg = Crypt().encrypt(str(cfg), SECRET_KEY)
+            f.write(cfg)
+            f.flush()
+
+    @staticmethod
+    def cur(cand: ttk.Combobox):
+        """Selects 1st value in a combobox."""
+        try:
+            cand.current(0)
+        except:
+            pass
+
+    def updt(self, event):
+        slave = event.widget.winfo_children()[event.widget.index('current')]
+        tabs = self.tab.tabs()
+
+        tab_ins = [Candidates, Posts, Classes, Sections]
+        
+        for i in range(len(tab_ins)):
+            if isinstance(slave, tab_ins[i]):
+                c_ind = self.tab.index(tabs[i])
+                self.tab.forget(tabs[i])
+                del slave
+                slave = tab_ins[i](self.tab)
+                if c_ind < 3:
+                    self.tab.insert(c_ind, slave, text=f'{tab_ins[i]}'.split('.')[-1].strip("'>"))
+                else:
+                    self.tab.add(slave, text=f'{tab_ins[i]}'.split('.')[-1].strip("'>"))
+                self.tab.select(slave)
+                break
+
+
+class Candidates(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg=Win.SM_BG_HEX)
+        #self.bind('<Button-1>', lambda e: Edit.updt(master, self))
+
+        post = [eval(i)[0] for i in list(Access_Config().cand_config.keys())]
+        cand_vw_ed = ttk.LabelFrame(self, text='View/Edit', padding=10)
         cand_vw_ed.pack(pady=(48, 10))
         cand_vw_ed_top = tk.Frame(cand_vw_ed, bg=Win.SM_BG_HEX)
         cand_vw_ed_top.pack(side='top', pady=(0, 10))
@@ -259,11 +307,12 @@ class Edit(tk.Frame):
                                    validatecommand=(str_reg, '%S'))
         cand_vw_ed_ent.pack(side='left', padx=(0, 45))
         cand_vw_ed_ent.insert(1, 'Candidate')
+        cand_vw_ed_ent.config(state='disabled')
         cand_vw_ed_btn = ttk.Button(cand_vw_ed_btm, text='Edit', style='m.TButton', command=lambda: self.wrt_edt(
             cand_vw_ed_pst, cand_vw_ed_cand, cand_vw_ed_ent), takefocus=0)
         cand_vw_ed_btn.pack(side='left', padx=(0, 25))
 
-        cand_add = ttk.LabelFrame(cand, text='Add', padding=10)
+        cand_add = ttk.LabelFrame(self, text='Add', padding=10)
         cand_add.pack(pady=(0, 10))
         cand_add_pst = ttk.Combobox(cand_add, values=post, state='readonly')
         cand_add_pst.set('Post')
@@ -272,11 +321,12 @@ class Edit(tk.Frame):
                                  validatecommand=(str_reg, '%S'))
         cand_add_ent.pack(side='left', padx=(0, 10))
         cand_add_ent.insert(1, 'Candidate')
+        cand_add_ent.config(state='disabled')
         cand_add_btn = ttk.Button(cand_add, text='Add', style='m.TButton', command=lambda: (
             self.wrt_add(cand_add_pst, cand_add_ent), cand_add_ent.delete(0, tk.END)), takefocus=0)
         cand_add_btn.pack(side='left')
 
-        cand_del = ttk.LabelFrame(cand, text='Delete', padding=10)
+        cand_del = ttk.LabelFrame(self, text='Delete', padding=10)
         cand_del.pack(pady=(0, 20))
         cand_del_pst = ttk.Combobox(cand_del, values=post, state='readonly')
         cand_del_pst.set('Post')
@@ -288,21 +338,204 @@ class Edit(tk.Frame):
                                   command=lambda: self.cand_del(cand_del_pst, cand_del_cand), takefocus=0)
         cand_del_btn.pack(side='left')
 
-        cand_clr = ttk.Button(cand, text='Clear', padding=10, style='m.TButton', command=lambda: (
-            self.wrt(1, Default_Config.candidate_config), mg.showinfo('Candidancy', 'Cleared!', parent=self)), takefocus=0)
+        cand_clr = ttk.Button(self, text='Clear', padding=10, style='m.TButton', command=lambda: (
+            Edit.wrt(1, Default_Config.candidate_config), mg.showinfo('Info', 'Cleared, And set to default.', parent=self)), takefocus=0)
         cand_clr.pack()
-        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[cand_vw_ed_pst.get(
-        )]), cand_vw_ed_cand.set(''), self.cur(cand_vw_ed_cand), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
+        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[Cand_Check(cand_vw_ed_pst.get(
+        )).get()]), cand_vw_ed_cand.set(''), Edit.cur(cand_vw_ed_cand), cand_vw_ed_ent.config(state='enabled'), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
         cand_vw_ed_cand.bind('<<ComboboxSelected>>', lambda event: (
             cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
         cand_add_pst.bind('<<ComboboxSelected>>',
-                          lambda event: cand_add_ent.delete(0, tk.END))
+                          lambda event: (cand_add_ent.config(state='enabled'), cand_add_ent.delete(0, tk.END)))
         cand_del_pst.bind('<<ComboboxSelected>>', lambda event: (cand_del_cand.config(
-            values=Access_Config().cand_config[cand_del_pst.get()]), cand_del_cand.set(''), self.cur(cand_del_cand)))
-        # Clss&Sec Frame__________________________
+            values=Access_Config().cand_config[Cand_Check(cand_del_pst.get()).get()]), cand_del_cand.set(''), Edit.cur(cand_del_cand)))
+
+    @staticmethod
+    def str_check(inp: str) -> bool:
+        """Checks if the input is an alphabet or not."""
+        if inp.isalpha():
+            return True
+        else:
+            return False
+
+    def wrt_edt(self, key: ttk.Combobox, pos: ttk.Combobox, val: tk.Entry):
+        """Writes changes to the Candidate file."""
+        cfg = Access_Config().cand_config
+        if val.get().strip() != '':
+            try:
+                cfg[Cand_Check(key.get()).get()][cfg[Cand_Check(key.get()).get()].index(
+                    pos.get())] = val.get().strip()
+                Edit.wrt(1, cfg)
+                pos.set(val.get())
+                pos.config(values=Access_Config(
+                ).cand_config[Cand_Check(key.get()).get()])
+            except:
+                mg.showerror('Error', 'No Canidate was selected.', parent=self)
+        else:
+            mg.showerror('Error', 'Enter a value first.', parent=self)
+
+    def wrt_add(self, key: ttk.Combobox, val: tk.Entry):
+        """Adds value to the candidate file."""
+        cfg = Access_Config().cand_config
+        if val.get().strip() != '':
+            try:
+                cfg[Cand_Check(key.get()).get()].append(val.get().strip())
+                Edit.wrt(1, cfg)
+            except:
+                mg.showerror('Error', 'Select a Post first.', parent=self)
+        else:
+            mg.showerror('Error', 'Enter a value first.', parent=self)
+
+    def cand_del(self, key: ttk.Combobox, val: ttk.Combobox):
+        """Deletes value from candidate file."""
+        cfg = Access_Config().cand_config
+        try:
+            cfg[Cand_Check(key.get()).get()].remove(val.get())
+            Edit.wrt(1, cfg)
+            val.set('')
+            val.config(values=Access_Config(
+            ).cand_config[Cand_Check(key.get()).get()])
+            val.current(0)
+        except (ValueError, KeyError):
+            val.set('')
+            mg.showerror('Error', 'Candidate doesn\'t exist.', parent=self)
+        except tk.TclError:
+            pass
+
+
+class Posts(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg=Win.SM_BG_HEX)
+
+        self.flpost = [
+            f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+        tag_reg = self.register(self.tag_check)
+        self.lbl_ent = 'Full-Post'
+        self.lbl_tag = 'Post Tag'
+        self.lbl_pst = 'Post'
+
+        pst_edt = ttk.LabelFrame(self, text='Edit', padding=10)
+        pst_edt.pack(pady=(48, 10))
+        pst_edt_top = tk.Frame(pst_edt, bg=Win.SM_BG_HEX)
+        pst_edt_top.pack(side='top', pady=(0, 10))
+        pst_edt_btm = tk.Frame(pst_edt, bg=Win.SM_BG_HEX)
+        pst_edt_btm.pack(side='bottom')
+        self.pst_edt_pst = ttk.Combobox(
+            pst_edt_top, values=self.flpost, state='readonly', style='TCombobox')
+        self.pst_edt_pst.set(self.lbl_pst)
+        self.pst_edt_pst.pack(side='left', padx=(0, 10))
+        pst_edt_ent = ttk.Entry(pst_edt_btm)
+        pst_edt_ent.pack(side='left', padx=(0, 10))
+        pst_edt_ent.insert(1, self.lbl_ent)
+        pst_edt_ent.config(state='disabled')
+        pst_edt_tag = ttk.Entry(pst_edt_btm, width=8)
+        pst_edt_tag.pack(side='left')
+        pst_edt_tag.insert(1, self.lbl_tag)
+        pst_edt_tag.config(state='disabled')
+        pst_edt_btn = ttk.Button(
+            pst_edt_top, text='Edit', style='m.TButton', takefocus=0, command=lambda: self.pst_edt(self.pst_edt_pst, pst_edt_ent, pst_edt_tag))
+        pst_edt_btn.pack(side='left')
+        self.pst_edt_pst.bind('<<ComboboxSelected>>', lambda event: (pst_edt_ent.config(state='enabled'), pst_edt_tag.config(state='enabled'), pst_edt_tag.config(validate='key', validatecommand=(tag_reg, '%P')), self.pst_edt_pst.config(values=[
+                           f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]), pst_edt_ent.delete(0, 'end'), pst_edt_tag.delete(0, 'end'), pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip()), pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())))
+        ######################################
+        pst_add = ttk.LabelFrame(self, text='Add', padding=10)
+        pst_add.pack(pady=(0, 10))
+        pst_add_ent = ttk.Entry(pst_add)
+        pst_add_ent.pack(side='left', padx=(0, 10))
+        pst_add_ent.insert(1, self.lbl_ent)
+        pst_add_tag = ttk.Entry(pst_add, width=8)
+        pst_add_tag.pack(side='left', padx=(0, 10))
+        pst_add_tag.insert(1, self.lbl_tag)
+        pst_add_btn = ttk.Button(
+            pst_add, text='Add', style='m.TButton', takefocus=0, command=lambda: self.pst_add(pst_add_ent, pst_add_tag))
+        pst_add_btn.pack(side='left')
+        pst_add_ent.bind('<Enter>', lambda e: (
+            pst_add_ent.delete(0, 'end'), pst_add_ent.unbind('<Enter>')))
+        pst_add_tag.bind('<Enter>', lambda e: (pst_add_tag.delete(0, 'end'), pst_add_tag.config(
+            validate='key', validatecommand=(tag_reg, '%P')), pst_add_tag.unbind('<Enter>')))
+        ######################################
+        pst_del = ttk.LabelFrame(self, text='Delete', padding=10)
+        pst_del.pack(pady=(0, 20))
+        self.pst_del_pst = ttk.Combobox(
+            pst_del, values=self.flpost, state='readonly')
+        self.pst_del_pst.set(self.lbl_pst)
+        self.pst_del_pst.pack(side='left', padx=(0, 10))
+        pst_del_btn = ttk.Button(
+            pst_del, text='Delete', style='m.TButton', takefocus=0, command=lambda: self.pst_del(self.pst_del_pst))
+        pst_del_btn.pack(side='left')
+
+        self.pst_del_pst.bind('<<ComboboxSelected>>', lambda e: self.pst_del_pst.config(values=[
+                         f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]))
+
+        pst_clr = ttk.Button(self, text='Clear', padding=10, style='m.TButton', command=lambda: (
+            Edit.wrt(1, Default_Config.candidate_config), mg.showinfo('Info', 'Cleared, And set to default.', parent=self)), takefocus=0)
+        pst_clr.pack()
+
+    def tag_check(self, inp):
+        if ((inp.isalpha() or inp is '') and len(inp) <= 3) or inp in [i.split(';')[-1].strip() for i in self.flpost]:
+            return True
+        else:
+            return False
+
+    def pst_edt(self, key, ent, tag):
+        if ent.get() != '' and tag.get() != '':
+            cfg = Access_Config().cand_config
+            _tag = [eval(i)[-1] for i in list(cfg.keys()) if eval(i)[-1] != tag.get()]
+            if tag.get() not in _tag:
+                cmb = key
+                _key = f'{[ent.get(), tag.get().upper()]}'
+                key = str([key.get().split(';')[0].strip(),key.get().split(';')[-1].strip()])
+                con = cfg.get(key)
+                del cfg[key]
+                cfg[_key] = con
+                Edit.wrt(1, cfg)
+                val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                self.pst_del_pst.config(values=val)
+                self.pst_edt_pst.config(values=val)
+                cmb.current(len(cfg)-1)
+            else:
+                mg.showwarning(
+                    'Error', 'This Tag already exists.', parent=self)
+
+    def pst_add(self, ent, tag):
+        if ent.get() not in ['', self.lbl_ent] and tag.get() not in ['', self.lbl_tag]:
+            cfg = Access_Config().cand_config
+            _tag = [eval(i)[-1] for i in list(cfg.keys())]
+            if tag.get() not in _tag:
+                key = f'{[ent.get(), tag.get().upper()]}'
+                cfg[key] = []
+                Edit.wrt(1, cfg)
+                val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                self.pst_del_pst.config(values=val)
+                self.pst_edt_pst.config(values=val)
+            else:
+                mg.showwarning(
+                    'Error', 'This Tag already exists.', parent=self)
+
+    def pst_del(self, ent):
+        if ent.get() != self.lbl_pst:
+            cfg = Access_Config().cand_config
+            key = str([ent.get().split(';')[0].strip(),
+                       ent.get().split(';')[-1].strip()])
+            del cfg[key]
+            Edit.wrt(1, cfg)
+            val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+            ent.config(values=val)
+            self.pst_edt_pst.config(values=val)
+            ent.current(0)
+
+
+class Classes(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg=Win.SM_BG_HEX)
+
+
+class Sections(tk.Frame):
+    def __init__(self, master):
+        super().__init__(master, bg=Win.SM_BG_HEX)
         clss_lst = list(Access_Config().clss_config.keys())
 
-        clss_vw = ttk.LabelFrame(clss, text='View', padding=10)
+        clss_vw = ttk.LabelFrame(self, text='View', padding=10)
         clss_vw.pack(pady=(30, 10))
         clss_vw_clss = ttk.Combobox(clss_vw, values=clss_lst, state='readonly')
         clss_vw_clss.set('Class')
@@ -313,21 +546,22 @@ class Edit(tk.Frame):
         clss_vw_sec.pack()
         clss_vw_sec.config(state='disabled')
 
-        clss_add = ttk.LabelFrame(clss, text='Add', padding=10)
+        clss_add = ttk.LabelFrame(self, text='Add', padding=10)
         clss_add.pack(pady=(0, 10))
         clss_add_clss = ttk.Combobox(
             clss_add, values=clss_lst, state='readonly')
         clss_add_clss.set('Class')
         clss_add_clss.pack(side='left', padx=(0, 10))
         one_reg = self.register(self.one_check)
-        self.clss_add_sec = ttk.Entry(clss_add, validate='key',
-                                      validatecommand=(one_reg, '%P'))
+        self.clss_add_sec = ttk.Entry(clss_add)
+        self.clss_add_sec.insert(0, 'Section')
+        self.clss_add_sec.config(state='disabled')
         self.clss_add_sec.pack(side='left', padx=(0, 10))
         clss_add_btn = ttk.Button(clss_add, text='Add', style='m.TButton', command=lambda: (
             self.clss_add(clss_add_clss, self.clss_add_sec), self.clss_add_sec.delete(0, tk.END)), takefocus=0)
         clss_add_btn.pack(side='left')
 
-        clss_del = ttk.LabelFrame(clss, text='Delete', padding=10)
+        clss_del = ttk.LabelFrame(self, text='Delete', padding=10)
         clss_del.pack(pady=(0, 10))
         clss_del_clss = ttk.Combobox(
             clss_del, values=clss_lst, state='readonly')
@@ -340,23 +574,15 @@ class Edit(tk.Frame):
                                   command=lambda: self.clss_del(clss_del_clss, clss_del_sec), takefocus=0)
         clss_del_btn.pack(side='left')
 
-        clss_def = ttk.Button(clss, text='Default', padding=10, style='m.TButton', command=lambda: (
-            self.wrt(2, Default_Config.clss_config), mg.showinfo('Class&Sec', 'Set to Default.', parent=self)), takefocus=0)
+        clss_def = ttk.Button(self, text='Default', padding=10, style='m.TButton', command=lambda: (
+            Edit.wrt(2, Default_Config.clss_config), mg.showinfo('Class&Sec', 'Set to Default.', parent=self)), takefocus=0)
         clss_def.pack()
         clss_vw_clss.bind('<<ComboboxSelected>>', lambda event: (clss_vw_sec.config(state='normal'), clss_vw_sec.delete(
             0.0, tk.END), clss_vw_sec.insert(0.0, Access_Config().clss_config[int(clss_vw_clss.get())]), clss_vw_sec.config(state='disabled')))
         clss_add_clss.bind('<<ComboboxSelected>>',
-                           lambda event: self.clss_add_sec.delete(0, tk.END))
+                           lambda event: (self.clss_add_sec.config(state='enabled', validate='key', validatecommand=(one_reg, '%P')), self.clss_add_sec.delete(0, tk.END)))
         clss_del_clss.bind('<<ComboboxSelected>>', lambda event: (clss_del_sec.config(values=Access_Config(
-        ).clss_config[int(clss_del_clss.get())]), clss_del_sec.set(''), self.cur(clss_del_sec)))
-
-    @staticmethod
-    def str_check(inp: str) -> bool:
-        """Checks if the input is an alphabet or not."""
-        if inp.isalpha():
-            return True
-        else:
-            return False
+        ).clss_config[int(clss_del_clss.get())]), clss_del_sec.set(''), Edit.cur(clss_del_sec)))
 
     def one_check(self, inp: str) -> bool:
         """Check to allow only 1 alphabet."""
@@ -365,70 +591,12 @@ class Edit(tk.Frame):
         else:
             return False
 
-    @staticmethod
-    def cur(cand: ttk.Combobox):
-        """Selects 1st value in a combobox."""
-        try:
-            cand.current(0)
-        except:
-            pass
-
-    @staticmethod
-    def wrt(fle: int, cfg: str):
-        """Writes Default config. files."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[fle]}', 'w') as f:
-            cfg = Crypt().encrypt(str(cfg), SECRET_KEY)
-            f.write(cfg)
-            f.flush()
-
-    def wrt_edt(self, key: ttk.Combobox, pos: ttk.Combobox, val: tk.Entry):
-        """Writes changes to the Candidate file."""
-        cfg = Access_Config().cand_config
-        if val.get().strip() != '':
-            try:
-                cfg[key.get()][cfg[key.get()].index(
-                    pos.get())] = val.get().strip()
-                self.wrt(1, cfg)
-                pos.set(val.get())
-                pos.config(values=Access_Config().cand_config[key.get()])
-            except:
-                mg.showerror('Error', 'No Canidate was selected.', parent=self)
-        else:
-            mg.showerror('Error', 'Enter a value first.', parent=self)
-
-    def wrt_add(self, key: ttk.Combobox, val: tk.Entry):
-        """Adds value to the candidate file."""
-        cfg = Access_Config().cand_config
-        if val.get().strip() != '':
-            try:
-                cfg[key.get()].append(val.get().strip())
-                self.wrt(1, cfg)
-            except:
-                mg.showerror('Error', 'Select a Post first.', parent=self)
-        else:
-            mg.showerror('Error', 'Enter a value first.', parent=self)
-
-    def cand_del(self, key: ttk.Combobox, val: ttk.Combobox):
-        """Deletes value from candidate file."""
-        cfg = Access_Config().cand_config
-        try:
-            cfg[key.get()].remove(val.get())
-            self.wrt(1, cfg)
-            val.set('')
-            val.config(values=Access_Config().cand_config[key.get()])
-            val.current(0)
-        except (ValueError, KeyError):
-            val.set('')
-            mg.showerror('Error', 'Candidate doesn\'t exist.', parent=self)
-        except tk.TclError:
-            pass
-
     def clss_del(self, key: ttk.Combobox, val: ttk.Combobox):
         """Deletes value from class file."""
         cfg = Access_Config().clss_config
         try:
             cfg[int(key.get())].remove(val.get())
-            self.wrt(2, cfg)
+            Edit.wrt(2, cfg)
             val.set('')
             val.config(values=Access_Config().clss_config[int(key.get())])
             val.current(0)
@@ -446,7 +614,7 @@ class Edit(tk.Frame):
                 try:
                     cfg[int(key.get())].append(val.get().upper())
                     cfg[int(key.get())].sort()
-                    self.wrt(2, cfg)
+                    Edit.wrt(2, cfg)
                 except:
                     mg.showerror('Error', 'Select a Class first.', parent=self)
             else:
@@ -482,10 +650,10 @@ class Result(tk.Frame):
         mrg_clr.pack(side='top', fill='x')
         mrg_brws = ttk.Button(mrg_right, text='Browse',
                               command=lambda: self.opn_mrg_fles(), takefocus=0)
-        mrg_brws.pack(side='top', pady=(10, 10))
+        mrg_brws.pack(side='top', pady=(10, 10), fill='x')
         mrg_shw = ttk.Button(mrg_right, text='Merge',
                              command=lambda: self.do_mrg(), takefocus=0)
-        mrg_shw.pack(side='top', pady=(0, 10))
+        mrg_shw.pack(side='top', pady=(0, 10), fill='x')
         mrg_conv_exl = ttk.Button(
             mrg_right, text='Export Merge File', command=lambda: self.crt_mrg_fle(), takefocus=0)
         mrg_conv_exl.pack(side='top', pady=(0, 10))
@@ -624,18 +792,29 @@ class Result(tk.Frame):
         """Creates a string from a list of columns to be shown and it is passed to the Result window."""
         try:
             if self.shw_db.get() != 'merged':
-                pst_cand, _ = Sql_init(0).cols(self.shw_db.get())
+                pst_cand = Sql_init(0).cols(self.shw_db.get())[0][4:]
             else:
-                pst_cand, _ = Sql_init(0, dtb=1).cols(self.shw_db.get())
-            hb = (str([i for i in pst_cand if i.startswith('HB')]
-                      ).lstrip('[').rstrip(']')).replace("'", "")
-            vhb = (str([i for i in pst_cand if i.startswith('VHB')]
-                       ).lstrip('[').rstrip(']')).replace("'", "")
-            hg = (str([i for i in pst_cand if i.startswith('HG')]
-                      ).lstrip('[').rstrip(']')).replace("'", "")
-            vhg = (str([i for i in pst_cand if i.startswith('VHG')]
-                       ).lstrip('[').rstrip(']')).replace("'", "")
-            vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
+                pst_cand = Sql_init(0, dtb=1).cols(self.shw_db.get())[0][4:]
+            shrt = [i[:3].strip('_') for i in pst_cand]
+            count = []
+            for i in shrt:
+                if i not in count:
+                    count.append(i)
+            vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC']
+            for i in range(len(count)):
+                exec(
+                    f"{shrt[i].lower()}=(str([i for i in pst_cand if i.startswith('{shrt[i]}')]).lstrip('[').rstrip(']')).replace(\"'\", \"\")")
+                exec(f'vals.append({shrt[i].lower()})')
+
+            # hb = (str([i for i in pst_cand if i.startswith('HB')]
+            #          ).lstrip('[').rstrip(']')).replace("'", "")
+            # vhb = (str([i for i in pst_cand if i.startswith('VHB')]
+            #           ).lstrip('[').rstrip(']')).replace("'", "")
+            # hg = (str([i for i in pst_cand if i.startswith('HG')]
+            #          ).lstrip('[').rstrip(']')).replace("'", "")
+            # vhg = (str([i for i in pst_cand if i.startswith('VHG')]
+            #           ).lstrip('[').rstrip(']')).replace("'", "")
+            #vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
             args = []
             for i in range(len(self.var_val_lst)):
                 if self.var_val_lst[i] == 1:
@@ -704,10 +883,13 @@ class Settings(tk.Frame):
         lbl_hed_dtb.pack(side='left', padx=(0, 40))
 
         # Import/Export_______________________________
-        lbl_hed_imp_exp = ttk.LabelFrame(frm_btm, text='Import/Export', padding=10)
+        lbl_hed_imp_exp = ttk.LabelFrame(
+            frm_btm, text='Import/Export', padding=10)
         lbl_hed_imp_exp.pack(side='left', padx=(0, 20), fill='both')
-        imp_btn = ttk.Button(lbl_hed_imp_exp, text='Import Settings', command=lambda: self.imp_set())
-        exp_btn = ttk.Button(lbl_hed_imp_exp, text='Export Settings', command=lambda: self.exp_set())
+        imp_btn = ttk.Button(
+            lbl_hed_imp_exp, text='Import Settings', command=lambda: self.imp_set())
+        exp_btn = ttk.Button(
+            lbl_hed_imp_exp, text='Export Settings', command=lambda: self.exp_set())
         imp_btn.pack(pady=(0, 20), fill='both', expand=1)
         exp_btn.pack(fill='both', expand=1)
 
@@ -724,9 +906,9 @@ class Settings(tk.Frame):
         # Tokens Settings_______________________________
         lbfrm_tkn = ttk.LabelFrame(frm_top, text='Tokens', padding=10)
         lbfrm_tkn.pack(side='left')
-        lbfrm_tkn_top = tk.Frame(lbfrm_tkn)
+        lbfrm_tkn_top = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
         lbfrm_tkn_top.pack(side='top', pady=(0, 10), fill='x')
-        lbfrm_tkn_btm = tk.Frame(lbfrm_tkn)
+        lbfrm_tkn_btm = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
         lbfrm_tkn_btm.pack(side='top')
 
         tkn_reg = self.register(self.tkn_check)
@@ -803,9 +985,11 @@ class Settings(tk.Frame):
                 for i in fles:
                     fsrc = src+i
                     copyfile(fsrc, dest+f'/{i}')
-                mg.showinfo('Info', f'Settings Exported successfuly to-\n{dest}', parent=self)
+                mg.showinfo(
+                    'Info', f'Settings Exported successfuly to-\n{dest}', parent=self)
             except:
-                mg.showerror('Error', 'Can\'t export! File doesn\'t exist', parent=self)
+                mg.showerror(
+                    'Error', 'Can\'t export! File doesn\'t exist', parent=self)
 
     def imp_set(self):
         fdir = path.dirname(__file__)
@@ -814,12 +998,14 @@ class Settings(tk.Frame):
         if fnmes != '':
             try:
                 dest = rf'{Write_Default.loc}/'
-                fsrc = [i for i in fnmes if i.split('/')[-1] in Write_Default.fles[1:3]]
+                fsrc = [i for i in fnmes if i.split(
+                    '/')[-1] in Write_Default.fles[1:3]]
                 for i in fsrc:
                     copyfile(i, dest+(i.split('/')[-1]))
-                repr_dir=''.join(fsrc[0].split('/')[:-1])+'/'
+                repr_dir = ''.join(fsrc[0].split('/')[:-1])+'/'
                 if fsrc != []:
-                    mg.showinfo('Info', f'Settings Imported successfuly from-\n{repr_dir}', parent=self)
+                    mg.showinfo(
+                        'Info', f'Settings Imported successfuly from-\n{repr_dir}', parent=self)
             except:
                 pass
 
@@ -872,7 +1058,7 @@ class Settings(tk.Frame):
                     pswd.insert(0, Access_Config().bse_config['key'])
                     mg.showinfo('Settings', 'Key Changed!', parent=self)
                 except:
-                    raise
+                    pass
             else:
                 if pswd.get().strip() == '':
                     pswd.delete(0, tk.END)
@@ -905,11 +1091,12 @@ class Result_Show_Sep(tk.Tk):
         file_menu.add_separator()
         file_menu.add_command(label='Exit', command=self.destroy)
 
-        __hedbar = tk.Frame(self)
-        __hedbar.pack(side='top', fill='x')
-        __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
-                            fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
-        __lblres.pack(fill='x', ipady=10)
+        if key == 1:
+            __hedbar = tk.Frame(self)
+            __hedbar.pack(side='top', fill='x')
+            __lblres = tk.Label(__hedbar, text='Result', font=('Segoe UI', 24, 'bold'),
+                                fg='#FFFFFF', bg='#0077CC', relief='solid', bd=1)
+            __lblres.pack(fill='x', ipady=10)
         self.flval = 0
         self.r_navbar()
         h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
@@ -1048,21 +1235,24 @@ class Token_Show(Result_Show_Sep):
     def __init__(self):
         super().__init__(None, None, key=0)
         self.title('Tokens')
-        with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-            tkns = ''
-            try:
-                tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
-                line = len(tkn_lst)//7
-                if (len(tkn_lst)/7)-line > 0:
-                    line += 1
-                n = 0
-                for _ in range(line):
-                    n += 7
-                    tkn_tab = tabulate([tkn_lst[n-7:n]],
-                                       tablefmt='fancy_grid', numalign='center', stralign='center')
-                    tkns += tkn_tab+'\n'
-            except:
-                pass
+        try:
+            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
+                tkns = ''
+                try:
+                    tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
+                    line = len(tkn_lst)//7
+                    if (len(tkn_lst)/7)-line > 0:
+                        line += 1
+                    n = 0
+                    for _ in range(line):
+                        n += 7
+                        tkn_tab = tabulate([tkn_lst[n-7:n]],
+                                           tablefmt='fancy_grid', numalign='center', stralign='center')
+                        tkns += tkn_tab+'\n'
+                except:
+                    pass
+        except FileNotFoundError:
+            mg.showerror('Error', 'Token file doesn\'t exists.')
 
         self.res_tbl.insert(0.0, tkns)
         self.res_tbl.config(state='disabled')

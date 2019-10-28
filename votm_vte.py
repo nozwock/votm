@@ -328,46 +328,88 @@ class Vote(tk.Frame):
                                  validatecommand=(tkn_reg, '%P'))
         self.tkn_ent.pack()
 
-        bhead = ttk.LabelFrame(uppr, text='HeadBoy', padding=10)
-        bhead.pack(side='left', padx=(0, 10))
-        vbhead = ttk.LabelFrame(uppr, text='ViceHeadBoy', padding=10)
-        vbhead.pack(side='left')
-        ghead = ttk.LabelFrame(lwr, text='HeadGirl', padding=10)
-        ghead.pack(side='left', padx=(0, 10))
-        vghead = ttk.LabelFrame(lwr, text='ViceHeadGirl', padding=10)
-        vghead.pack(side='left')
+        cnd = Sql_init(0).db_cands()
+        row = len(cnd)//2
+        if (len(cnd)/2)-row > 0:
+            row += 1
+        lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
+        cn = 1
+        self.args = []
 
-        self.bhead_ch = ttk.Combobox(bhead, values=Sql_init(
-            0).db_cands()['HB'], state='readonly')
-        self.bhead_ch.set('Select')
-        self.bhead_ch.pack()
+        for j in range(len(cnd)):
+            text = str(list(cnd.keys())[j])
+            for _ in range(len(lcl_cnd)):
+                if text == lcl_cnd[_][-1]:
+                    text = lcl_cnd[_][0]
+                    break
+            if cn <= 2:
+                pos = uppr
+            else:
+                pos = lwr
+            if cn%2==0:
+                padx=(0,0)
+            else:
+                padx=(0,10)
+            exec(f'{str(list(cnd.keys())[j].lower())}_frm = ttk.LabelFrame(pos, text=\'{text}\', padding=10)')
+            exec(f'{str(list(cnd.keys())[j].lower())}_frm.pack(side=\'left\', padx=padx)')
+            cn += 1
 
-        self.vbhead_ch = ttk.Combobox(vbhead, values=Sql_init(
-            0).db_cands()['VHB'], state='readonly')
-        self.vbhead_ch.set('Select')
-        self.vbhead_ch.pack()
 
-        self.ghead_ch = ttk.Combobox(ghead, values=Sql_init(
-            0).db_cands()['HG'], state='readonly')
-        self.ghead_ch.set('Select')
-        self.ghead_ch.pack()
+        #hb_frm = ttk.LabelFrame(uppr, text='HeadBoy', padding=10)
+        #hb_frm.pack(side='left', padx=(0, 10))
+        #vhb_frm = ttk.LabelFrame(uppr, text='ViceHeadBoy', padding=10)
+        #vhb_frm.pack(side='left')
+        #hg_frm = ttk.LabelFrame(lwr, text='HeadGirl', padding=10)
+        #hg_frm.pack(side='left', padx=(0, 10))
+        #vhg_frm = ttk.LabelFrame(lwr, text='ViceHeadGirl', padding=10)
+        #vhg_frm.pack(side='left')
 
-        self.vghead_ch = ttk.Combobox(vghead, values=Sql_init(
-            0).db_cands()['VHG'], state='readonly')
-        self.vghead_ch.set('Select')
-        self.vghead_ch.pack()
 
-        self.btnvt = ttk.Button(self, text='Vote', style='1.TButton', state='disabled', command=lambda: (
-            self.mv_Done(self.btnvt, self.bhead_ch.get(), self.vbhead_ch.get(), self.ghead_ch.get(), self.vghead_ch.get())))
+        for i in range(len(cnd)):
+            exec(f'self.{str(list(cnd.keys())[i].lower())}_box = ttk.Combobox({str(list(cnd.keys())[i].lower())}_frm, values={cnd[list(cnd.keys())[i]]}, state=\'readonly\')')
+            exec(f'self.{str(list(cnd.keys())[i].lower())}_box.set(\'Select\')')
+            exec(f'self.{str(list(cnd.keys())[i].lower())}_box.pack()')
+
+        #self.bhead_ch = ttk.Combobox(bhead, values=Sql_init(
+        #    0).db_cands()['HB'], state='readonly')
+        #self.bhead_ch.set('Select')
+        #self.bhead_ch.pack()
+#
+        #self.vbhead_ch = ttk.Combobox(vbhead, values=Sql_init(
+        #    0).db_cands()['VHB'], state='readonly')
+        #self.vbhead_ch.set('Select')
+        #self.vbhead_ch.pack()
+#
+        #self.ghead_ch = ttk.Combobox(ghead, values=Sql_init(
+        #    0).db_cands()['HG'], state='readonly')
+        #self.ghead_ch.set('Select')
+        #self.ghead_ch.pack()
+#
+        #self.vghead_ch = ttk.Combobox(vghead, values=Sql_init(
+        #    0).db_cands()['VHG'], state='readonly')
+        #self.vghead_ch.set('Select')
+        #self.vghead_ch.pack()
+
+        self.btnvt = ttk.Button(self, text='Vote', style='1.TButton', state='disabled', command=lambda: self.mv_Done(self.btnvt, self.crt_args()))
         self.btnvt.pack(side='bottom', pady=(0, 10))
-        self.bhead_ch.bind('<<ComboboxSelected>>',
-                           lambda event: self.chk_vote())
-        self.vbhead_ch.bind('<<ComboboxSelected>>',
-                            lambda event: self.chk_vote())
-        self.ghead_ch.bind('<<ComboboxSelected>>',
-                           lambda event: self.chk_vote())
-        self.vghead_ch.bind('<<ComboboxSelected>>',
-                            lambda event: self.chk_vote())
+        for i in range(len(cnd)):
+            exec(f'self.{str(list(cnd.keys())[i].lower())}_box.bind(\'<<ComboboxSelected>>\', self.chk_vote)')
+        #self.hb_box.bind('<<ComboboxSelected>>',
+        #                   lambda event: self.chk_vote())
+        #self.vhb_box.bind('<<ComboboxSelected>>',
+        #                    lambda event: self.chk_vote())
+        #self.hg_box.bind('<<ComboboxSelected>>',
+        #                   lambda event: self.chk_vote())
+        #self.vhg_box.bind('<<ComboboxSelected>>',
+        #                    lambda event: self.chk_vote())
+
+    def crt_args(self):
+        cnd = Sql_init(0).db_cands()
+        del self.args
+        self.args = []
+        for i in range(len(cnd)):
+            exec(f'self.args.append(self.{str(list(cnd.keys())[i].lower())}_box.get())')
+        return self.args
 
     def tkn_check(self, inp: str) -> bool:
         """Restricts all but numbers and that too upto 5 digits only."""
@@ -378,15 +420,13 @@ class Vote(tk.Frame):
         else:
             return False
 
-    def chk_vote(self):
+    def chk_vote(self, event=None):
         """Makes sure Vote button stays disabled untill a candidate has been selected in each menu."""
         btn = self.btnvt
-        args = (self.bhead_ch.get(), self.vbhead_ch.get(),
-                self.ghead_ch.get(), self.vghead_ch.get())
         n = 0
         m = 0
         for j in [Sql_init(0).db_cands()[x] for x in list(Sql_init(0).db_cands().keys())]:
-            if args[m] in j:
+            if self.crt_args()[m] in j:
                 n += 1
             m += 1
         if n == 4 and self.chk_val == 1:
@@ -394,12 +434,16 @@ class Vote(tk.Frame):
 
     def mv_Done(self, btnvt: ttk.Button, *args: str):
         """Move to Done frame while saving votes in database through the logic module."""
+        args, = args
         global vte_lst  # Votes of 1 turn
-        if Tokens(self).get(self.tkn_ent.get()):
-            if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
+        if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
+            if Tokens(self).get(self.tkn_ent.get()):
                 vte_lst = list(args)
-                vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
-                    3] = f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
+                x = [eval(i) for i in list(Access_Config().cand_config.keys())]
+                for i in range(len(vte_lst)):
+                    vte_lst[i] = f'{x[i][-1]}_{vte_lst[i]}'
+                # vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
+                #    3] = f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
                 if sel == 0:  # Staff
                     btnvt.config(state='disabled')
                     Sql_init(0).tchr_vte(vte_lst)
