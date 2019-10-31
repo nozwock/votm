@@ -264,6 +264,9 @@ class Edit(tk.Frame):
             pass
 
     def updt(self, event):
+        self.after(100, self.updt_sec(event))
+
+    def updt_sec(self, event):
         slave = event.widget.winfo_children()[event.widget.index('current')]
         tabs = self.tab.tabs()
 
@@ -504,10 +507,13 @@ class Posts(tk.Frame):
             if tag.get() not in _tag:
                 key = f'{[ent.get(), tag.get().upper()]}'
                 cfg[key] = []
-                Edit.wrt(1, cfg)
-                val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
-                self.pst_del_pst.config(values=val)
-                self.pst_edt_pst.config(values=val)
+                if len(cfg) <= 8:
+                    Edit.wrt(1, cfg)
+                    val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                    self.pst_del_pst.config(values=val)
+                    self.pst_edt_pst.config(values=val)
+                else:
+                    mg.showerror('Error', 'No. of Max posts is 8!')
             else:
                 mg.showwarning(
                     'Error', 'This Tag already exists.', parent=self)
@@ -517,12 +523,15 @@ class Posts(tk.Frame):
             cfg = Access_Config().cand_config
             key = str([ent.get().split(';')[0].strip(),
                        ent.get().split(';')[-1].strip()])
-            del cfg[key]
-            Edit.wrt(1, cfg)
-            val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
-            ent.config(values=val)
-            self.pst_edt_pst.config(values=val)
-            ent.current(0)
+            if len(cfg) > 1:
+                del cfg[key]
+                Edit.wrt(1, cfg)
+                val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                ent.config(values=val)
+                self.pst_edt_pst.config(values=val)
+                ent.current(0)
+            else:
+                mg.showwarning('Error', 'Can\'t delete, Atleast 1 Post should exist.')
 
 
 class Classes(tk.Frame):
@@ -679,10 +688,6 @@ class Result(tk.Frame):
         self.shw_chk_var_std = tk.IntVar()
         self.shw_chk_var_clss = tk.IntVar()
         self.shw_chk_var_sec = tk.IntVar()
-        self.shw_chk_var_HB = tk.IntVar()
-        self.shw_chk_var_VHB = tk.IntVar()
-        self.shw_chk_var_HG = tk.IntVar()
-        self.shw_chk_var_VHG = tk.IntVar()
         shw_opt_cstm = ttk.Radiobutton(
             shw_lblfrm_top, text='Custom', variable=self.shw_opt_var, value=0, command=lambda: self.opt_call(shw_chk_clss))
         shw_opt_all = ttk.Radiobutton(shw_lblfrm_top, text='Select All',
@@ -691,29 +696,62 @@ class Result(tk.Frame):
             self.chk_btn(), self.shw_opt_var.set(0)))
         shw_chk_std = ttk.Checkbutton(shw_lblfrm_sup, text='Student', takefocus=0, variable=self.shw_chk_var_std, command=lambda: (
             self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_clss = ttk.Checkbutton(shw_lblfrm_btw, text='Class', takefocus=0, variable=self.shw_chk_var_clss, command=lambda: (
+        shw_chk_clss = ttk.Checkbutton(shw_lblfrm_sup, text='Class', takefocus=0, variable=self.shw_chk_var_clss, command=lambda: (
             self.chk_clss_sec(self.shw_chk_var_clss, shw_chk_clss, self.shw_chk_var_sec), self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_sec = ttk.Checkbutton(shw_lblfrm_btw, text='Section', takefocus=0, variable=self.shw_chk_var_sec, command=lambda: (
+        shw_chk_sec = ttk.Checkbutton(shw_lblfrm_sup, text='Section', takefocus=0, variable=self.shw_chk_var_sec, command=lambda: (
             self.chk_clss_sec(self.shw_chk_var_clss, shw_chk_clss, self.shw_chk_var_sec), self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_HB = ttk.Checkbutton(shw_lblfrm_btw, text='Headboy', takefocus=0, variable=self.shw_chk_var_HB, command=lambda: (
-            self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_VHB = ttk.Checkbutton(shw_lblfrm_btm, text='ViceHeadboy', takefocus=0, variable=self.shw_chk_var_VHB, command=lambda: (
-            self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_HG = ttk.Checkbutton(shw_lblfrm_btm, text='Headgirl', takefocus=0, variable=self.shw_chk_var_HG, command=lambda: (
-            self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_VHG = ttk.Checkbutton(shw_lblfrm_btm, text='ViceHeadgirl', takefocus=0, variable=self.shw_chk_var_VHG, command=lambda: (
-            self.chk_btn(), self.shw_opt_var.set(0)))
         shw_opt_cstm.pack(side='left')
         shw_opt_all.pack(side='left')
         shw_chk_tchr.pack(side='left')
         shw_chk_std.pack(side='left')
         shw_chk_clss.pack(side='left')
         shw_chk_sec.pack(side='left')
-        shw_chk_HB.pack(side='left')
-        shw_chk_VHB.pack(side='left')
-        shw_chk_HG.pack(side='left')
-        shw_chk_VHG.pack(side='left')
+
+        cnd = Sql_init(0).db_cands()
+        lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
+        cn = 1
+        self.args = []
+
+        for j in range(len(cnd)):
+            text = str(list(cnd.keys())[j])
+            for _ in range(len(lcl_cnd)):
+                if text == lcl_cnd[_][-1]:
+                    text = lcl_cnd[_][0]
+                    break
+            if cn <= 4:
+                pos = shw_lblfrm_btw
+                shw_lblfrm_btw.pack(side='top', pady=(0,10))
+                shw_lblfrm_btm.pack_forget()
+            else:
+                pos = shw_lblfrm_btm
+                shw_lblfrm_btw.pack(side='top', pady=(0,10))
+                shw_lblfrm_btm.pack(side='top', pady=(0,10))
+            exec(f'self.shw_chk_var_{str(list(cnd.keys())[j])} = tk.IntVar()')
+            exec(f'shw_chk_{str(list(cnd.keys())[j])} = ttk.Checkbutton(pos, text=\'{text}\', takefocus=0, variable=self.shw_chk_var_{str(list(cnd.keys())[j])}, command=self.exec_do)')
+            exec(f'shw_chk_{str(list(cnd.keys())[j])}.pack(side=\'left\')')
+            cn += 1
+
         self.shw_db.bind("<<ComboboxSelected>>", lambda event: self.chk_btn())
+
+    def exec_do(self):
+        self.chk_btn()
+        self.shw_opt_var.set(0)
+
+    def crt_args(self):
+        cnd = Sql_init(0).db_cands()
+        del self.args
+        self.args = []
+        try:
+            del kwargs
+        except:
+            pass
+        kwargs = []
+        for i in range(len(cnd)):
+            exec(
+                f'self.args.append(self.shw_chk_var_{str(list(cnd.keys())[i])}.get())')
+            exec(
+                f'kwargs.append(self.shw_chk_var_{str(list(cnd.keys())[i])})')
+        return self.args, kwargs
 
     def crt_mrg_fle(self):
         """Creates a merge file through a dialog box."""
@@ -806,15 +844,6 @@ class Result(tk.Frame):
                     f"{shrt[i].lower()}=(str([i for i in pst_cand if i.startswith('{shrt[i]}')]).lstrip('[').rstrip(']')).replace(\"'\", \"\")")
                 exec(f'vals.append({shrt[i].lower()})')
 
-            # hb = (str([i for i in pst_cand if i.startswith('HB')]
-            #          ).lstrip('[').rstrip(']')).replace("'", "")
-            # vhb = (str([i for i in pst_cand if i.startswith('VHB')]
-            #           ).lstrip('[').rstrip(']')).replace("'", "")
-            # hg = (str([i for i in pst_cand if i.startswith('HG')]
-            #          ).lstrip('[').rstrip(']')).replace("'", "")
-            # vhg = (str([i for i in pst_cand if i.startswith('VHG')]
-            #           ).lstrip('[').rstrip(']')).replace("'", "")
-            #vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC', hb, vhb, hg, vhg]
             args = []
             for i in range(len(self.var_val_lst)):
                 if self.var_val_lst[i] == 1:
@@ -844,8 +873,8 @@ class Result(tk.Frame):
 
     def chk_btn(self):
         """Keeps the "show" button disabled unless (a checkbutton & year/database) is selected."""
-        self.var_val_lst = [self.shw_chk_var_tchr.get(), self.shw_chk_var_std.get(), self.shw_chk_var_clss.get(), self.shw_chk_var_sec.get(),
-                            self.shw_chk_var_HB.get(), self.shw_chk_var_VHB.get(), self.shw_chk_var_HG.get(), self.shw_chk_var_VHG.get()]
+        self.var_val_lst = [self.shw_chk_var_tchr.get(), self.shw_chk_var_std.get(), self.shw_chk_var_clss.get(), self.shw_chk_var_sec.get()]
+        self.var_val_lst.extend(self.crt_args()[0])
         if self.shw_db.get() in Yr_fle.yr:
             if any(self.var_val_lst) == 0:
                 self.shw_shw.config(state='disabled')
@@ -854,8 +883,8 @@ class Result(tk.Frame):
 
     def opt_call(self, clss: ttk.Combobox):
         """Tickmarks all for select all and change to custom for any changes."""
-        var_lst = [self.shw_chk_var_tchr, self.shw_chk_var_std, self.shw_chk_var_clss, self.shw_chk_var_sec, self.shw_chk_var_HB,
-                   self.shw_chk_var_VHB, self.shw_chk_var_HG, self.shw_chk_var_VHG]
+        var_lst = [self.shw_chk_var_tchr, self.shw_chk_var_std, self.shw_chk_var_clss, self.shw_chk_var_sec]
+        var_lst.extend(self.crt_args()[-1])
         if self.shw_opt_var.get() == 1:
             for v in var_lst:
                 v.set(1)
@@ -1253,8 +1282,10 @@ class Token_Show(Result_Show_Sep):
                     pass
         except FileNotFoundError:
             mg.showerror('Error', 'Token file doesn\'t exists.')
-
-        self.res_tbl.insert(0.0, tkns)
+        try:
+            self.res_tbl.insert(0.0, tkns)
+        except:
+            pass
         self.res_tbl.config(state='disabled')
 
 

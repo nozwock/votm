@@ -306,138 +306,199 @@ class Vote(tk.Frame):
         ttk.Style().configure('1.TButton', font=('Segoe UI', 15))
         self.config(background=Win.SM_BG_HEX)
 
-        cls_txt = tk.Label(self, text='', font=(
-            'Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')
-        cls_txt.pack(side='top', anchor='n', fill='x')
-        if sel == 1:
-            cls_txt.config(text=f'{ch_clss}\' {ch_sec}')
-        else:
-            cls_txt.config(text='Staff')
-
-        tkn_frm = ttk.LabelFrame(self, text='Token', padding=10)
-        tkn_frm.pack(pady=(50, 0))
-
-        uppr = tk.Frame(self, background=Win.SM_BG_HEX)
-        uppr.pack(pady=(40, 20))
-        lwr = tk.Frame(self, background=Win.SM_BG_HEX)
-        lwr.pack()
-
-        self.chk_val = 0
-        tkn_reg = self.register(self.tkn_check)
-        self.tkn_ent = ttk.Entry(tkn_frm, validate='key',
-                                 validatecommand=(tkn_reg, '%P'))
-        self.tkn_ent.pack()
-
         cnd = Sql_init(0).db_cands()
-        row = len(cnd)//2
-        if (len(cnd)/2)-row > 0:
-            row += 1
+        self.n_val = len(cnd)
         lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
         cn = 1
         self.args = []
 
-        for j in range(len(cnd)):
-            text = str(list(cnd.keys())[j])
-            for _ in range(len(lcl_cnd)):
-                if text == lcl_cnd[_][-1]:
-                    text = lcl_cnd[_][0]
-                    break
-            if cn <= 2:
-                pos = uppr
+        if self.n_val > 4:
+            ttk.Style().configure('TNotebook', tabposition='s')
+            ttk.Style().configure('TNotebook.Tab', font=('Segoe UI', 14, 'bold'),
+                              focuscolor=ttk.Style().configure('.')['background'], width=20)
+            self.tab = ttk.Notebook(self)
+            p1 = tk.Frame(self.tab)
+            p2 = tk.Frame(self.tab)
+            self.tab.add(p1, text='               Page 1')
+            self.tab.add(p2, text='               Page 2')
+            self.tab.pack(side='right', expand=1, fill='both')
+            self.tab.bind('<<NotebookTabChanged>>', lambda event: self.updt(event))
+            for i in range(1,3):
+                exec(f"cls_txt{i} = tk.Label(p{i}, text='', font=('Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')")
+                exec(f"cls_txt{i}.pack(side='top', anchor='n', fill='x')")
+                if sel == 1:
+                    txt = f'{ch_clss}\' {ch_sec}'
+                    exec(f"cls_txt{i}.config(text=txt)")
+                else:
+                    exec(f"cls_txt{i}.config(text='Staff')")
+                exec(f'tkn_frm{i} = ttk.LabelFrame(p{i}, text=\'Token\', padding=10)')
+                exec(f'tkn_frm{i}.pack(pady=(50, 0))')
+                exec(f'self.uppr{i} = tk.Frame(p{i}, background=Win.SM_BG_HEX)')
+                exec(f'self.lwr{i} = tk.Frame(p{i}, background=Win.SM_BG_HEX)')
+                exec(f'self.uppr{i}.pack(pady=(40, 20))')
+                exec(f'self.lwr{i}.pack()')
+            tkn_reg = self.register(self.tkn_check)
+            for i in range(1,3):
+                exec(f"self.tkn_ent{i} = ttk.Entry(tkn_frm{i}, validate='key',validatecommand=(tkn_reg, '%P'))")
+                exec(f"self.tkn_ent{i}.pack()")
+            pg = 1
+
+            for j in range(len(cnd)):
+                text = str(list(cnd.keys())[j])
+                for _ in range(len(lcl_cnd)):
+                    if text == lcl_cnd[_][-1]:
+                        text = lcl_cnd[_][0]
+                        break
+                if cn <= 2 and pg <= 4:
+                    pos = self.uppr1
+                elif cn > 2 and pg <= 4:
+                    pos = self.lwr1
+                elif cn <= 6 and pg > 4:
+                    pos = self.uppr2
+                else:
+                    psos = self.lwr2
+                if cn % 2 == 0:
+                    padx = (0, 0)
+                else:
+                    padx = (0, 10)
+                exec(
+                    f'{str(list(cnd.keys())[j].lower())}_frm = ttk.LabelFrame(pos, text=\'{text}\', padding=10)')
+                exec(
+                    f'{str(list(cnd.keys())[j].lower())}_frm.pack(side=\'left\', padx=padx)')
+                cn += 1
+                pg += 1
+
+            for i in range(len(cnd)):
+                exec(
+                    f'self.{str(list(cnd.keys())[i].lower())}_box = ttk.Combobox({str(list(cnd.keys())[i].lower())}_frm, values={cnd[list(cnd.keys())[i]]}, state=\'readonly\')')
+                exec(
+                    f'self.{str(list(cnd.keys())[i].lower())}_box.set(\'Select\')')
+                exec(f'self.{str(list(cnd.keys())[i].lower())}_box.pack()')
+
+            for i in range(1,3):
+                exec(f"self.btnvt{i} = ttk.Button(p{i}, text='Vote', style='1.TButton', state='disabled',command= self.exec_do{i})")
+                exec(f"self.btnvt{i}.pack(side='bottom', pady=(0, 10))")
+
+            for i in range(len(cnd)):
+                exec(
+                    f'self.{str(list(cnd.keys())[i].lower())}_box.bind(\'<<ComboboxSelected>>\', self.exec_do_chk)')
+        else:
+            cls_txt = tk.Label(self, text='', font=(
+                'Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')
+            cls_txt.pack(side='top', anchor='n', fill='x')
+            if sel == 1:
+                cls_txt.config(text=f'{ch_clss}\' {ch_sec}')
             else:
-                pos = lwr
-            if cn%2==0:
-                padx=(0,0)
-            else:
-                padx=(0,10)
-            exec(f'{str(list(cnd.keys())[j].lower())}_frm = ttk.LabelFrame(pos, text=\'{text}\', padding=10)')
-            exec(f'{str(list(cnd.keys())[j].lower())}_frm.pack(side=\'left\', padx=padx)')
-            cn += 1
+                cls_txt.config(text='Staff')
 
+            tkn_frm = ttk.LabelFrame(self, text='Token', padding=10)
+            tkn_frm.pack(pady=(50, 0))
 
-        #hb_frm = ttk.LabelFrame(uppr, text='HeadBoy', padding=10)
-        #hb_frm.pack(side='left', padx=(0, 10))
-        #vhb_frm = ttk.LabelFrame(uppr, text='ViceHeadBoy', padding=10)
-        #vhb_frm.pack(side='left')
-        #hg_frm = ttk.LabelFrame(lwr, text='HeadGirl', padding=10)
-        #hg_frm.pack(side='left', padx=(0, 10))
-        #vhg_frm = ttk.LabelFrame(lwr, text='ViceHeadGirl', padding=10)
-        #vhg_frm.pack(side='left')
+            uppr = tk.Frame(self, background=Win.SM_BG_HEX)
+            uppr.pack(pady=(40, 20))
+            lwr = tk.Frame(self, background=Win.SM_BG_HEX)
+            lwr.pack()
 
+            tkn_reg = self.register(self.tkn_check)
+            self.tkn_ent = ttk.Entry(tkn_frm, validate='key',
+                                     validatecommand=(tkn_reg, '%P'))
+            self.tkn_ent.pack()
 
-        for i in range(len(cnd)):
-            exec(f'self.{str(list(cnd.keys())[i].lower())}_box = ttk.Combobox({str(list(cnd.keys())[i].lower())}_frm, values={cnd[list(cnd.keys())[i]]}, state=\'readonly\')')
-            exec(f'self.{str(list(cnd.keys())[i].lower())}_box.set(\'Select\')')
-            exec(f'self.{str(list(cnd.keys())[i].lower())}_box.pack()')
+            for j in range(len(cnd)):
+                text = str(list(cnd.keys())[j])
+                for _ in range(len(lcl_cnd)):
+                    if text == lcl_cnd[_][-1]:
+                        text = lcl_cnd[_][0]
+                        break
+                if cn <= 2:
+                    pos = uppr
+                else:
+                    pos = lwr
+                if cn % 2 == 0:
+                    padx = (0, 0)
+                else:
+                    padx = (0, 10)
+                exec(
+                    f'{str(list(cnd.keys())[j].lower())}_frm = ttk.LabelFrame(pos, text=\'{text}\', padding=10)')
+                exec(
+                    f'{str(list(cnd.keys())[j].lower())}_frm.pack(side=\'left\', padx=padx)')
+                cn += 1
 
-        #self.bhead_ch = ttk.Combobox(bhead, values=Sql_init(
-        #    0).db_cands()['HB'], state='readonly')
-        #self.bhead_ch.set('Select')
-        #self.bhead_ch.pack()
-#
-        #self.vbhead_ch = ttk.Combobox(vbhead, values=Sql_init(
-        #    0).db_cands()['VHB'], state='readonly')
-        #self.vbhead_ch.set('Select')
-        #self.vbhead_ch.pack()
-#
-        #self.ghead_ch = ttk.Combobox(ghead, values=Sql_init(
-        #    0).db_cands()['HG'], state='readonly')
-        #self.ghead_ch.set('Select')
-        #self.ghead_ch.pack()
-#
-        #self.vghead_ch = ttk.Combobox(vghead, values=Sql_init(
-        #    0).db_cands()['VHG'], state='readonly')
-        #self.vghead_ch.set('Select')
-        #self.vghead_ch.pack()
+            for i in range(len(cnd)):
+                exec(
+                    f'self.{str(list(cnd.keys())[i].lower())}_box = ttk.Combobox({str(list(cnd.keys())[i].lower())}_frm, values={cnd[list(cnd.keys())[i]]}, state=\'readonly\')')
+                exec(
+                    f'self.{str(list(cnd.keys())[i].lower())}_box.set(\'Select\')')
+                exec(f'self.{str(list(cnd.keys())[i].lower())}_box.pack()')
 
-        self.btnvt = ttk.Button(self, text='Vote', style='1.TButton', state='disabled', command=lambda: self.mv_Done(self.btnvt, self.crt_args()))
-        self.btnvt.pack(side='bottom', pady=(0, 10))
-        for i in range(len(cnd)):
-            exec(f'self.{str(list(cnd.keys())[i].lower())}_box.bind(\'<<ComboboxSelected>>\', self.chk_vote)')
-        #self.hb_box.bind('<<ComboboxSelected>>',
-        #                   lambda event: self.chk_vote())
-        #self.vhb_box.bind('<<ComboboxSelected>>',
-        #                    lambda event: self.chk_vote())
-        #self.hg_box.bind('<<ComboboxSelected>>',
-        #                   lambda event: self.chk_vote())
-        #self.vhg_box.bind('<<ComboboxSelected>>',
-        #                    lambda event: self.chk_vote())
+            self.btnvt = ttk.Button(self, text='Vote', style='1.TButton', state='disabled',
+                                    command=lambda: self.mv_Done(self.btnvt, self.tkn_ent, self.crt_args()))
+            self.btnvt.pack(side='bottom', pady=(0, 10))
+
+            for i in range(len(cnd)):
+                exec(
+                    f'self.{str(list(cnd.keys())[i].lower())}_box.bind(\'<<ComboboxSelected>>\', self.exec_do_al_chk)')
+
+    def exec_do1(self):
+        self.mv_Done(self.btnvt1, self.tkn_ent1, self.crt_args())
+
+    def exec_do2(self):
+        self.mv_Done(self.btnvt2, self.tkn_ent2, self.crt_args())
+
+    def exec_do_chk(self, event):
+        self.chk_vote(self.btnvt1, self.btnvt2)
+
+    def exec_do_al_chk(self, event):
+        self.chk_vote(self.btnvt)
+
+    def updt(self, event):
+        slave = event.widget.winfo_children()[event.widget.index('current')]
+        if str(slave).split('!')[-1] == 'frame':
+            self.tkn_ent1.delete(0, 'end')
+            self.tkn_ent1.insert(0, self.tkn_ent2.get())
+        else:
+            self.tkn_ent2.delete(0, 'end')
+            self.tkn_ent2.insert(0, self.tkn_ent1.get())
 
     def crt_args(self):
         cnd = Sql_init(0).db_cands()
         del self.args
         self.args = []
         for i in range(len(cnd)):
-            exec(f'self.args.append(self.{str(list(cnd.keys())[i].lower())}_box.get())')
+            exec(
+                f'self.args.append(self.{str(list(cnd.keys())[i].lower())}_box.get())')
         return self.args
 
     def tkn_check(self, inp: str) -> bool:
         """Restricts all but numbers and that too upto 5 digits only."""
-        self.chk_val = 1
-        self.chk_vote()
         if (inp.isdigit() or inp is '') and len(inp) <= 8:
             return True
         else:
             return False
 
-    def chk_vote(self, event=None):
+    def chk_vote(self, _btn=None, btn2=None, event=None):
         """Makes sure Vote button stays disabled untill a candidate has been selected in each menu."""
-        btn = self.btnvt
+        if _btn:
+            btn = _btn
+        else:
+            btn = self.btnvt
         n = 0
         m = 0
         for j in [Sql_init(0).db_cands()[x] for x in list(Sql_init(0).db_cands().keys())]:
             if self.crt_args()[m] in j:
                 n += 1
             m += 1
-        if n == 4 and self.chk_val == 1:
+        if n == self.n_val:
             btn.config(state='enabled')
+            if btn2:
+                btn2.config(state='enabled')
 
-    def mv_Done(self, btnvt: ttk.Button, *args: str):
+    def mv_Done(self, btnvt: ttk.Button, tkn, *args: str):
         """Move to Done frame while saving votes in database through the logic module."""
         args, = args
         global vte_lst  # Votes of 1 turn
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
-            if Tokens(self).get(self.tkn_ent.get()):
+            if Tokens(self).get(tkn.get()):
                 vte_lst = list(args)
                 x = [eval(i) for i in list(Access_Config().cand_config.keys())]
                 for i in range(len(vte_lst)):

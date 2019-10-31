@@ -12,7 +12,7 @@ from Crypto.Cipher import AES
 from base64 import b64encode, b64decode
 
 __author__ = 'Sagar Kumar'
-__version__ = '0.9.86-b'
+__version__ = '0.9.91'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 
