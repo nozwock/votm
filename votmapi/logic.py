@@ -10,9 +10,10 @@ from string import digits
 from random import choice
 from Crypto.Cipher import AES
 from base64 import b64encode, b64decode
+from collections import OrderedDict
 
 __author__ = 'Sagar Kumar'
-__version__ = '0.9.91'
+__version__ = '0.9.94'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 
@@ -420,6 +421,63 @@ class Crypt:
             pass
 
 
+class Dicto:
+    """A Class for creating ordered dictionaries."""
+
+    def __init__(self, _dict):
+        self.state = OrderedDict(_dict)
+        self.dict = OrderedDict(_dict)
+
+    def insert(self, pos, key, val):
+        self.dict = OrderedDict()
+        keys = list(dict(self.state).keys())
+        if pos >= 0:
+            flag = 0
+            for i in range(len(dict(self.state))):
+                try:
+                    if keys[i] == keys[pos]:
+                        pos = keys[i]
+                        break
+                except:
+                    flag = 1
+                    pos = keys[-1]
+                    break
+        else:
+            flag = 1
+            for i in range(-1, -len(dict(self.state))-1, -1):
+                if keys[i] == keys[pos]:
+                    pos = keys[i]
+                    break
+        for k, v in dict(self.state).items():
+            if flag == 0:
+                if k == pos:
+                    self.dict[key] = val
+                self.dict[k] = v
+            else:
+                self.dict[k] = v
+                if k == pos:
+                    self.dict[key] = val
+        del self.state
+        self.state = self.dict
+        return self.dict
+
+    def remove(self, key):
+        self.dict = dict(self.state)
+        try:
+            del self.dict[key]
+            del self.state
+            self.state = self.dict
+            return OrderedDict(self.dict)
+        except:
+            print('Error, No such key exists.')
+
+    def get(self):
+        return dict(self.state)
+
+    def __repr__(self):
+        return repr(dict(self.state))
+
+
 class Ent_Box(tk.Toplevel):
     """Constructs a toplevel frame whose master is Win,
     It provides a interface for authentication system."""
@@ -603,4 +661,14 @@ if __name__ == '__main__':
     mg.showinfo(
         'VotmAPI', f'A logical subset part of the main application.\n\nVersion: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20')
     Sql_init(1)
+
+    # Dict test
+    test = Dicto(Access_Config().cand_config)
+    test.insert(1, "['HeadGirls', 'HGS']", ['bruh'])
+    test.insert(-2, "['Hopp', 'HP']", ['grg'])
+    print(test)
+    test.remove("['ViceHeadBoy', 'VHB']")
+    print(test)
+    print(test.get()["['Hopp', 'HP']"])
+
     mg.showinfo('Succes', 'Test run Successfull.')

@@ -314,32 +314,37 @@ class Vote(tk.Frame):
 
         if self.n_val > 4:
             ttk.Style().configure('TNotebook', tabposition='s')
-            ttk.Style().configure('TNotebook.Tab', font=('Segoe UI', 14, 'bold'),
-                              focuscolor=ttk.Style().configure('.')['background'], width=20)
-            self.tab = ttk.Notebook(self)
-            p1 = tk.Frame(self.tab)
-            p2 = tk.Frame(self.tab)
+            ttk.Style().configure('TNotebook.Tab', font=('Small Fonts', 14),
+                                  focuscolor=ttk.Style().configure('.')['background'], width=20)
+            self.tab = ttk.Notebook(self, padding=-1)
+            p1 = tk.Frame(self.tab, background=Win.SM_BG_HEX)
+            p2 = tk.Frame(self.tab, background=Win.SM_BG_HEX)
             self.tab.add(p1, text='               Page 1')
             self.tab.add(p2, text='               Page 2')
             self.tab.pack(side='right', expand=1, fill='both')
-            self.tab.bind('<<NotebookTabChanged>>', lambda event: self.updt(event))
-            for i in range(1,3):
-                exec(f"cls_txt{i} = tk.Label(p{i}, text='', font=('Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')")
+            self.tab.bind('<<NotebookTabChanged>>',
+                          lambda event: self.updt(event))
+            for i in range(1, 3):
+                exec(
+                    f"cls_txt{i} = tk.Label(p{i}, text='', font=('Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')")
                 exec(f"cls_txt{i}.pack(side='top', anchor='n', fill='x')")
                 if sel == 1:
                     txt = f'{ch_clss}\' {ch_sec}'
                     exec(f"cls_txt{i}.config(text=txt)")
                 else:
                     exec(f"cls_txt{i}.config(text='Staff')")
-                exec(f'tkn_frm{i} = ttk.LabelFrame(p{i}, text=\'Token\', padding=10)')
+                exec(
+                    f'tkn_frm{i} = ttk.LabelFrame(p{i}, text=\'Token\', padding=10)')
                 exec(f'tkn_frm{i}.pack(pady=(50, 0))')
-                exec(f'self.uppr{i} = tk.Frame(p{i}, background=Win.SM_BG_HEX)')
+                exec(
+                    f'self.uppr{i} = tk.Frame(p{i}, background=Win.SM_BG_HEX)')
                 exec(f'self.lwr{i} = tk.Frame(p{i}, background=Win.SM_BG_HEX)')
                 exec(f'self.uppr{i}.pack(pady=(40, 20))')
                 exec(f'self.lwr{i}.pack()')
             tkn_reg = self.register(self.tkn_check)
-            for i in range(1,3):
-                exec(f"self.tkn_ent{i} = ttk.Entry(tkn_frm{i}, validate='key',validatecommand=(tkn_reg, '%P'))")
+            for i in range(1, 3):
+                exec(
+                    f"self.tkn_ent{i} = ttk.Entry(tkn_frm{i}, validate='key',validatecommand=(tkn_reg, '%P'))")
                 exec(f"self.tkn_ent{i}.pack()")
             pg = 1
 
@@ -356,7 +361,7 @@ class Vote(tk.Frame):
                 elif cn <= 6 and pg > 4:
                     pos = self.uppr2
                 else:
-                    psos = self.lwr2
+                    pos = self.lwr2
                 if cn % 2 == 0:
                     padx = (0, 0)
                 else:
@@ -375,8 +380,9 @@ class Vote(tk.Frame):
                     f'self.{str(list(cnd.keys())[i].lower())}_box.set(\'Select\')')
                 exec(f'self.{str(list(cnd.keys())[i].lower())}_box.pack()')
 
-            for i in range(1,3):
-                exec(f"self.btnvt{i} = ttk.Button(p{i}, text='Vote', style='1.TButton', state='disabled',command= self.exec_do{i})")
+            for i in range(1, 3):
+                exec(
+                    f"self.btnvt{i} = ttk.Button(p{i}, text='Vote', style='1.TButton', state='disabled',command= self.exec_do{i})")
                 exec(f"self.btnvt{i}.pack(side='bottom', pady=(0, 10))")
 
             for i in range(len(cnd)):

@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
+from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Dicto, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
 from tabulate import tabulate
 from shutil import copyfile
 import xlsxwriter
@@ -244,8 +244,7 @@ class Edit(tk.Frame):
         sec = Sections(self.tab)
         self.tab.add(sec, text='Sections')
         self.tab.pack(side='right', expand=1, fill='both')
-        #self.tab.bind('<<NotebookTabChanged>>', lambda event: self.updt(event))
-        self.tab.bind('<Button-1>', lambda event: self.updt(event))
+        self.tab.bind('<ButtonRelease-1>', lambda event: self.updt(event))
 
     @staticmethod
     def wrt(fle: int, cfg: str):
@@ -264,14 +263,11 @@ class Edit(tk.Frame):
             pass
 
     def updt(self, event):
-        self.after(100, self.updt_sec(event))
-
-    def updt_sec(self, event):
         slave = event.widget.winfo_children()[event.widget.index('current')]
         tabs = self.tab.tabs()
 
         tab_ins = [Candidates, Posts, Classes, Sections]
-        
+
         for i in range(len(tab_ins)):
             if isinstance(slave, tab_ins[i]):
                 c_ind = self.tab.index(tabs[i])
@@ -279,9 +275,11 @@ class Edit(tk.Frame):
                 del slave
                 slave = tab_ins[i](self.tab)
                 if c_ind < 3:
-                    self.tab.insert(c_ind, slave, text=f'{tab_ins[i]}'.split('.')[-1].strip("'>"))
+                    self.tab.insert(
+                        c_ind, slave, text=f'{tab_ins[i]}'.split('.')[-1].strip("'>"))
                 else:
-                    self.tab.add(slave, text=f'{tab_ins[i]}'.split('.')[-1].strip("'>"))
+                    self.tab.add(slave, text=f'{tab_ins[i]}'.split(
+                        '.')[-1].strip("'>"))
                 self.tab.select(slave)
                 break
 
@@ -289,7 +287,6 @@ class Edit(tk.Frame):
 class Candidates(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bg=Win.SM_BG_HEX)
-        #self.bind('<Button-1>', lambda e: Edit.updt(master, self))
 
         post = [eval(i)[0] for i in list(Access_Config().cand_config.keys())]
         cand_vw_ed = ttk.LabelFrame(self, text='View/Edit', padding=10)
@@ -417,8 +414,11 @@ class Posts(tk.Frame):
         self.lbl_tag = 'Post Tag'
         self.lbl_pst = 'Post'
 
-        pst_edt = ttk.LabelFrame(self, text='Edit', padding=10)
-        pst_edt.pack(pady=(48, 10))
+        top_frm = tk.Frame(self, bg=Win.SM_BG_HEX)
+        top_frm.pack(pady=(40, 10))
+
+        pst_edt = ttk.LabelFrame(top_frm, text='Edit', padding=10)
+        pst_edt.pack(side='left', padx=(0, 10))
         pst_edt_top = tk.Frame(pst_edt, bg=Win.SM_BG_HEX)
         pst_edt_top.pack(side='top', pady=(0, 10))
         pst_edt_btm = tk.Frame(pst_edt, bg=Win.SM_BG_HEX)
@@ -439,7 +439,7 @@ class Posts(tk.Frame):
             pst_edt_top, text='Edit', style='m.TButton', takefocus=0, command=lambda: self.pst_edt(self.pst_edt_pst, pst_edt_ent, pst_edt_tag))
         pst_edt_btn.pack(side='left')
         self.pst_edt_pst.bind('<<ComboboxSelected>>', lambda event: (pst_edt_ent.config(state='enabled'), pst_edt_tag.config(state='enabled'), pst_edt_tag.config(validate='key', validatecommand=(tag_reg, '%P')), self.pst_edt_pst.config(values=[
-                           f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]), pst_edt_ent.delete(0, 'end'), pst_edt_tag.delete(0, 'end'), pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip()), pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())))
+            f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]), pst_edt_ent.delete(0, 'end'), pst_edt_tag.delete(0, 'end'), pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip()), pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())))
         ######################################
         pst_add = ttk.LabelFrame(self, text='Add', padding=10)
         pst_add.pack(pady=(0, 10))
@@ -457,8 +457,13 @@ class Posts(tk.Frame):
         pst_add_tag.bind('<Enter>', lambda e: (pst_add_tag.delete(0, 'end'), pst_add_tag.config(
             validate='key', validatecommand=(tag_reg, '%P')), pst_add_tag.unbind('<Enter>')))
         ######################################
-        pst_del = ttk.LabelFrame(self, text='Delete', padding=10)
-        pst_del.pack(pady=(0, 20))
+        btm_frm = tk.Frame(self, bg=Win.SM_BG_HEX)
+        btm_frm.pack(pady=(0, 20))
+        left_btm = tk.Frame(btm_frm, bg=Win.SM_BG_HEX)
+        left_btm.pack(side='left', fill='y', expand=1, padx=(0, 10))
+
+        pst_del = ttk.LabelFrame(left_btm, text='Delete', padding=10)
+        pst_del.pack(side='top')
         self.pst_del_pst = ttk.Combobox(
             pst_del, values=self.flpost, state='readonly')
         self.pst_del_pst.set(self.lbl_pst)
@@ -468,11 +473,77 @@ class Posts(tk.Frame):
         pst_del_btn.pack(side='left')
 
         self.pst_del_pst.bind('<<ComboboxSelected>>', lambda e: self.pst_del_pst.config(values=[
-                         f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]))
+            f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]))
 
-        pst_clr = ttk.Button(self, text='Clear', padding=10, style='m.TButton', command=lambda: (
+        pst_clr = ttk.Button(left_btm, text='Clear', padding=10, style='m.TButton', command=lambda: (
             Edit.wrt(1, Default_Config.candidate_config), mg.showinfo('Info', 'Cleared, And set to default.', parent=self)), takefocus=0)
-        pst_clr.pack()
+        pst_clr.pack(side='top', fill='y', expand=1, pady=(20, 20))
+        ########################################
+        self.cfg = Dicto(Access_Config().cand_config)
+        keys = list(self.cfg.get().keys())
+        evl_keys = [eval(i) for i in keys]
+
+        ordr_frm = ttk.LabelFrame(btm_frm, text='Rearrange', padding=10)
+        ordr_frm.pack(side='left')
+        self.pst_list = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in keys]
+        self.pst_var = tk.StringVar(value=self.pst_list)
+        self.ordr_posts = tk.Listbox(
+            ordr_frm, height=5, listvariable=self.pst_var, relief='groove', bd=2, highlightthickness=0)
+        self.ordr_posts.pack(side='top')
+        up_dn_frm = tk.Frame(ordr_frm)
+        up_dn_frm.pack(side='top', fill='x', expand=1)
+        up_btn = tk.Button(up_dn_frm, text='Up', relief='groove', highlightthickness=0, bg=Win.SM_BG_HEX, command=lambda: self.move_up(),
+                           activebackground=Win.SM_BG_HEX, activeforeground='#5C616C', fg='#5C616C', takefocus=0)
+        up_btn.pack(side='left', fill='x', expand=1)
+        dn_btn = tk.Button(up_dn_frm, text='Down', relief='groove', highlightthickness=0, bg=Win.SM_BG_HEX, command=lambda: self.move_down(),
+                           activebackground=Win.SM_BG_HEX, activeforeground='#5C616C', fg='#5C616C', takefocus=0)
+        dn_btn.pack(side='left', fill='x', expand=1)
+
+    def move_up(self, *args):
+        try:
+            self.idxs = self.ordr_posts.curselection()
+            if not self.idxs:
+                return
+            for pos in self.idxs:
+                if pos == 0:
+                    continue
+                val = self.ordr_posts.get(pos)
+                self.ordr_posts.delete(pos)
+                self.ordr_posts.insert(pos-1, val)
+                self.pst_list.pop(pos)
+                self.pst_list.insert(pos-1, val)
+                self.ordr_posts.selection_set(pos-1)
+                key = str([val.split(';')[0].strip(),
+                           val.split(';')[-1].strip()])
+                item = self.cfg.get()[key]
+                self.cfg.remove(key)
+                self.cfg.insert(pos-1, key, item)
+                Edit.wrt(1, self.cfg)
+        except:
+            raise
+
+    def move_down(self, *args):
+        try:
+            self.idxs = self.ordr_posts.curselection()
+            if not self.idxs:
+                return
+            for pos in self.idxs:
+                if pos == len(self.pst_list)-1:
+                    continue
+                val = self.ordr_posts.get(pos)
+                self.ordr_posts.delete(pos)
+                self.ordr_posts.insert(pos+1, val)
+                self.pst_list.pop(pos)
+                self.pst_list.insert(pos+1, val)
+                self.ordr_posts.selection_set(pos+1)
+                key = str([val.split(';')[0].strip(),
+                           val.split(';')[-1].strip()])
+                item = self.cfg.get()[key]
+                self.cfg.remove(key)
+                self.cfg.insert(pos+1, key, item)
+                Edit.wrt(1, self.cfg)
+        except:
+            raise
 
     def tag_check(self, inp):
         if ((inp.isalpha() or inp is '') and len(inp) <= 3) or inp in [i.split(';')[-1].strip() for i in self.flpost]:
@@ -483,16 +554,27 @@ class Posts(tk.Frame):
     def pst_edt(self, key, ent, tag):
         if ent.get() != '' and tag.get() != '':
             cfg = Access_Config().cand_config
-            _tag = [eval(i)[-1] for i in list(cfg.keys()) if eval(i)[-1] != tag.get()]
+            _tag = [eval(i)[-1]
+                    for i in list(cfg.keys()) if eval(i)[-1] != tag.get()]
             if tag.get() not in _tag:
                 cmb = key
                 _key = f'{[ent.get(), tag.get().upper()]}'
-                key = str([key.get().split(';')[0].strip(),key.get().split(';')[-1].strip()])
+                key = str([key.get().split(';')[0].strip(),
+                           key.get().split(';')[-1].strip()])
                 con = cfg.get(key)
                 del cfg[key]
                 cfg[_key] = con
+                self.cfg = Dicto(cfg)
+                pos = self.pst_list.index(
+                    [f'{i[0]}; {i[-1]}' for i in [eval(key)]][0])
+                self.pst_list = [
+                    f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())]
+                self.ordr_posts.delete(pos)
+                self.ordr_posts.insert(
+                    pos, [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())][pos])
                 Edit.wrt(1, cfg)
-                val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                val = [
+                    f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_del_pst.config(values=val)
                 self.pst_edt_pst.config(values=val)
                 cmb.current(len(cfg)-1)
@@ -508,8 +590,14 @@ class Posts(tk.Frame):
                 key = f'{[ent.get(), tag.get().upper()]}'
                 cfg[key] = []
                 if len(cfg) <= 8:
+                    self.cfg = Dicto(cfg)
+                    self.pst_list = [
+                        f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())]
+                    self.ordr_posts.insert(
+                        'end', [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())][-1])
                     Edit.wrt(1, cfg)
-                    val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                    val = [
+                        f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                     self.pst_del_pst.config(values=val)
                     self.pst_edt_pst.config(values=val)
                 else:
@@ -525,13 +613,21 @@ class Posts(tk.Frame):
                        ent.get().split(';')[-1].strip()])
             if len(cfg) > 1:
                 del cfg[key]
+                print(eval(key))
+                self.cfg = Dicto(cfg)
+                pos = self.pst_list.index(
+                    [f'{i[0]}; {i[-1]}' for i in [eval(key)]][0])
+                self.pst_list = list(self.cfg.get().keys())
+                self.ordr_posts.delete(pos)
                 Edit.wrt(1, cfg)
-                val = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                val = [
+                    f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 ent.config(values=val)
                 self.pst_edt_pst.config(values=val)
                 ent.current(0)
             else:
-                mg.showwarning('Error', 'Can\'t delete, Atleast 1 Post should exist.')
+                mg.showwarning(
+                    'Error', 'Can\'t delete, Atleast 1 Post should exist.')
 
 
 class Classes(tk.Frame):
@@ -720,14 +816,15 @@ class Result(tk.Frame):
                     break
             if cn <= 4:
                 pos = shw_lblfrm_btw
-                shw_lblfrm_btw.pack(side='top', pady=(0,10))
+                shw_lblfrm_btw.pack(side='top', pady=(0, 10))
                 shw_lblfrm_btm.pack_forget()
             else:
                 pos = shw_lblfrm_btm
-                shw_lblfrm_btw.pack(side='top', pady=(0,10))
-                shw_lblfrm_btm.pack(side='top', pady=(0,10))
+                shw_lblfrm_btw.pack(side='top', pady=(0, 10))
+                shw_lblfrm_btm.pack(side='top', pady=(0, 10))
             exec(f'self.shw_chk_var_{str(list(cnd.keys())[j])} = tk.IntVar()')
-            exec(f'shw_chk_{str(list(cnd.keys())[j])} = ttk.Checkbutton(pos, text=\'{text}\', takefocus=0, variable=self.shw_chk_var_{str(list(cnd.keys())[j])}, command=self.exec_do)')
+            exec(
+                f'shw_chk_{str(list(cnd.keys())[j])} = ttk.Checkbutton(pos, text=\'{text}\', takefocus=0, variable=self.shw_chk_var_{str(list(cnd.keys())[j])}, command=self.exec_do)')
             exec(f'shw_chk_{str(list(cnd.keys())[j])}.pack(side=\'left\')')
             cn += 1
 
@@ -873,7 +970,8 @@ class Result(tk.Frame):
 
     def chk_btn(self):
         """Keeps the "show" button disabled unless (a checkbutton & year/database) is selected."""
-        self.var_val_lst = [self.shw_chk_var_tchr.get(), self.shw_chk_var_std.get(), self.shw_chk_var_clss.get(), self.shw_chk_var_sec.get()]
+        self.var_val_lst = [self.shw_chk_var_tchr.get(), self.shw_chk_var_std.get(
+        ), self.shw_chk_var_clss.get(), self.shw_chk_var_sec.get()]
         self.var_val_lst.extend(self.crt_args()[0])
         if self.shw_db.get() in Yr_fle.yr:
             if any(self.var_val_lst) == 0:
@@ -883,7 +981,8 @@ class Result(tk.Frame):
 
     def opt_call(self, clss: ttk.Combobox):
         """Tickmarks all for select all and change to custom for any changes."""
-        var_lst = [self.shw_chk_var_tchr, self.shw_chk_var_std, self.shw_chk_var_clss, self.shw_chk_var_sec]
+        var_lst = [self.shw_chk_var_tchr, self.shw_chk_var_std,
+                   self.shw_chk_var_clss, self.shw_chk_var_sec]
         var_lst.extend(self.crt_args()[-1])
         if self.shw_opt_var.get() == 1:
             for v in var_lst:
