@@ -338,8 +338,8 @@ class Candidates(tk.Frame):
                                   command=lambda: self.cand_del(cand_del_pst, cand_del_cand), takefocus=0)
         cand_del_btn.pack(side='left')
 
-        cand_clr = ttk.Button(self, text='Clear', padding=10, style='m.TButton', command=lambda: (
-            Edit.wrt(1, Default_Config.candidate_config), mg.showinfo('Info', 'Cleared, And set to default.', parent=self)), takefocus=0)
+        cand_clr = ttk.Button(self, text='Clear', padding=10,
+                              style='m.TButton', command=lambda: self.clr(), takefocus=0)
         cand_clr.pack()
         cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[Cand_Check(cand_vw_ed_pst.get(
         )).get()]), cand_vw_ed_cand.set(''), Edit.cur(cand_vw_ed_cand), cand_vw_ed_ent.config(state='enabled'), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
@@ -357,6 +357,12 @@ class Candidates(tk.Frame):
             return True
         else:
             return False
+
+    def clr(self):
+        if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
+            Edit.wrt(1, Default_Config.candidate_config)
+            app.replace_frame(Edit)
+            mg.showinfo('Info', 'Cleared, And set to default.', parent=self)
 
     def wrt_edt(self, key: ttk.Combobox, pos: ttk.Combobox, val: tk.Entry):
         """Writes changes to the Candidate file."""
@@ -410,6 +416,7 @@ class Posts(tk.Frame):
         self.flpost = [
             f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
         tag_reg = self.register(self.tag_check)
+        pst_reg = self.register(self.pst_check)
         self.lbl_ent = 'Full-Post'
         self.lbl_tag = 'Post Tag'
         self.lbl_pst = 'Post'
@@ -436,26 +443,26 @@ class Posts(tk.Frame):
         pst_edt_tag.insert(1, self.lbl_tag)
         pst_edt_tag.config(state='disabled')
         pst_edt_btn = ttk.Button(
-            pst_edt_top, text='Edit', style='m.TButton', takefocus=0, command=lambda: self.pst_edt(self.pst_edt_pst, pst_edt_ent, pst_edt_tag))
+            pst_edt_top, text='Edit', style='m.TButton', takefocus=0, command=lambda: self.post_edt(self.pst_edt_pst, pst_edt_ent, pst_edt_tag))
         pst_edt_btn.pack(side='left')
-        self.pst_edt_pst.bind('<<ComboboxSelected>>', lambda event: (pst_edt_ent.config(state='enabled'), pst_edt_tag.config(state='enabled'), pst_edt_tag.config(validate='key', validatecommand=(tag_reg, '%P')), self.pst_edt_pst.config(values=[
+        self.pst_edt_pst.bind('<<ComboboxSelected>>', lambda event: (pst_edt_ent.config(state='enabled'), pst_edt_tag.config(state='enabled'), pst_edt_ent.config(validate='key', validatecommand=(pst_reg, '%P')), pst_edt_tag.config(validate='key', validatecommand=(tag_reg, '%P')), self.pst_edt_pst.config(values=[
             f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]), pst_edt_ent.delete(0, 'end'), pst_edt_tag.delete(0, 'end'), pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip()), pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())))
         ######################################
         pst_add = ttk.LabelFrame(self, text='Add', padding=10)
         pst_add.pack(pady=(0, 10))
-        pst_add_ent = ttk.Entry(pst_add)
-        pst_add_ent.pack(side='left', padx=(0, 10))
-        pst_add_ent.insert(1, self.lbl_ent)
-        pst_add_tag = ttk.Entry(pst_add, width=8)
-        pst_add_tag.pack(side='left', padx=(0, 10))
-        pst_add_tag.insert(1, self.lbl_tag)
+        self.pst_add_ent = ttk.Entry(pst_add)
+        self.pst_add_ent.pack(side='left', padx=(0, 10))
+        self.pst_add_ent.insert(1, self.lbl_ent)
+        self.pst_add_tag = ttk.Entry(pst_add, width=8)
+        self.pst_add_tag.pack(side='left', padx=(0, 10))
+        self.pst_add_tag.insert(1, self.lbl_tag)
         pst_add_btn = ttk.Button(
-            pst_add, text='Add', style='m.TButton', takefocus=0, command=lambda: self.pst_add(pst_add_ent, pst_add_tag))
+            pst_add, text='Add', style='m.TButton', takefocus=0, command=lambda: (self.post_add(self.pst_add_ent, self.pst_add_tag), self.pst_add_ent.delete(0, 'end'), self.pst_add_tag.delete(0, 'end')))
         pst_add_btn.pack(side='left')
-        pst_add_ent.bind('<Enter>', lambda e: (
-            pst_add_ent.delete(0, 'end'), pst_add_ent.unbind('<Enter>')))
-        pst_add_tag.bind('<Enter>', lambda e: (pst_add_tag.delete(0, 'end'), pst_add_tag.config(
-            validate='key', validatecommand=(tag_reg, '%P')), pst_add_tag.unbind('<Enter>')))
+        self.pst_add_ent.bind('<Enter>', lambda e: (self.pst_add_ent.delete(0, 'end'), self.pst_add_ent.config(
+            validate='key', validatecommand=(pst_reg, '%P')), self.pst_add_ent.unbind('<Enter>')))
+        self.pst_add_tag.bind('<Enter>', lambda e: (self.pst_add_tag.delete(0, 'end'), self.pst_add_tag.config(
+            validate='key', validatecommand=(tag_reg, '%P')), self.pst_add_tag.unbind('<Enter>')))
         ######################################
         btm_frm = tk.Frame(self, bg=Win.SM_BG_HEX)
         btm_frm.pack(pady=(0, 20))
@@ -469,14 +476,14 @@ class Posts(tk.Frame):
         self.pst_del_pst.set(self.lbl_pst)
         self.pst_del_pst.pack(side='left', padx=(0, 10))
         pst_del_btn = ttk.Button(
-            pst_del, text='Delete', style='m.TButton', takefocus=0, command=lambda: self.pst_del(self.pst_del_pst))
+            pst_del, text='Delete', style='m.TButton', takefocus=0, command=lambda: self.post_del(self.pst_del_pst))
         pst_del_btn.pack(side='left')
 
         self.pst_del_pst.bind('<<ComboboxSelected>>', lambda e: self.pst_del_pst.config(values=[
             f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]))
 
-        pst_clr = ttk.Button(left_btm, text='Clear', padding=10, style='m.TButton', command=lambda: (
-            Edit.wrt(1, Default_Config.candidate_config), mg.showinfo('Info', 'Cleared, And set to default.', parent=self)), takefocus=0)
+        pst_clr = ttk.Button(left_btm, text='Default', padding=10,
+                             style='m.TButton', command=lambda: self.clr(), takefocus=0)
         pst_clr.pack(side='top', fill='y', expand=1, pady=(20, 20))
         ########################################
         self.cfg = Dicto(Access_Config().cand_config)
@@ -499,6 +506,24 @@ class Posts(tk.Frame):
                            activebackground=Win.SM_BG_HEX, activeforeground='#5C616C', fg='#5C616C', takefocus=0)
         dn_btn.pack(side='left', fill='x', expand=1)
 
+    def tag_check(self, inp):
+        if ((inp.isalpha() or inp is '') and len(inp) <= 3) or inp in [i.split(';')[-1].strip() for i in self.flpost]:
+            return True
+        else:
+            return False
+
+    def pst_check(self, inp):
+        if ((inp.isalpha() or inp is '') and len(inp) <= 15) or inp in [i.split(';')[0].strip() for i in self.flpost]:
+            return True
+        else:
+            return False
+
+    def clr(self):
+        if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
+            Edit.wrt(1, Default_Config.candidate_config)
+            app.replace_frame(Edit)
+            mg.showinfo('Info', 'Cleared, And set to default.', parent=self)
+
     def move_up(self, *args):
         try:
             self.idxs = self.ordr_posts.curselection()
@@ -518,7 +543,13 @@ class Posts(tk.Frame):
                 item = self.cfg.get()[key]
                 self.cfg.remove(key)
                 self.cfg.insert(pos-1, key, item)
+
                 Edit.wrt(1, self.cfg)
+                self.flpost = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                self.pst_edt_pst.config(values=self.flpost)
+                self.pst_edt_pst.current(0)
+                self.pst_del_pst.config(values=self.flpost)
+                self.pst_del_pst.current(0)
         except:
             raise
 
@@ -542,47 +573,49 @@ class Posts(tk.Frame):
                 self.cfg.remove(key)
                 self.cfg.insert(pos+1, key, item)
                 Edit.wrt(1, self.cfg)
+                self.flpost = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                self.pst_edt_pst.config(values=self.flpost)
+                self.pst_edt_pst.current(0)
+                self.pst_del_pst.config(values=self.flpost)
+                self.pst_del_pst.current(0)
         except:
             raise
 
-    def tag_check(self, inp):
-        if ((inp.isalpha() or inp is '') and len(inp) <= 3) or inp in [i.split(';')[-1].strip() for i in self.flpost]:
-            return True
-        else:
-            return False
-
-    def pst_edt(self, key, ent, tag):
+    def post_edt(self, key, ent, tag):
         if ent.get() != '' and tag.get() != '':
-            cfg = Access_Config().cand_config
+            cfg = Dicto(Access_Config().cand_config)
             _tag = [eval(i)[-1]
-                    for i in list(cfg.keys()) if eval(i)[-1] != tag.get()]
+                    for i in list(cfg.get().keys()) if eval(i)[-1] != key.get().split(';')[-1].strip()]
             if tag.get() not in _tag:
                 cmb = key
                 _key = f'{[ent.get(), tag.get().upper()]}'
                 key = str([key.get().split(';')[0].strip(),
                            key.get().split(';')[-1].strip()])
-                con = cfg.get(key)
-                del cfg[key]
-                cfg[_key] = con
-                self.cfg = Dicto(cfg)
-                pos = self.pst_list.index(
-                    [f'{i[0]}; {i[-1]}' for i in [eval(key)]][0])
+                con = cfg.get().get(key)
+                ind = list(cfg.get().keys()).index(key)
+                cfg.remove(key)
+                #del cfg.get()[key]
+                cfg.insert(ind, _key, con)
+                #cfg.get()[_key] = con
+                self.cfg = Dicto(cfg.get())
                 self.pst_list = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())]
-                self.ordr_posts.delete(pos)
+                self.ordr_posts.delete(ind)
                 self.ordr_posts.insert(
-                    pos, [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())][pos])
-                Edit.wrt(1, cfg)
+                    ind, [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())][ind])
+                Edit.wrt(1, cfg.get())
                 val = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_del_pst.config(values=val)
-                self.pst_edt_pst.config(values=val)
-                cmb.current(len(cfg)-1)
+                self.pst_del_pst.current(0)
+                cmb.config(values=val)
+                cmb.current(ind)
+                mg.showinfo('Info', 'Post has been edited.', parent=self)
             else:
                 mg.showwarning(
                     'Error', 'This Tag already exists.', parent=self)
 
-    def pst_add(self, ent, tag):
+    def post_add(self, ent, tag):
         if ent.get() not in ['', self.lbl_ent] and tag.get() not in ['', self.lbl_tag]:
             cfg = Access_Config().cand_config
             _tag = [eval(i)[-1] for i in list(cfg.keys())]
@@ -599,40 +632,135 @@ class Posts(tk.Frame):
                     val = [
                         f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                     self.pst_del_pst.config(values=val)
+                    self.pst_del_pst.current(0)
                     self.pst_edt_pst.config(values=val)
+                    self.pst_edt_pst.current(0)
+                    mg.showinfo('Info', 'Post has been added.', parent=self)
                 else:
-                    mg.showerror('Error', 'No. of Max posts is 8!')
+                    mg.showerror('Error', 'No. of Max posts is 8!', parent=self)
             else:
                 mg.showwarning(
                     'Error', 'This Tag already exists.', parent=self)
+        else:
+            mg.showerror('Error', 'Incorrect values.')
 
-    def pst_del(self, ent):
+    def post_del(self, ent):
         if ent.get() != self.lbl_pst:
-            cfg = Access_Config().cand_config
+            cfg = Dicto(Access_Config().cand_config)
             key = str([ent.get().split(';')[0].strip(),
                        ent.get().split(';')[-1].strip()])
-            if len(cfg) > 1:
-                del cfg[key]
-                print(eval(key))
-                self.cfg = Dicto(cfg)
-                pos = self.pst_list.index(
-                    [f'{i[0]}; {i[-1]}' for i in [eval(key)]][0])
+            if len(cfg.get()) > 1:
+                ind = list(cfg.get().keys()).index(key)
+                cfg.remove(key)
+                self.cfg = Dicto(cfg.get())
                 self.pst_list = list(self.cfg.get().keys())
-                self.ordr_posts.delete(pos)
+                self.ordr_posts.delete(ind)
                 Edit.wrt(1, cfg)
                 val = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 ent.config(values=val)
                 self.pst_edt_pst.config(values=val)
+                self.pst_edt_pst.current(0)
                 ent.current(0)
+                mg.showinfo('Info', 'Post has been deleted.', parent=self)
             else:
                 mg.showwarning(
-                    'Error', 'Can\'t delete, Atleast 1 Post should exist.')
+                    'Error', 'Can\'t delete, Atleast 1 Post should exist.', parent=self)
 
 
 class Classes(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bg=Win.SM_BG_HEX)
+        clss_lst = list(Access_Config().clss_config.keys())
+
+        clss_add = ttk.LabelFrame(self, text='Add', padding=10)
+        clss_add.pack(pady=(100, 40))
+        clss_reg = self.register(self.clss_check)
+        self.clss_add_cls = ttk.Entry(clss_add)
+        self.clss_add_cls.insert(0, 'Class')
+        self.clss_add_cls.pack(side='left', padx=(0, 10))
+        clss_add_btn = ttk.Button(clss_add, text='Add', style='m.TButton', command=lambda: (
+            self.add_clss(), self.clss_add_cls.delete(0, tk.END)), takefocus=0)
+        clss_add_btn.pack(side='left')
+
+        clss_del = ttk.LabelFrame(self, text='Delete', padding=10)
+        clss_del.pack(pady=(0, 40))
+        self.clss_del_clss = ttk.Combobox(
+            clss_del, values=clss_lst, state='readonly')
+        self.clss_del_clss.set('Class')
+        self.clss_del_clss.pack(side='left', padx=(0, 10))
+        clss_del_btn = ttk.Button(
+            clss_del, text='Delete', style='m.TButton', takefocus=0, command=lambda: self.del_clss())
+        clss_del_btn.pack(side='left')
+
+        clss_def = ttk.Button(self, text='Default', padding=10,
+                              style='m.TButton', command=lambda: self.set_dft(), takefocus=0)
+        clss_def.pack()
+
+        self.clss_add_cls.bind('<Enter>', lambda e: (self.clss_add_cls.delete(0, 'end'), self.clss_add_cls.config(
+            validate='key', validatecommand=(clss_reg, '%P')), self.clss_add_cls.unbind('<Enter>')))
+
+    def clss_check(self, inp):
+        try:
+            if list(inp)[0] != '0':
+                if len(inp) == 1:
+                    if ((inp.isdigit() or inp is '') and len(inp) <= 2):
+                        return True
+                    else:
+                        return False
+                elif list(inp)[0] == '1' and len(inp) == 2 or inp is '':
+                    if list(inp)[-1] in ['1', '2', '0']:
+                        if ((inp.isdigit() or inp is '') and len(inp) <= 2):
+                            return True
+                        else:
+                            return False
+                    else:
+                        return False
+                else:
+                    return False
+            else:
+                return False
+        except:
+            return True
+
+    def set_dft(self):
+        if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
+            Edit.wrt(2, Default_Config.clss_config)
+            app.replace_frame(Edit)
+            mg.showinfo('Classes', 'Set to Default.', parent=self)
+
+    def add_clss(self):
+        cfg = Dicto(Access_Config().clss_config)
+        val = self.clss_add_cls.get()
+        clss = list(cfg.get().keys())
+        if val != '':
+            if int(val) not in clss:
+                clss.append(int(val))
+                clss.sort()
+                ind = clss.index(int(val))
+                cfg.insert(ind, int(val), ['A', 'B', 'C', 'D'])
+                Edit.wrt(2, str(cfg.get()))
+                self.clss_del_clss.config(values=list(
+                    Access_Config().clss_config.keys()))
+                mg.showinfo('Info', 'Class has been added.')
+            else:
+                mg.showerror('Error', 'Class already exists.')
+
+    def del_clss(self):
+        cfg = Access_Config().clss_config
+        val = self.clss_del_clss.get()
+        if val != 'Class':
+            if len(cfg) > 4:
+                del cfg[int(val)]
+                Edit.wrt(2, str(cfg))
+                self.clss_del_clss.config(values=list(
+                    Access_Config().clss_config.keys()))
+                self.clss_del_clss.current(0)
+                mg.showinfo('Info', 'Class has been Deleted.')
+            else:
+                mg.showwarning('Caution', 'Too Many Classes has been deleted.')
+        else:
+            mg.showerror('Error', 'Invalid, Select a Class first.')
 
 
 class Sections(tk.Frame):
@@ -679,8 +807,8 @@ class Sections(tk.Frame):
                                   command=lambda: self.clss_del(clss_del_clss, clss_del_sec), takefocus=0)
         clss_del_btn.pack(side='left')
 
-        clss_def = ttk.Button(self, text='Default', padding=10, style='m.TButton', command=lambda: (
-            Edit.wrt(2, Default_Config.clss_config), mg.showinfo('Class&Sec', 'Set to Default.', parent=self)), takefocus=0)
+        clss_def = ttk.Button(self, text='Default', padding=10,
+                              style='m.TButton', command=lambda: self.set_dft(), takefocus=0)
         clss_def.pack()
         clss_vw_clss.bind('<<ComboboxSelected>>', lambda event: (clss_vw_sec.config(state='normal'), clss_vw_sec.delete(
             0.0, tk.END), clss_vw_sec.insert(0.0, Access_Config().clss_config[int(clss_vw_clss.get())]), clss_vw_sec.config(state='disabled')))
@@ -695,6 +823,12 @@ class Sections(tk.Frame):
             return True
         else:
             return False
+
+    def set_dft(self):
+        if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
+            Edit.wrt(2, Default_Config.clss_config)
+            app.replace_frame(Edit)
+            mg.showinfo('Sections', 'Set to Default.', parent=self)
 
     def clss_del(self, key: ttk.Combobox, val: ttk.Combobox):
         """Deletes value from class file."""
@@ -738,9 +872,9 @@ class Result(tk.Frame):
         self.config(bg=Win.SM_BG_HEX)
         # Merge Frame______________________
         mrg_lblfrm = ttk.Labelframe(self, text='Merge', padding=10)
-        shw_lblfrm = ttk.Labelframe(self, text='Show', padding=10)
+        self.shw_lblfrm = ttk.Labelframe(self, text='Show', padding=10)
         mrg_lblfrm.pack(pady=(20, 10))
-        shw_lblfrm.pack()
+        self.shw_lblfrm.pack()
 
         mrg_left = tk.Frame(mrg_lblfrm, bg=Win.SM_BG_HEX)
         mrg_left.pack(side='left', padx=(0, 10))
@@ -764,19 +898,15 @@ class Result(tk.Frame):
         mrg_conv_exl.pack(side='top', pady=(0, 10))
         # Show Frame______________________
         self.shw_db = ttk.Combobox(
-            shw_lblfrm, state='readonly', values=Yr_fle().yr)
+            self.shw_lblfrm, state='readonly', values=Yr_fle().yr)
         self.shw_db.set('Database')
-        shw_lblfrm_top = tk.Frame(shw_lblfrm)
-        shw_lblfrm_sup = tk.Frame(shw_lblfrm)
-        shw_lblfrm_btw = tk.Frame(shw_lblfrm)
-        shw_lblfrm_btm = tk.Frame(shw_lblfrm)
+        self.shw_lblfrm_top = tk.Frame(self.shw_lblfrm)
+        self.shw_lblfrm_sup = tk.Frame(self.shw_lblfrm)
         self.shw_shw = ttk.Button(
-            shw_lblfrm, text='Show', state='disabled', command=lambda: self.shw_res(), takefocus=0)
+            self.shw_lblfrm, text='Show', state='disabled', command=lambda: self.shw_res(), takefocus=0)
         self.shw_db.pack(side='top', pady=(0, 10))
-        shw_lblfrm_top.pack(side='top', pady=(0, 10))
-        shw_lblfrm_sup.pack(side='top', pady=(0, 10))
-        shw_lblfrm_btw.pack(side='top', pady=(0, 10))
-        shw_lblfrm_btm.pack(side='top', pady=(0, 10))
+        self.shw_lblfrm_top.pack(side='top', pady=(0, 10))
+        self.shw_lblfrm_sup.pack(side='top', pady=(0, 10))
         self.shw_shw.pack(side='bottom')
 
         self.shw_opt_var = tk.IntVar()
@@ -785,16 +915,16 @@ class Result(tk.Frame):
         self.shw_chk_var_clss = tk.IntVar()
         self.shw_chk_var_sec = tk.IntVar()
         shw_opt_cstm = ttk.Radiobutton(
-            shw_lblfrm_top, text='Custom', variable=self.shw_opt_var, value=0, command=lambda: self.opt_call(shw_chk_clss))
-        shw_opt_all = ttk.Radiobutton(shw_lblfrm_top, text='Select All',
+            self.shw_lblfrm_top, text='Custom', state='disabled', variable=self.shw_opt_var, value=0, command=lambda: self.opt_call(shw_chk_clss))
+        shw_opt_all = ttk.Radiobutton(self.shw_lblfrm_top, text='Select All', state='disabled',
                                       variable=self.shw_opt_var, value=1, command=lambda: self.opt_call(shw_chk_clss))
-        shw_chk_tchr = ttk.Checkbutton(shw_lblfrm_sup, text='Staff', takefocus=0, variable=self.shw_chk_var_tchr, command=lambda: (
+        shw_chk_tchr = ttk.Checkbutton(self.shw_lblfrm_sup, text='Staff', state='disabled', takefocus=0, variable=self.shw_chk_var_tchr, command=lambda: (
             self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_std = ttk.Checkbutton(shw_lblfrm_sup, text='Student', takefocus=0, variable=self.shw_chk_var_std, command=lambda: (
+        shw_chk_std = ttk.Checkbutton(self.shw_lblfrm_sup, text='Student', state='disabled', takefocus=0, variable=self.shw_chk_var_std, command=lambda: (
             self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_clss = ttk.Checkbutton(shw_lblfrm_sup, text='Class', takefocus=0, variable=self.shw_chk_var_clss, command=lambda: (
+        shw_chk_clss = ttk.Checkbutton(self.shw_lblfrm_sup, text='Class', state='disabled', takefocus=0, variable=self.shw_chk_var_clss, command=lambda: (
             self.chk_clss_sec(self.shw_chk_var_clss, shw_chk_clss, self.shw_chk_var_sec), self.chk_btn(), self.shw_opt_var.set(0)))
-        shw_chk_sec = ttk.Checkbutton(shw_lblfrm_sup, text='Section', takefocus=0, variable=self.shw_chk_var_sec, command=lambda: (
+        shw_chk_sec = ttk.Checkbutton(self.shw_lblfrm_sup, text='Section', state='disabled', takefocus=0, variable=self.shw_chk_var_sec, command=lambda: (
             self.chk_clss_sec(self.shw_chk_var_clss, shw_chk_clss, self.shw_chk_var_sec), self.chk_btn(), self.shw_opt_var.set(0)))
         shw_opt_cstm.pack(side='left')
         shw_opt_all.pack(side='left')
@@ -803,11 +933,46 @@ class Result(tk.Frame):
         shw_chk_clss.pack(side='left')
         shw_chk_sec.pack(side='left')
 
-        cnd = Sql_init(0).db_cands()
+        self.shw_db.bind("<<ComboboxSelected>>", lambda event: (self.do_enb(
+            shw_opt_cstm, shw_opt_all, shw_chk_tchr, shw_chk_std, shw_chk_clss, shw_chk_sec), self.do_upd(), self.chk_btn()))
+
+    def exec_do(self):
+        self.chk_btn()
+        self.shw_opt_var.set(0)
+
+    def do_enb(self, *args):
+        for i in args:
+            i.config(state='enabled')
+        self.shw_db.unbind("<<ComboboxSelected>>")
+        self.shw_db.bind("<<ComboboxSelected>>", lambda event: (
+            self.do_upd(), self.chk_btn()))
+
+    def do_upd(self):
+        if self.shw_db.get() != 'merged':
+            cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
+        else:
+            cnd = Sql_init(0, dtb=1).db_cands()
         lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
         cn = 1
-        self.args = []
 
+        try:
+            _list = self.main.winfo_children()
+            for item in _list:
+                if item.winfo_children():
+                    _list.extend(item.winfo_children())
+            for item in _list:
+                item.pack_forget()
+            self.main.pack_forget()
+        except:
+            pass
+
+        self.args = []
+        self.main = tk.Frame(self.shw_lblfrm)
+        self.main.pack()
+        self.shw_lblfrm_btw = tk.Frame(self.main)
+        self.shw_lblfrm_btm = tk.Frame(self.main)
+        self.shw_lblfrm_btw.pack(side='top', pady=(0, 10))
+        self.shw_lblfrm_btm.pack(side='top', pady=(0, 10))
         for j in range(len(cnd)):
             text = str(list(cnd.keys())[j])
             for _ in range(len(lcl_cnd)):
@@ -815,27 +980,24 @@ class Result(tk.Frame):
                     text = lcl_cnd[_][0]
                     break
             if cn <= 4:
-                pos = shw_lblfrm_btw
-                shw_lblfrm_btw.pack(side='top', pady=(0, 10))
-                shw_lblfrm_btm.pack_forget()
+                pos = self.shw_lblfrm_btw
+                self.shw_lblfrm_btw.pack(side='top', pady=(0, 10))
+                self.shw_lblfrm_btm.pack_forget()
             else:
-                pos = shw_lblfrm_btm
-                shw_lblfrm_btw.pack(side='top', pady=(0, 10))
-                shw_lblfrm_btm.pack(side='top', pady=(0, 10))
+                pos = self.shw_lblfrm_btm
+                self.shw_lblfrm_btw.pack(side='top', pady=(0, 10))
+                self.shw_lblfrm_btm.pack(side='top', pady=(0, 10))
             exec(f'self.shw_chk_var_{str(list(cnd.keys())[j])} = tk.IntVar()')
             exec(
                 f'shw_chk_{str(list(cnd.keys())[j])} = ttk.Checkbutton(pos, text=\'{text}\', takefocus=0, variable=self.shw_chk_var_{str(list(cnd.keys())[j])}, command=self.exec_do)')
             exec(f'shw_chk_{str(list(cnd.keys())[j])}.pack(side=\'left\')')
             cn += 1
 
-        self.shw_db.bind("<<ComboboxSelected>>", lambda event: self.chk_btn())
-
-    def exec_do(self):
-        self.chk_btn()
-        self.shw_opt_var.set(0)
-
     def crt_args(self):
-        cnd = Sql_init(0).db_cands()
+        if self.shw_db.get() != 'merged':
+            cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
+        else:
+            cnd = Sql_init(0, dtb=1).db_cands()
         del self.args
         self.args = []
         try:
@@ -920,6 +1082,7 @@ class Result(tk.Frame):
                         mrg_tbl_data.append(
                             eval(Crypt().decrypt(str(f.read()), SECRET_KEY)))
                 Sql_init(0, dtb=1).mrg_dtb_res(mrg_tbl_n, mrg_tbl_data)
+                mg.showinfo('Info', 'Merging is Done.')
         else:
             mg.showwarning('Alert', 'No Merge file is selected!', parent=self)
 

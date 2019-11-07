@@ -13,7 +13,7 @@ from base64 import b64encode, b64decode
 from collections import OrderedDict
 
 __author__ = 'Sagar Kumar'
-__version__ = '0.9.94'
+__version__ = '1.0.2'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 
