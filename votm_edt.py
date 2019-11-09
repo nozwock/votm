@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import win32api
+import xlsxwriter
+import win32event
+from shutil import copyfile
 from os import path, remove
 from datetime import date
 import tkinter as tk
@@ -12,8 +16,8 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
 from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Dicto, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
 from tabulate import tabulate
-from shutil import copyfile
-import xlsxwriter
+from winerror import ERROR_ALREADY_EXISTS
+
 
 
 class Root(ThemedTk):
@@ -87,7 +91,7 @@ class Win(tk.Toplevel):
             pass
         else:
             self.master.destroy()
-            exit()
+            sys.exit()
 
         if Write_Default.exist is 1:
             mg.showinfo('One-Time Process',
@@ -149,7 +153,7 @@ class Win(tk.Toplevel):
         flb.pack(side='bottom', fill='x', expand=1, anchor='s', pady=(1, 0))
 
         btxlb = tk.Button(flb, text='X', highlightthickness=0, bg='#FF3232', activebackground='#FF4C4C', takefocus=0,
-                          relief='flat', bd=1, fg='#EFEFEF', height=2, command=self.master.destroy, font=('Segoe UI', 10, 'bold'))
+                          relief='flat', bd=1, fg='#EFEFEF', height=2, command=lambda: (self.master.destroy(), sys.exit()), font=('Segoe UI', 10, 'bold'))
         btxlb.pack(side='left', fill='x', expand=1, anchor='s')
 
         bthlb = tk.Button(flb, text='?', highlightthickness=0, bg='#303030', activebackground='#6D6D6D', takefocus=0,
@@ -295,21 +299,21 @@ class Candidates(tk.Frame):
         cand_vw_ed_top.pack(side='top', pady=(0, 10))
         cand_vw_ed_btm = tk.Frame(cand_vw_ed, bg=Win.SM_BG_HEX)
         cand_vw_ed_btm.pack(side='bottom')
-        cand_vw_ed_pst = ttk.Combobox(
+        self.cand_vw_ed_pst = ttk.Combobox(
             cand_vw_ed_top, values=post, state='readonly', style='TCombobox')
-        cand_vw_ed_pst.set('Post')
-        cand_vw_ed_pst.pack(side='left', padx=(0, 10))
-        cand_vw_ed_cand = ttk.Combobox(cand_vw_ed_top, state='readonly')
-        cand_vw_ed_cand.set('Candidate')
-        cand_vw_ed_cand.pack(side='left')
+        self.cand_vw_ed_pst.set('Post')
+        self.cand_vw_ed_pst.pack(side='left', padx=(0, 10))
+        self.cand_vw_ed_cand = ttk.Combobox(cand_vw_ed_top, state='readonly')
+        self.cand_vw_ed_cand.set('Candidate')
+        self.cand_vw_ed_cand.pack(side='left')
         str_reg = self.register(self.str_check)
-        cand_vw_ed_ent = ttk.Entry(cand_vw_ed_btm, validate='key',
+        self.cand_vw_ed_ent = ttk.Entry(cand_vw_ed_btm, validate='key',
                                    validatecommand=(str_reg, '%S'))
-        cand_vw_ed_ent.pack(side='left', padx=(0, 45))
-        cand_vw_ed_ent.insert(1, 'Candidate')
-        cand_vw_ed_ent.config(state='disabled')
+        self.cand_vw_ed_ent.pack(side='left', padx=(0, 45))
+        self.cand_vw_ed_ent.insert(1, 'Candidate')
+        self.cand_vw_ed_ent.config(state='disabled')
         cand_vw_ed_btn = ttk.Button(cand_vw_ed_btm, text='Edit', style='m.TButton', command=lambda: self.wrt_edt(
-            cand_vw_ed_pst, cand_vw_ed_cand, cand_vw_ed_ent), takefocus=0)
+            self.cand_vw_ed_pst, self.cand_vw_ed_cand, self.cand_vw_ed_ent), takefocus=0)
         cand_vw_ed_btn.pack(side='left', padx=(0, 25))
 
         cand_add = ttk.LabelFrame(self, text='Add', padding=10)
@@ -328,27 +332,27 @@ class Candidates(tk.Frame):
 
         cand_del = ttk.LabelFrame(self, text='Delete', padding=10)
         cand_del.pack(pady=(0, 20))
-        cand_del_pst = ttk.Combobox(cand_del, values=post, state='readonly')
-        cand_del_pst.set('Post')
-        cand_del_pst.pack(side='left', padx=(0, 10))
-        cand_del_cand = ttk.Combobox(cand_del, state='readonly')
-        cand_del_cand.set('Candidate')
-        cand_del_cand.pack(side='left', padx=(0, 10))
+        self.cand_del_pst = ttk.Combobox(cand_del, values=post, state='readonly')
+        self.cand_del_pst.set('Post')
+        self.cand_del_pst.pack(side='left', padx=(0, 10))
+        self.cand_del_cand = ttk.Combobox(cand_del, state='readonly')
+        self.cand_del_cand.set('Candidate')
+        self.cand_del_cand.pack(side='left', padx=(0, 10))
         cand_del_btn = ttk.Button(cand_del, text='Delete', style='m.TButton',
-                                  command=lambda: self.cand_del(cand_del_pst, cand_del_cand), takefocus=0)
+                                  command=lambda: self.cand_del(self.cand_del_pst, self.cand_del_cand), takefocus=0)
         cand_del_btn.pack(side='left')
 
         cand_clr = ttk.Button(self, text='Clear', padding=10,
                               style='m.TButton', command=lambda: self.clr(), takefocus=0)
         cand_clr.pack()
-        cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (cand_vw_ed_cand.config(values=Access_Config().cand_config[Cand_Check(cand_vw_ed_pst.get(
-        )).get()]), cand_vw_ed_cand.set(''), Edit.cur(cand_vw_ed_cand), cand_vw_ed_ent.config(state='enabled'), cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
-        cand_vw_ed_cand.bind('<<ComboboxSelected>>', lambda event: (
-            cand_vw_ed_ent.delete(0, tk.END), cand_vw_ed_ent.insert(0, cand_vw_ed_cand.get())))
+        self.cand_vw_ed_pst.bind('<<ComboboxSelected>>', lambda event: (self.cand_vw_ed_cand.config(values=Access_Config().cand_config[Cand_Check(self.cand_vw_ed_pst.get(
+        )).get()]), self.cand_vw_ed_cand.set(''), Edit.cur(self.cand_vw_ed_cand), self.cand_vw_ed_ent.config(state='enabled'), self.cand_vw_ed_ent.delete(0, tk.END), self.cand_vw_ed_ent.insert(0, self.cand_vw_ed_cand.get())))
+        self.cand_vw_ed_cand.bind('<<ComboboxSelected>>', lambda event: (
+            self.cand_vw_ed_ent.delete(0, tk.END), self.cand_vw_ed_ent.insert(0, self.cand_vw_ed_cand.get())))
         cand_add_pst.bind('<<ComboboxSelected>>',
                           lambda event: (cand_add_ent.config(state='enabled'), cand_add_ent.delete(0, tk.END)))
-        cand_del_pst.bind('<<ComboboxSelected>>', lambda event: (cand_del_cand.config(
-            values=Access_Config().cand_config[Cand_Check(cand_del_pst.get()).get()]), cand_del_cand.set(''), Edit.cur(cand_del_cand)))
+        self.cand_del_pst.bind('<<ComboboxSelected>>', lambda event: (self.cand_del_cand.config(
+            values=Access_Config().cand_config[Cand_Check(self.cand_del_pst.get()).get()]), self.cand_del_cand.set(''), Edit.cur(self.cand_del_cand)))
 
     @staticmethod
     def str_check(inp: str) -> bool:
@@ -372,9 +376,15 @@ class Candidates(tk.Frame):
                 cfg[Cand_Check(key.get()).get()][cfg[Cand_Check(key.get()).get()].index(
                     pos.get())] = val.get().strip()
                 Edit.wrt(1, cfg)
+                txt_val = pos.get()
                 pos.set(val.get())
                 pos.config(values=Access_Config(
                 ).cand_config[Cand_Check(key.get()).get()])
+                if self.cand_vw_ed_pst.get() == self.cand_del_pst.get():
+                    self.cand_del_cand.config(values=Access_Config(
+                    ).cand_config[Cand_Check(key.get()).get()])
+                    if txt_val == self.cand_del_cand.get():
+                        self.cand_del_cand.current(0)
             except:
                 mg.showerror('Error', 'No Canidate was selected.', parent=self)
         else:
@@ -387,6 +397,10 @@ class Candidates(tk.Frame):
             try:
                 cfg[Cand_Check(key.get()).get()].append(val.get().strip())
                 Edit.wrt(1, cfg)
+                self.cand_del_cand.config(values=Access_Config(
+                ).cand_config[Cand_Check(key.get()).get()])
+                self.cand_vw_ed_cand.config(values=Access_Config(
+                ).cand_config[Cand_Check(key.get()).get()])
             except:
                 mg.showerror('Error', 'Select a Post first.', parent=self)
         else:
@@ -402,6 +416,12 @@ class Candidates(tk.Frame):
             val.config(values=Access_Config(
             ).cand_config[Cand_Check(key.get()).get()])
             val.current(0)
+            if self.cand_vw_ed_pst.get() == self.cand_del_pst.get():
+                self.cand_vw_ed_cand.config(values=Access_Config(
+                ).cand_config[Cand_Check(key.get()).get()])
+                self.cand_vw_ed_cand.current(0)
+                self.cand_vw_ed_ent.delete(0, 'end')
+                self.cand_vw_ed_ent.insert(0, self.cand_vw_ed_cand.get())
         except (ValueError, KeyError):
             val.set('')
             mg.showerror('Error', 'Candidate doesn\'t exist.', parent=self)
@@ -545,7 +565,8 @@ class Posts(tk.Frame):
                 self.cfg.insert(pos-1, key, item)
 
                 Edit.wrt(1, self.cfg)
-                self.flpost = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                self.flpost = [
+                    f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_edt_pst.config(values=self.flpost)
                 self.pst_edt_pst.current(0)
                 self.pst_del_pst.config(values=self.flpost)
@@ -573,7 +594,8 @@ class Posts(tk.Frame):
                 self.cfg.remove(key)
                 self.cfg.insert(pos+1, key, item)
                 Edit.wrt(1, self.cfg)
-                self.flpost = [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
+                self.flpost = [
+                    f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_edt_pst.config(values=self.flpost)
                 self.pst_edt_pst.current(0)
                 self.pst_del_pst.config(values=self.flpost)
@@ -637,7 +659,8 @@ class Posts(tk.Frame):
                     self.pst_edt_pst.current(0)
                     mg.showinfo('Info', 'Post has been added.', parent=self)
                 else:
-                    mg.showerror('Error', 'No. of Max posts is 8!', parent=self)
+                    mg.showerror(
+                        'Error', 'No. of Max posts is 8!', parent=self)
             else:
                 mg.showwarning(
                     'Error', 'This Tag already exists.', parent=self)
@@ -770,14 +793,14 @@ class Sections(tk.Frame):
 
         clss_vw = ttk.LabelFrame(self, text='View', padding=10)
         clss_vw.pack(pady=(30, 10))
-        clss_vw_clss = ttk.Combobox(clss_vw, values=clss_lst, state='readonly')
-        clss_vw_clss.set('Class')
-        clss_vw_clss.pack(pady=(0, 10))
-        clss_vw_sec = ScrolledText(clss_vw, wrap=tk.WORD, font=(
+        self.clss_vw_clss = ttk.Combobox(clss_vw, values=clss_lst, state='readonly')
+        self.clss_vw_clss.set('Class')
+        self.clss_vw_clss.pack(pady=(0, 10))
+        self.clss_vw_sec = ScrolledText(clss_vw, wrap=tk.WORD, font=(
             'Segue UI', 8), width=30, height=5, relief='flat', fg='#5C616C')
-        clss_vw_sec.insert(0.0, 'Sections Here')
-        clss_vw_sec.pack()
-        clss_vw_sec.config(state='disabled')
+        self.clss_vw_sec.insert(0.0, 'Sections Here')
+        self.clss_vw_sec.pack()
+        self.clss_vw_sec.config(state='disabled')
 
         clss_add = ttk.LabelFrame(self, text='Add', padding=10)
         clss_add.pack(pady=(0, 10))
@@ -796,26 +819,26 @@ class Sections(tk.Frame):
 
         clss_del = ttk.LabelFrame(self, text='Delete', padding=10)
         clss_del.pack(pady=(0, 10))
-        clss_del_clss = ttk.Combobox(
+        self.clss_del_clss = ttk.Combobox(
             clss_del, values=clss_lst, state='readonly')
-        clss_del_clss.set('Class')
-        clss_del_clss.pack(side='left', padx=(0, 10))
-        clss_del_sec = ttk.Combobox(clss_del, state='readonly')
-        clss_del_sec.set('Section')
-        clss_del_sec.pack(side='left', padx=(0, 10))
+        self.clss_del_clss.set('Class')
+        self.clss_del_clss.pack(side='left', padx=(0, 10))
+        self.clss_del_sec = ttk.Combobox(clss_del, state='readonly')
+        self.clss_del_sec.set('Section')
+        self.clss_del_sec.pack(side='left', padx=(0, 10))
         clss_del_btn = ttk.Button(clss_del, text='Delete', style='m.TButton',
-                                  command=lambda: self.clss_del(clss_del_clss, clss_del_sec), takefocus=0)
+                                  command=lambda: self.clss_del(self.clss_del_clss, self.clss_del_sec), takefocus=0)
         clss_del_btn.pack(side='left')
 
         clss_def = ttk.Button(self, text='Default', padding=10,
                               style='m.TButton', command=lambda: self.set_dft(), takefocus=0)
         clss_def.pack()
-        clss_vw_clss.bind('<<ComboboxSelected>>', lambda event: (clss_vw_sec.config(state='normal'), clss_vw_sec.delete(
-            0.0, tk.END), clss_vw_sec.insert(0.0, Access_Config().clss_config[int(clss_vw_clss.get())]), clss_vw_sec.config(state='disabled')))
+        self.clss_vw_clss.bind('<<ComboboxSelected>>', lambda event: (self.clss_vw_sec.config(state='normal'), self.clss_vw_sec.delete(
+            0.0, tk.END), self.clss_vw_sec.insert(0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())]), self.clss_vw_sec.config(state='disabled')))
         clss_add_clss.bind('<<ComboboxSelected>>',
                            lambda event: (self.clss_add_sec.config(state='enabled', validate='key', validatecommand=(one_reg, '%P')), self.clss_add_sec.delete(0, tk.END)))
-        clss_del_clss.bind('<<ComboboxSelected>>', lambda event: (clss_del_sec.config(values=Access_Config(
-        ).clss_config[int(clss_del_clss.get())]), clss_del_sec.set(''), Edit.cur(clss_del_sec)))
+        self.clss_del_clss.bind('<<ComboboxSelected>>', lambda event: (self.clss_del_sec.config(values=Access_Config(
+        ).clss_config[int(self.clss_del_clss.get())]), self.clss_del_sec.set(''), Edit.cur(self.clss_del_sec)))
 
     def one_check(self, inp: str) -> bool:
         """Check to allow only 1 alphabet."""
@@ -839,6 +862,11 @@ class Sections(tk.Frame):
             val.set('')
             val.config(values=Access_Config().clss_config[int(key.get())])
             val.current(0)
+            if key.get() == self.clss_vw_clss.get():
+                        self.clss_vw_sec.config(state='normal')
+                        self.clss_vw_sec.delete(0.0, 'end')
+                        self.clss_vw_sec.insert(0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())])
+                        self.clss_vw_sec.config(state='disabled')
         except (ValueError, KeyError):
             val.set('')
             mg.showerror('Error', 'Section doesn\'t exist.', parent=self)
@@ -854,6 +882,14 @@ class Sections(tk.Frame):
                     cfg[int(key.get())].append(val.get().upper())
                     cfg[int(key.get())].sort()
                     Edit.wrt(2, cfg)
+                    if key.get() == self.clss_vw_clss.get():
+                        self.clss_vw_sec.config(state='normal')
+                        self.clss_vw_sec.delete(0.0, 'end')
+                        self.clss_vw_sec.insert(0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())])
+                        self.clss_vw_sec.config(state='disabled')
+                    if key.get() == self.clss_del_sec.get():
+                        self.clss_del_sec.config(values=Access_Config().clss_config[int(self.clss_del_clss.get())])
+                        self.clss_del_sec.current(0)
                 except:
                     mg.showerror('Error', 'Select a Class first.', parent=self)
             else:
@@ -900,8 +936,8 @@ class Result(tk.Frame):
         self.shw_db = ttk.Combobox(
             self.shw_lblfrm, state='readonly', values=Yr_fle().yr)
         self.shw_db.set('Database')
-        self.shw_lblfrm_top = tk.Frame(self.shw_lblfrm)
-        self.shw_lblfrm_sup = tk.Frame(self.shw_lblfrm)
+        self.shw_lblfrm_top = tk.Frame(self.shw_lblfrm, bg=Win.SM_BG_HEX)
+        self.shw_lblfrm_sup = tk.Frame(self.shw_lblfrm, bg=Win.SM_BG_HEX)
         self.shw_shw = ttk.Button(
             self.shw_lblfrm, text='Show', state='disabled', command=lambda: self.shw_res(), takefocus=0)
         self.shw_db.pack(side='top', pady=(0, 10))
@@ -967,10 +1003,10 @@ class Result(tk.Frame):
             pass
 
         self.args = []
-        self.main = tk.Frame(self.shw_lblfrm)
+        self.main = tk.Frame(self.shw_lblfrm, bg=Win.SM_BG_HEX)
         self.main.pack()
-        self.shw_lblfrm_btw = tk.Frame(self.main)
-        self.shw_lblfrm_btm = tk.Frame(self.main)
+        self.shw_lblfrm_btw = tk.Frame(self.main, bg=Win.SM_BG_HEX)
+        self.shw_lblfrm_btm = tk.Frame(self.main, bg=Win.SM_BG_HEX)
         self.shw_lblfrm_btw.pack(side='top', pady=(0, 10))
         self.shw_lblfrm_btm.pack(side='top', pady=(0, 10))
         for j in range(len(cnd)):
@@ -1552,6 +1588,18 @@ class Token_Show(Result_Show_Sep):
 
 
 if __name__ == '__main__':
+    mutex = win32event.CreateMutex(None, False, 'name')
+    last_error = win32api.GetLastError()
+    if last_error == ERROR_ALREADY_EXISTS:
+        Root.ins_dat(['res\\v_r.ico'])
+        msg = tk.Tk()
+        msg.attributes('-topmost', 1)
+        msg.withdraw()
+        msg.title('Error')
+        msg.iconbitmap(Root.DATAFILE[0])
+        mg.showwarning('Error', 'App instance already running.', parent=msg)
+        msg.destroy()
+        sys.exit()
     root = Root()
     root.lower()
     root.iconify()

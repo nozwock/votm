@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import win32api
+import win32event
 from os import path
 from datetime import date
 import tkinter as tk
@@ -9,6 +11,7 @@ from PIL import Image, ImageTk
 from ttkthemes import ThemedTk
 from tkinter import messagebox as mg
 from votmapi.logic import Write_Default, Access_Config, Sql_init, Ent_Box, Tokens, __author__, __version__
+from winerror import ERROR_ALREADY_EXISTS
 
 
 class Root(ThemedTk):
@@ -86,7 +89,7 @@ class Win(tk.Toplevel):
             mg.showerror(
                 'Error', 'No Candidate found!, Add Candidate in Main App.', parent=self)
             self.master.destroy()
-            exit()
+            sys.exit()
         else:
             pass
 
@@ -150,6 +153,7 @@ class Win(tk.Toplevel):
     def ext(self):
         if Ent_Box(self, icn=Root.DATAFILE[0]).get():
             self.master.destroy()
+            sys.exit()
 
     @staticmethod
     def session() -> str:
@@ -232,7 +236,7 @@ class Home(tk.Frame):
         btn2.config(state='disabled')
         if Tokens(self).check() is False:
             root.destroy()
-            exit()
+            sys.exit()
         Sql_init(1, master=self).tbl()
         if Ent_Box(self, 'Enter SuperKey & Confirm to Continue.', Root.DATAFILE[0], 'key').get() and Sql_init.NXT == 1:
             app.replace_frame(Vote)
@@ -249,7 +253,7 @@ class Home(tk.Frame):
         btn2.config(state='disabled')
         if Tokens(self).check() is False:
             root.destroy()
-            exit()
+            sys.exit()
         Sql_init(1, master=self).tbl()
         if Ent_Box(self, 'Enter SuperKey & Confirm to Continue.', Root.DATAFILE[0], 'key').get() and Sql_init.NXT == 1:
             app.replace_frame(Class)
@@ -581,6 +585,18 @@ class Done_1(Done):
 
 
 if __name__ == '__main__':
+    mutex = win32event.CreateMutex(None, False, 'name')
+    last_error = win32api.GetLastError()
+    if last_error == ERROR_ALREADY_EXISTS:
+        Root.ins_dat(['res\\v_r.ico'])
+        msg = tk.Tk()
+        msg.attributes('-topmost', 1)
+        msg.withdraw()
+        msg.title('Error')
+        msg.iconbitmap(Root.DATAFILE[0])
+        mg.showwarning('Error', 'App instance already running.', parent=msg)
+        msg.destroy()
+        sys.exit()
     root = Root()
     root.lower()
     root.iconify()
