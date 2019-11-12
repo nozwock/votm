@@ -1,19 +1,25 @@
 """A logical subset part of the main application."""
 
+import os
+import sys
 import sqlite3 as sql
 import tkinter as tk
 from tkinter import ttk
 from datetime import date
-from os import getenv, path, walk
 from tkinter import messagebox as mg
 from string import digits
 from random import choice
 from Crypto.Cipher import AES
 from base64 import b64encode, b64decode
 from collections import OrderedDict
+from winreg import (ConnectRegistry, OpenKey, SetValueEx, DeleteKeyEx,
+                    QueryValueEx, CloseKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_EXPAND_SZ)
+
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.3'
+__version__ = '1.0.32'
+
+ENV_KEY = 'BASE_VCON_CONFIG'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 
@@ -320,8 +326,8 @@ class Sql_init:
 
 class Tokens:
     """Handles Tokens generation, saving and to get a specific token."""
-    LOC = getenv('ALLUSERSPROFILE')
-    FL = 'tkn.md'
+    LOC = os.getenv('ALLUSERSPROFILE')
+    FL = 'tkn.vcon'
 
     def __init__(self, master, entries=None):
         self.master = master
@@ -478,6 +484,27 @@ class Dicto:
         return repr(dict(self.state))
 
 
+class Reg:
+    def __init__(self):
+        self.path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+        self.reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+        self.key = OpenKey(self.reg, self.path, 0, KEY_ALL_ACCESS)
+
+    def setx(self, _key, val):
+        SetValueEx(self.key, _key, 0, REG_EXPAND_SZ, val)
+
+    def delx(self, _key):
+        DeleteKeyEx(self.key, _key)
+
+    def get(self, _key):
+        return QueryValueEx(self.key, _key)[0]
+
+    def close(self):
+        CloseKey(self.reg)
+        CloseKey(self.key)
+        del self
+
+
 class Ent_Box(tk.Toplevel):
     """Constructs a toplevel frame whose master is Win,
     It provides a interface for authentication system."""
@@ -562,7 +589,7 @@ class Yr_fle:
 
     def __init__(self):
         fle = []
-        for _, _, f in walk(Write_Default.loc):
+        for _, _, f in os.walk(Write_Default.loc):
             for file in f:
                 if '.db' in file:
                     if 'votm_' in file:
@@ -592,14 +619,14 @@ class Default_Config:
 class Write_Default:
     """Writes Default config file which doesn't exist already, in the /roaming directory."""
     exist = 0
-    loc = getenv('ALLUSERSPROFILE')
-    fles = ['base.md', 'cand.md',
-            'clss.md']
+    loc = os.getenv('ALLUSERSPROFILE')
+    fles = ['cand.vcon', 'clss.vcon']
 
     def __init__(self):
         Write_Default.exist = 0
         self.crypt = Crypt()
-        eval_lst = [path.exists(rf'{Write_Default.loc}\{f}')
+        self.reg = Reg()
+        eval_lst = [os.path.exists(rf'{Write_Default.loc}\{f}')
                     == False for f in Write_Default.fles]
         if any(eval_lst):
             Write_Default.exist = 1
@@ -607,27 +634,27 @@ class Write_Default:
             for i in eval_lst:
                 if i is True:
                     if j is 0:
-                        self.wrt_base()
-                    elif j is 1:
                         self.wrt_cand()
                     else:
                         self.wrt_clss()
                 j += 1
-
-    def wrt_base(self):
-        """Writes Base file."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[0]}', 'w') as f:
-            f.write(self.crypt.encrypt(Default_Config.base_config, SECRET_KEY))
+        try:
+            self.reg.get(ENV_KEY)
+        except FileNotFoundError:
+            Write_Default.exist = 1
+            self.reg.setx(ENV_KEY, self.crypt.encrypt(
+                Default_Config.base_config, SECRET_KEY))
+            self.reg.close()
 
     def wrt_cand(self):
         """Writes Candidate file."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[1]}', 'w') as f:
+        with open(rf'{Write_Default.loc}\{Write_Default.fles[0]}', 'w') as f:
             f.write(self.crypt.encrypt(
                 Default_Config.candidate_config, SECRET_KEY))
 
     def wrt_clss(self):
         """Writes Class&Sec file."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[2]}', 'w') as f:
+        with open(rf'{Write_Default.loc}\{Write_Default.fles[1]}', 'w') as f:
             f.write(self.crypt.encrypt(Default_Config.clss_config, SECRET_KEY))
 
 
@@ -638,13 +665,14 @@ class Access_Config:
         loc = Write_Default.loc
         fles = Write_Default.fles
         self.crypt = Crypt()
+        self.reg = Reg()
+        bse_str = self.reg.get(ENV_KEY)
+        self.reg.close()
+        bse_str = self.crypt.decrypt(bse_str, SECRET_KEY)
         with open(rf'{loc}\{fles[0]}', 'r') as f:
-            bse_str = f.read()
-            bse_str = self.crypt.decrypt(bse_str, SECRET_KEY)
-        with open(rf'{loc}\{fles[1]}', 'r') as f:
             cand_str = f.read()
             cand_str = self.crypt.decrypt(cand_str, SECRET_KEY)
-        with open(rf'{loc}\{fles[2]}', 'r') as f:
+        with open(rf'{loc}\{fles[1]}', 'r') as f:
             clss_str = f.read()
             clss_str = self.crypt.decrypt(clss_str, SECRET_KEY)
 
@@ -653,22 +681,9 @@ class Access_Config:
         self.clss_config = eval(clss_str)
 
 
-# TEST RUN________________
 if __name__ == '__main__':
     Write_Default()
     root = tk.Tk()
     root.withdraw()
     mg.showinfo(
         'VotmAPI', f'A logical subset part of the main application.\n\nVersion: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20')
-    Sql_init(1)
-
-    # Dict test
-    test = Dicto(Access_Config().cand_config)
-    test.insert(1, "['HeadGirls', 'HGS']", ['bruh'])
-    test.insert(-2, "['Hopp', 'HP']", ['grg'])
-    print(test)
-    test.remove("['ViceHeadBoy', 'VHB']")
-    print(test)
-    print(test.get()["['Hopp', 'HP']"])
-
-    mg.showinfo('Succes', 'Test run Successfull.')

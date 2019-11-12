@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import ctypes
 import win32api
 import xlsxwriter
 import win32event
@@ -12,12 +13,12 @@ from tkinter import ttk
 from ttkthemes import ThemedTk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
-from tkinter.scrolledtext import ScrolledText
-from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from votmapi.logic import Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle, Cand_Check, Dicto, Ent_Box, Tokens, Crypt, SECRET_KEY, __author__, __version__
 from tabulate import tabulate
 from winerror import ERROR_ALREADY_EXISTS
-
+from tkinter.scrolledtext import ScrolledText
+from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
+from votmapi.logic import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
+                           Cand_Check, Dicto, Reg, Ent_Box, Tokens, Crypt, SECRET_KEY, ENV_KEY, __author__, __version__)
 
 
 class Root(ThemedTk):
@@ -30,6 +31,13 @@ class Root(ThemedTk):
         self.attributes('-alpha', 0.0)
         self.ins_dat(['res\\v_r.ico', 'res\\ttle.png', 'res\\edtw.png', 'res\\rslw.png',
                       'res\\sttw.png', 'res\\edtb.png', 'res\\rslb.png', 'res\\sttb.png'])
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            self.withdraw()
+            self.attributes('-topmost', 1)
+            self.title('Error')
+            mg.showwarning('Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.', parent=self)
+            self.destroy()
+            sys.exit()
         self.iconbitmap(Root.DATAFILE[0])
 
     @classmethod
@@ -94,7 +102,7 @@ class Win(tk.Toplevel):
             sys.exit()
 
         if Write_Default.exist is 1:
-            mg.showinfo('One-Time Process',
+            mg.showinfo('Info',
                         'Some default configuration files has been saved.', parent=self)
 
     def replace_frame(self, cont: tk.Frame):
@@ -308,7 +316,7 @@ class Candidates(tk.Frame):
         self.cand_vw_ed_cand.pack(side='left')
         str_reg = self.register(self.str_check)
         self.cand_vw_ed_ent = ttk.Entry(cand_vw_ed_btm, validate='key',
-                                   validatecommand=(str_reg, '%S'))
+                                        validatecommand=(str_reg, '%S'))
         self.cand_vw_ed_ent.pack(side='left', padx=(0, 45))
         self.cand_vw_ed_ent.insert(1, 'Candidate')
         self.cand_vw_ed_ent.config(state='disabled')
@@ -332,7 +340,8 @@ class Candidates(tk.Frame):
 
         cand_del = ttk.LabelFrame(self, text='Delete', padding=10)
         cand_del.pack(pady=(0, 20))
-        self.cand_del_pst = ttk.Combobox(cand_del, values=post, state='readonly')
+        self.cand_del_pst = ttk.Combobox(
+            cand_del, values=post, state='readonly')
         self.cand_del_pst.set('Post')
         self.cand_del_pst.pack(side='left', padx=(0, 10))
         self.cand_del_cand = ttk.Combobox(cand_del, state='readonly')
@@ -364,7 +373,7 @@ class Candidates(tk.Frame):
 
     def clr(self):
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
-            Edit.wrt(1, Default_Config.candidate_config)
+            Edit.wrt(0, Default_Config.candidate_config)
             app.replace_frame(Edit)
             mg.showinfo('Info', 'Cleared, And set to default.', parent=self)
 
@@ -375,7 +384,7 @@ class Candidates(tk.Frame):
             try:
                 cfg[Cand_Check(key.get()).get()][cfg[Cand_Check(key.get()).get()].index(
                     pos.get())] = val.get().strip()
-                Edit.wrt(1, cfg)
+                Edit.wrt(0, cfg)
                 txt_val = pos.get()
                 pos.set(val.get())
                 pos.config(values=Access_Config(
@@ -396,7 +405,7 @@ class Candidates(tk.Frame):
         if val.get().strip() != '':
             try:
                 cfg[Cand_Check(key.get()).get()].append(val.get().strip())
-                Edit.wrt(1, cfg)
+                Edit.wrt(0, cfg)
                 self.cand_del_cand.config(values=Access_Config(
                 ).cand_config[Cand_Check(key.get()).get()])
                 self.cand_vw_ed_cand.config(values=Access_Config(
@@ -411,7 +420,7 @@ class Candidates(tk.Frame):
         cfg = Access_Config().cand_config
         try:
             cfg[Cand_Check(key.get()).get()].remove(val.get())
-            Edit.wrt(1, cfg)
+            Edit.wrt(0, cfg)
             val.set('')
             val.config(values=Access_Config(
             ).cand_config[Cand_Check(key.get()).get()])
@@ -540,7 +549,7 @@ class Posts(tk.Frame):
 
     def clr(self):
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
-            Edit.wrt(1, Default_Config.candidate_config)
+            Edit.wrt(0, Default_Config.candidate_config)
             app.replace_frame(Edit)
             mg.showinfo('Info', 'Cleared, And set to default.', parent=self)
 
@@ -564,7 +573,7 @@ class Posts(tk.Frame):
                 self.cfg.remove(key)
                 self.cfg.insert(pos-1, key, item)
 
-                Edit.wrt(1, self.cfg)
+                Edit.wrt(0, self.cfg)
                 self.flpost = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_edt_pst.config(values=self.flpost)
@@ -593,7 +602,7 @@ class Posts(tk.Frame):
                 item = self.cfg.get()[key]
                 self.cfg.remove(key)
                 self.cfg.insert(pos+1, key, item)
-                Edit.wrt(1, self.cfg)
+                Edit.wrt(0, self.cfg)
                 self.flpost = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_edt_pst.config(values=self.flpost)
@@ -625,7 +634,7 @@ class Posts(tk.Frame):
                 self.ordr_posts.delete(ind)
                 self.ordr_posts.insert(
                     ind, [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())][ind])
-                Edit.wrt(1, cfg.get())
+                Edit.wrt(0, cfg.get())
                 val = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 self.pst_del_pst.config(values=val)
@@ -650,7 +659,7 @@ class Posts(tk.Frame):
                         f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())]
                     self.ordr_posts.insert(
                         'end', [f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())][-1])
-                    Edit.wrt(1, cfg)
+                    Edit.wrt(0, cfg)
                     val = [
                         f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                     self.pst_del_pst.config(values=val)
@@ -678,7 +687,7 @@ class Posts(tk.Frame):
                 self.cfg = Dicto(cfg.get())
                 self.pst_list = list(self.cfg.get().keys())
                 self.ordr_posts.delete(ind)
-                Edit.wrt(1, cfg)
+                Edit.wrt(0, cfg)
                 val = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]
                 ent.config(values=val)
@@ -748,7 +757,7 @@ class Classes(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
-            Edit.wrt(2, Default_Config.clss_config)
+            Edit.wrt(1, Default_Config.clss_config)
             app.replace_frame(Edit)
             mg.showinfo('Classes', 'Set to Default.', parent=self)
 
@@ -762,7 +771,7 @@ class Classes(tk.Frame):
                 clss.sort()
                 ind = clss.index(int(val))
                 cfg.insert(ind, int(val), ['A', 'B', 'C', 'D'])
-                Edit.wrt(2, str(cfg.get()))
+                Edit.wrt(1, str(cfg.get()))
                 self.clss_del_clss.config(values=list(
                     Access_Config().clss_config.keys()))
                 mg.showinfo('Info', 'Class has been added.')
@@ -775,7 +784,7 @@ class Classes(tk.Frame):
         if val != 'Class':
             if len(cfg) > 4:
                 del cfg[int(val)]
-                Edit.wrt(2, str(cfg))
+                Edit.wrt(1, str(cfg))
                 self.clss_del_clss.config(values=list(
                     Access_Config().clss_config.keys()))
                 self.clss_del_clss.current(0)
@@ -793,7 +802,8 @@ class Sections(tk.Frame):
 
         clss_vw = ttk.LabelFrame(self, text='View', padding=10)
         clss_vw.pack(pady=(30, 10))
-        self.clss_vw_clss = ttk.Combobox(clss_vw, values=clss_lst, state='readonly')
+        self.clss_vw_clss = ttk.Combobox(
+            clss_vw, values=clss_lst, state='readonly')
         self.clss_vw_clss.set('Class')
         self.clss_vw_clss.pack(pady=(0, 10))
         self.clss_vw_sec = ScrolledText(clss_vw, wrap=tk.WORD, font=(
@@ -849,7 +859,7 @@ class Sections(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
-            Edit.wrt(2, Default_Config.clss_config)
+            Edit.wrt(1, Default_Config.clss_config)
             app.replace_frame(Edit)
             mg.showinfo('Sections', 'Set to Default.', parent=self)
 
@@ -858,15 +868,16 @@ class Sections(tk.Frame):
         cfg = Access_Config().clss_config
         try:
             cfg[int(key.get())].remove(val.get())
-            Edit.wrt(2, cfg)
+            Edit.wrt(1, cfg)
             val.set('')
             val.config(values=Access_Config().clss_config[int(key.get())])
             val.current(0)
             if key.get() == self.clss_vw_clss.get():
-                        self.clss_vw_sec.config(state='normal')
-                        self.clss_vw_sec.delete(0.0, 'end')
-                        self.clss_vw_sec.insert(0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())])
-                        self.clss_vw_sec.config(state='disabled')
+                self.clss_vw_sec.config(state='normal')
+                self.clss_vw_sec.delete(0.0, 'end')
+                self.clss_vw_sec.insert(0.0, Access_Config(
+                ).clss_config[int(self.clss_vw_clss.get())])
+                self.clss_vw_sec.config(state='disabled')
         except (ValueError, KeyError):
             val.set('')
             mg.showerror('Error', 'Section doesn\'t exist.', parent=self)
@@ -881,14 +892,16 @@ class Sections(tk.Frame):
                 try:
                     cfg[int(key.get())].append(val.get().upper())
                     cfg[int(key.get())].sort()
-                    Edit.wrt(2, cfg)
+                    Edit.wrt(1, cfg)
                     if key.get() == self.clss_vw_clss.get():
                         self.clss_vw_sec.config(state='normal')
                         self.clss_vw_sec.delete(0.0, 'end')
-                        self.clss_vw_sec.insert(0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())])
+                        self.clss_vw_sec.insert(0.0, Access_Config(
+                        ).clss_config[int(self.clss_vw_clss.get())])
                         self.clss_vw_sec.config(state='disabled')
                     if key.get() == self.clss_del_sec.get():
-                        self.clss_del_sec.config(values=Access_Config().clss_config[int(self.clss_del_clss.get())])
+                        self.clss_del_sec.config(values=Access_Config(
+                        ).clss_config[int(self.clss_del_clss.get())])
                         self.clss_del_sec.current(0)
                 except:
                     mg.showerror('Error', 'Select a Class first.', parent=self)
@@ -1308,7 +1321,7 @@ class Settings(tk.Frame):
         if dest != '':
             try:
                 src = rf'{Write_Default.loc}/'
-                fles = Write_Default.fles[1:3]
+                fles = Write_Default.fles
                 for i in fles:
                     fsrc = src+i
                     copyfile(fsrc, dest+f'/{i}')
@@ -1326,7 +1339,7 @@ class Settings(tk.Frame):
             try:
                 dest = rf'{Write_Default.loc}/'
                 fsrc = [i for i in fnmes if i.split(
-                    '/')[-1] in Write_Default.fles[1:3]]
+                    '/')[-1] in Write_Default.fles]
                 for i in fsrc:
                     copyfile(i, dest+(i.split('/')[-1]))
                 repr_dir = ''.join(fsrc[0].split('/')[:-1])+'/'
@@ -1359,8 +1372,9 @@ class Settings(tk.Frame):
         if cfg['passwd'] != pswd.get().strip():
             try:
                 cfg['passwd'] = pswd.get().strip()
-                with open(f'{Write_Default.loc}\\{Write_Default.fles[0]}', 'w') as f:
-                    f.write(Crypt().encrypt(str(cfg), SECRET_KEY))
+                self.reg = Reg()
+                self.reg.setx(ENV_KEY, Crypt().encrypt(str(cfg), SECRET_KEY))
+                self.reg.close()
                 pswd.delete(0, tk.END)
                 pswd.insert(0, Access_Config().bse_config['passwd'])
                 mg.showinfo('Settings', 'Password Changed!', parent=self)
@@ -1379,8 +1393,9 @@ class Settings(tk.Frame):
             if cfg['key'] != pswd.get().strip():
                 try:
                     cfg['key'] = pswd.get().strip()
-                    with open(f'{Write_Default.loc}\\{Write_Default.fles[0]}', 'w') as f:
-                        f.write(Crypt().encrypt(str(cfg), SECRET_KEY))
+                    self.reg = Reg()
+                    self.reg.setx(ENV_KEY, Crypt().encrypt(str(cfg), SECRET_KEY))
+                    self.reg.close()
                     pswd.delete(0, tk.END)
                     pswd.insert(0, Access_Config().bse_config['key'])
                     mg.showinfo('Settings', 'Key Changed!', parent=self)
@@ -1578,13 +1593,12 @@ class Token_Show(Result_Show_Sep):
                         tkns += tkn_tab+'\n'
                 except:
                     pass
-        except FileNotFoundError:
-            mg.showerror('Error', 'Token file doesn\'t exists.')
-        try:
             self.res_tbl.insert(0.0, tkns)
-        except:
-            pass
-        self.res_tbl.config(state='disabled')
+            self.res_tbl.config(state='disabled')
+        except FileNotFoundError:
+            self.withdraw()
+            mg.showerror('Error', 'Token file doesn\'t exists.', parent=self)
+            self.destroy()
 
 
 if __name__ == '__main__':

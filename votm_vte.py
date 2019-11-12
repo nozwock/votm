@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import ctypes
 import win32api
 import win32event
 from os import path
@@ -24,6 +25,13 @@ class Root(ThemedTk):
         self.attributes('-alpha', 0.0)
         self.protocol('WM_DELETE_WINDOW', Win.s_cls)
         self.ins_dat(['res\\v_r.ico', 'res\\bg.png'])
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            self.withdraw()
+            self.attributes('-topmost', 1)
+            self.title('Error')
+            mg.showwarning('Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.', parent=self)
+            self.destroy()
+            sys.exit()
         self.iconbitmap(default=Root.DATAFILE[0])
 
     @classmethod
