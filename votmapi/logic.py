@@ -17,7 +17,7 @@ from winreg import (ConnectRegistry, OpenKey, SetValueEx, DeleteKeyEx,
 
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.32'
+__version__ = '1.0.36'
 
 ENV_KEY = 'BASE_VCON_CONFIG'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
@@ -69,7 +69,7 @@ class Sql_init:
                         chk_cand.append(pst_cand)
                 if any([i not in tbl_cand for i in chk_cand]) or any([i not in chk_cand for i in tbl_cand]):
                     ch = mg.askyesnocancel(
-                        '', 'The Candidates in the Settings and in the Database are different.\nDo you want to Recreate the Database with the New Candidates<Yes>, Or Continue with the Candidates in the Database<No>?', parent=self.master)
+                        'Voting Master', 'The Data in the Settings and in the Database are different.\nDo you want to Recreate the Database with the New Data<Yes>, Or Continue with the Data in the Database<No>?', parent=self.master)
                     if ch is True:
                         __drp_sy = f'DROP TABLE {Sql_init.TBL_NM}'
                         self.cur.execute(__drp_sy)
@@ -337,7 +337,7 @@ class Tokens:
             try:
                 self.entries = int(entries)
                 mg.showwarning(
-                    'Warning!', 'The previous Tokens are about to be overwriiten if exists.', parent=master)
+                    'Voting Master', 'The previous Tokens are about to be overwriiten if exists.', parent=master)
             except:
                 mg.showerror('Error', 'Incorrect Value.', parent=master)
 
@@ -368,7 +368,7 @@ class Tokens:
                 tkn = self.crypt.encrypt(str(tkn), SECRET_KEY)
                 f.write(f'{tkn}')
             mg.showinfo(
-                'Info', f'{self.entries} Token(s) Generated.', parent=self.master)
+                'Voting Master', f'{self.entries} Token(s) Generated.', parent=self.master)
         except:
             pass
 

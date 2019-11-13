@@ -74,9 +74,12 @@ class Win(tk.Toplevel):
         min_btn.bind(
             '<Leave>', lambda event: min_btn.config(foreground='#9E5EFF'))
         min_btn.bind('<ButtonRelease-1>',
-                     lambda event: (self.withdraw()))
+                     lambda event: (self.master.iconify(), self.withdraw()))
+        self.master.bind('<FocusIn>', lambda event: self.lift())
         self.master.bind('<Map>', lambda event: (
-            self.master.deiconify(), self.deiconify()))
+            self.master.deiconify(), self.deiconify(), self.lift()))
+        self.master.bind('<Unmap>', lambda event: (
+            self.master.iconify(), self.withdraw()))
 
         x = self.winfo_screenwidth()/2 - 400
         y = self.winfo_screenheight()/2 - 240
@@ -90,7 +93,7 @@ class Win(tk.Toplevel):
         self.lift()
 
         if Write_Default.exist is 1:
-            mg.showinfo('One-Time Process',
+            mg.showinfo('Voting Master',
                         'Some default configuration files has been saved.', parent=self)
 
         if any([(Access_Config().cand_config[i]) == [] for i in list(Access_Config().cand_config.keys())]):
@@ -156,7 +159,7 @@ class Win(tk.Toplevel):
     def about(self) -> str:
         """Dialog box of about."""
         mg.showinfo(
-            'About', f'Version: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20\nArmy Public School\nMathura Cantt\nPrinciple - Mrs. Gayatri Kulshreshtha\nTeacher - Mr. Amit Bansal, PGT - Comp.Sc', parent=self)
+            'Voting Master - About', f'Version: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20\nArmy Public School\nMathura Cantt\nPrinciple - Mrs. Gayatri Kulshreshtha\nTeacher - Mr. Amit Bansal, PGT - Comp.Sc', parent=self)
 
     def ext(self):
         if Ent_Box(self, icn=Root.DATAFILE[0]).get():
