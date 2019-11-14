@@ -17,8 +17,10 @@ from tabulate import tabulate
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from votmapi.logic import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
-                           Cand_Check, Dicto, Reg, Ent_Box, Tokens, Crypt, SECRET_KEY, ENV_KEY, __author__, __version__)
+from votmapi.logic import Dicto, Reg, Tokens, Crypt
+from votmapi.__main__ import SECRET_KEY, ENV_KEY, __author__, __version__
+from votmapi import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
+                           Cand_Check, Ent_Box, About)
 
 
 class Root(ThemedTk):
@@ -27,6 +29,7 @@ class Root(ThemedTk):
 
     def __init__(self):
         super().__init__(theme='arc')
+        #ttk.Style().theme_use('vista')
         self.title('Voting Master-Edit')
         self.attributes('-alpha', 0.0)
         self.ins_dat(['res\\v_r.ico', 'res\\ttle.png', 'res\\edtw.png', 'res\\rslw.png',
@@ -142,11 +145,6 @@ class Win(tk.Toplevel):
         self.frame_n = frame
         self.frame_n.pack(side='right', expand=True, fill='both')
 
-    def about(self) -> str:
-        """Dialog box of about."""
-        mg.showinfo(
-            'Voting Master - About', f'Version: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20\nArmy Public School\nMathura Cantt\nPrinciple - Mrs. Gayatri Kulshreshtha\nTeacher - Mr. Amit Bansal, PGT - Comp.Sc', parent=self)
-
     def navbar(self):
         """Left sided navbar for main window."""
         fl = tk.Frame(self, bg='#0077CC', width=223)
@@ -169,7 +167,7 @@ class Win(tk.Toplevel):
         btxlb.pack(side='left', fill='x', expand=1, anchor='s')
 
         bthlb = tk.Button(flb, text='?', highlightthickness=0, bg='#303030', activebackground='#6D6D6D', takefocus=0,
-                          relief='flat', bd=1, fg='#EFEFEF', height=2, command=self.about, font=('Segoe UI', 10, 'bold'))
+                          relief='flat', bd=1, fg='#EFEFEF', height=2, command=lambda: About(self), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
         # contents_____________________________
         self.edt_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[2]))
@@ -941,14 +939,14 @@ class Result(tk.Frame):
         ttk.Style().configure('m.TButton', font=('Segoe UI', 10))
         self.config(bg=Win.SM_BG_HEX)
         # Merge Frame______________________
-        mrg_lblfrm = ttk.Labelframe(self, text='Merge', padding=10)
+        self.mrg_lblfrm = ttk.Labelframe(self, text='Merge', padding=10)
         self.shw_lblfrm = ttk.Labelframe(self, text='Show', padding=10)
-        mrg_lblfrm.pack(pady=(20, 10))
+        self.mrg_lblfrm.pack(pady=(60, 10))
         self.shw_lblfrm.pack()
 
-        mrg_left = tk.Frame(mrg_lblfrm, bg=Win.SM_BG_HEX)
+        mrg_left = tk.Frame(self.mrg_lblfrm, bg=Win.SM_BG_HEX)
         mrg_left.pack(side='left', padx=(0, 10))
-        mrg_right = tk.Frame(mrg_lblfrm, bg=Win.SM_BG_HEX)
+        mrg_right = tk.Frame(self.mrg_lblfrm, bg=Win.SM_BG_HEX)
         mrg_right.pack(side='right')
         self.mrg_drctr = tk.Listbox(
             mrg_left, height=5, relief='groove', bd=2, highlightthickness=0)
@@ -1018,6 +1016,7 @@ class Result(tk.Frame):
             self.do_upd(), self.chk_btn()))
 
     def do_upd(self):
+        self.mrg_lblfrm.pack(pady=(40, 10))
         if self.shw_db.get() != 'merged':
             cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
         else:

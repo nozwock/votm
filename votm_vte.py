@@ -11,8 +11,10 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from ttkthemes import ThemedTk
 from tkinter import messagebox as mg
-from votmapi.logic import Write_Default, Access_Config, Sql_init, Ent_Box, Tokens, __author__, __version__
 from winerror import ERROR_ALREADY_EXISTS
+from votmapi.logic import Tokens
+from votmapi.__main__ import __author__, __version__
+from votmapi import Write_Default, Access_Config, Sql_init, Ent_Box, About
 
 
 class Root(ThemedTk):
@@ -156,11 +158,6 @@ class Win(tk.Toplevel):
         self.frame_n = frame
         self.frame_n.pack(side='right', expand=True, fill='both')
 
-    def about(self) -> str:
-        """Dialog box of about."""
-        mg.showinfo(
-            'Voting Master - About', f'Version: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20\nArmy Public School\nMathura Cantt\nPrinciple - Mrs. Gayatri Kulshreshtha\nTeacher - Mr. Amit Bansal, PGT - Comp.Sc', parent=self)
-
     def ext(self):
         if Ent_Box(self, icn=Root.DATAFILE[0]).get():
             self.master.destroy()
@@ -199,7 +196,7 @@ class Win(tk.Toplevel):
                           relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=self.ext, font=('Segoe UI', 10, 'bold'))
         btxlb.pack(side='left', fill='x', expand=1, anchor='s')
         bthlb = tk.Button(flb, text='?', highlightthickness=0, background='#303030', activebackground='#6D6D6D',
-                          relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=self.about, font=('Segoe UI', 10, 'bold'))
+                          relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=lambda: About(self), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
         # NAVBAR's Content______________________________
         self.home = tk.Label(fl, text='⚪ Home', foreground='#FFFFFF',
