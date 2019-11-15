@@ -31,7 +31,6 @@ class Tokens:
                 mg.showerror('Error', 'Incorrect Value.', parent=master)
 
     def gen(self):
-        # def key_gen(size=8, chars=ascii_letters + digits):
         def key_gen(size=8, chars=digits):
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
                 try:

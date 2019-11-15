@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""For changing configurations which will be used at the time of voting"""
 
 import sys
 import ctypes
@@ -10,7 +10,6 @@ from os import path, remove
 from datetime import date
 import tkinter as tk
 from tkinter import ttk
-from ttkthemes import ThemedTk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tabulate import tabulate
@@ -20,16 +19,16 @@ from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
 from votmapi.logic import Dicto, Reg, Tokens, Crypt
 from votmapi.__main__ import SECRET_KEY, ENV_KEY, __author__, __version__
 from votmapi import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
-                           Cand_Check, Ent_Box, About)
+                     Cand_Check, Ent_Box, About)
 
 
-class Root(ThemedTk):
+class Root(tk.Tk):
     """Root Dummy Window."""
     DATAFILE = []
 
     def __init__(self):
-        super().__init__(theme='arc')
-        #ttk.Style().theme_use('vista')
+        super().__init__()
+        ttk.Style().theme_use('vista')
         self.title('Voting Master-Edit')
         self.attributes('-alpha', 0.0)
         self.ins_dat(['res\\v_r.ico', 'res\\ttle.png', 'res\\edtw.png', 'res\\rslw.png',
@@ -38,7 +37,8 @@ class Root(ThemedTk):
             self.withdraw()
             self.attributes('-topmost', 1)
             self.title('Error')
-            mg.showwarning('Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.', parent=self)
+            mg.showwarning(
+                'Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run as Administrator.', parent=self)
             self.destroy()
             sys.exit()
         self.iconbitmap(Root.DATAFILE[0])
@@ -58,7 +58,7 @@ class Root(ThemedTk):
 
 class Win(tk.Toplevel):
     """Main Window container."""
-    SM_BG_HEX = '#F5F6F7'
+    SM_BG_HEX = '#F0F0F0'
 
     def __init__(self, master):
         super().__init__(master)
@@ -167,7 +167,7 @@ class Win(tk.Toplevel):
         btxlb.pack(side='left', fill='x', expand=1, anchor='s')
 
         bthlb = tk.Button(flb, text='?', highlightthickness=0, bg='#303030', activebackground='#6D6D6D', takefocus=0,
-                          relief='flat', bd=1, fg='#EFEFEF', height=2, command=lambda: About(self), font=('Segoe UI', 10, 'bold'))
+                          relief='flat', bd=1, fg='#EFEFEF', height=2, command=lambda: About(self, Root.DATAFILE[0]), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
         # contents_____________________________
         self.edt_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[2]))
@@ -257,13 +257,13 @@ class Edit(tk.Frame):
         self.tab = ttk.Notebook(self)
         cand = Candidates(self.tab)
         #cand.bind('<Visibility>', lambda e: cand.update())
-        self.tab.add(cand, text='Candidates')
+        self.tab.add(cand, text=' Candidates ')
         pst = Posts(self.tab)
-        self.tab.add(pst, text='Posts')
+        self.tab.add(pst, text=' Posts ')
         clss = Classes(self.tab)
-        self.tab.add(clss, text='Classes')
+        self.tab.add(clss, text=' Classes ')
         sec = Sections(self.tab)
-        self.tab.add(sec, text='Sections')
+        self.tab.add(sec, text=' Sections ')
         self.tab.pack(side='right', expand=1, fill='both')
         self.tab.bind('<ButtonRelease-1>', lambda event: self.updt(event))
 
@@ -297,7 +297,7 @@ class Edit(tk.Frame):
                 slave = tab_ins[i](self.tab)
                 if c_ind < 3:
                     self.tab.insert(
-                        c_ind, slave, text=f'{tab_ins[i]}'.split('.')[-1].strip("'>"))
+                        c_ind, slave, text=' '+str(tab_ins[i]).split('.')[-1].strip("'>")+' ')
                 else:
                     self.tab.add(slave, text=f'{tab_ins[i]}'.split(
                         '.')[-1].strip("'>"))
@@ -384,7 +384,8 @@ class Candidates(tk.Frame):
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
             Edit.wrt(0, Default_Config.candidate_config)
             app.replace_frame(Edit)
-            mg.showinfo('Voting Master', 'Cleared, And set to default.', parent=self)
+            mg.showinfo('Voting Master',
+                        'Cleared, And set to default.', parent=self)
 
     def wrt_edt(self, key: ttk.Combobox, pos: ttk.Combobox, val: tk.Entry):
         """Writes changes to the Candidate file."""
@@ -526,7 +527,6 @@ class Posts(tk.Frame):
         ########################################
         self.cfg = Dicto(Access_Config().cand_config)
         keys = list(self.cfg.get().keys())
-        evl_keys = [eval(i) for i in keys]
 
         ordr_frm = ttk.LabelFrame(btm_frm, text='Rearrange', padding=10)
         ordr_frm.pack(side='left')
@@ -538,10 +538,10 @@ class Posts(tk.Frame):
         up_dn_frm = tk.Frame(ordr_frm)
         up_dn_frm.pack(side='top', fill='x', expand=1)
         up_btn = tk.Button(up_dn_frm, text='Up', relief='groove', highlightthickness=0, bg=Win.SM_BG_HEX, command=lambda: self.move_up(),
-                           activebackground=Win.SM_BG_HEX, activeforeground='#5C616C', fg='#5C616C', takefocus=0)
+                           activebackground=Win.SM_BG_HEX, takefocus=0)
         up_btn.pack(side='left', fill='x', expand=1)
         dn_btn = tk.Button(up_dn_frm, text='Down', relief='groove', highlightthickness=0, bg=Win.SM_BG_HEX, command=lambda: self.move_down(),
-                           activebackground=Win.SM_BG_HEX, activeforeground='#5C616C', fg='#5C616C', takefocus=0)
+                           activebackground=Win.SM_BG_HEX, takefocus=0)
         dn_btn.pack(side='left', fill='x', expand=1)
 
     def tag_check(self, inp):
@@ -560,7 +560,8 @@ class Posts(tk.Frame):
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
             Edit.wrt(0, Default_Config.candidate_config)
             app.replace_frame(Edit)
-            mg.showinfo('Voting Master', 'Cleared, And set to default.', parent=self)
+            mg.showinfo('Voting Master',
+                        'Cleared, And set to default.', parent=self)
 
     def move_up(self, *args):
         try:
@@ -650,7 +651,8 @@ class Posts(tk.Frame):
                 self.pst_del_pst.current(0)
                 cmb.config(values=val)
                 cmb.current(ind)
-                mg.showinfo('Voting Master', 'Post has been edited.', parent=self)
+                mg.showinfo('Voting Master',
+                            'Post has been edited.', parent=self)
             else:
                 mg.showwarning(
                     'Error', 'This Tag already exists.', parent=self)
@@ -679,9 +681,12 @@ class Posts(tk.Frame):
                     self.pst_edt_tag.config(state='enabled')
                     self.pst_edt_ent.delete(0, 'end')
                     self.pst_edt_tag.delete(0, 'end')
-                    self.pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip())
-                    self.pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())
-                    mg.showinfo('Voting Master', 'Post has been added.', parent=self)
+                    self.pst_edt_ent.insert(
+                        0, self.pst_edt_pst.get().split(';')[0].strip())
+                    self.pst_edt_tag.insert(
+                        0, self.pst_edt_pst.get().split(';')[-1].strip())
+                    mg.showinfo('Voting Master',
+                                'Post has been added.', parent=self)
                 else:
                     mg.showerror(
                         'Error', 'No. of Max posts is 8!', parent=self)
@@ -711,9 +716,12 @@ class Posts(tk.Frame):
                 ent.current(0)
                 self.pst_edt_ent.delete(0, 'end')
                 self.pst_edt_tag.delete(0, 'end')
-                self.pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip())
-                self.pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())
-                mg.showinfo('Voting Master', 'Post has been deleted.', parent=self)
+                self.pst_edt_ent.insert(
+                    0, self.pst_edt_pst.get().split(';')[0].strip())
+                self.pst_edt_tag.insert(
+                    0, self.pst_edt_pst.get().split(';')[-1].strip())
+                mg.showinfo('Voting Master',
+                            'Post has been deleted.', parent=self)
             else:
                 mg.showwarning(
                     'Error', 'Can\'t delete, Atleast 1 Post should exist.', parent=self)
@@ -793,7 +801,8 @@ class Classes(tk.Frame):
                 Edit.wrt(1, str(cfg.get()))
                 self.clss_del_clss.config(values=list(
                     Access_Config().clss_config.keys()))
-                mg.showinfo('Voting Master', 'Class has been added.', parent=self)
+                mg.showinfo('Voting Master',
+                            'Class has been added.', parent=self)
             else:
                 mg.showerror('Error', 'Class already exists.', parent=self)
 
@@ -807,11 +816,14 @@ class Classes(tk.Frame):
                 self.clss_del_clss.config(values=list(
                     Access_Config().clss_config.keys()))
                 self.clss_del_clss.current(0)
-                mg.showinfo('Voting Master', 'Class has been Deleted.', parent=self)
+                mg.showinfo('Voting Master',
+                            'Class has been Deleted.', parent=self)
             else:
-                mg.showwarning('Voting Master', 'Too Many Classes has been deleted.', parent=self)
+                mg.showwarning(
+                    'Voting Master', 'Too Many Classes has been deleted.', parent=self)
         else:
-            mg.showerror('Error', 'Invalid, Select a Class first.', parent=self)
+            mg.showerror(
+                'Error', 'Invalid, Select a Class first.', parent=self)
 
 
 class Sections(tk.Frame):
@@ -826,7 +838,7 @@ class Sections(tk.Frame):
         self.clss_vw_clss.set('Class')
         self.clss_vw_clss.pack(pady=(0, 10))
         self.clss_vw_sec = ScrolledText(clss_vw, wrap=tk.WORD, font=(
-            'Segue UI', 8), width=30, height=5, relief='flat', fg='#5C616C')
+            'Segue UI', 8), width=30, height=5, relief='flat', bg=Win.SM_BG_HEX)
         self.clss_vw_sec.insert(0.0, 'Sections Here')
         self.clss_vw_sec.pack()
         self.clss_vw_sec.config(state='disabled')
@@ -952,8 +964,7 @@ class Result(tk.Frame):
             mrg_left, height=5, relief='groove', bd=2, highlightthickness=0)
         self.mrg_drctr.pack(side='top')
         mrg_clr = tk.Button(mrg_left, text='Remove', relief='groove', highlightthickness=0, bg=Win.SM_BG_HEX,
-                            activebackground=Win.SM_BG_HEX, activeforeground='#5C616C', fg='#5C616C',
-                            command=lambda: self.rmv_item(), takefocus=0)
+                            activebackground=Win.SM_BG_HEX, command=lambda: self.rmv_item(), takefocus=0)
         mrg_clr.pack(side='top', fill='x')
         mrg_brws = ttk.Button(mrg_right, text='Browse',
                               command=lambda: self.opn_mrg_fles(), takefocus=0)
@@ -1153,7 +1164,8 @@ class Result(tk.Frame):
                 Sql_init(0, dtb=1).mrg_dtb_res(mrg_tbl_n, mrg_tbl_data)
                 mg.showinfo('Voting Master', 'Merging is Done.', parent=self)
         else:
-            mg.showwarning('Voting Master', 'No Merge file is selected!', parent=self)
+            mg.showwarning('Voting Master',
+                           'No Merge file is selected!', parent=self)
 
     def shw_res(self):
         """Creates a string from a list of columns to be shown and it is passed to the Result window."""
@@ -1397,7 +1409,8 @@ class Settings(tk.Frame):
                 self.reg.close()
                 pswd.delete(0, tk.END)
                 pswd.insert(0, Access_Config().bse_config['passwd'])
-                mg.showinfo('Voting Master', 'Password has been Changed!', parent=self)
+                mg.showinfo('Voting Master',
+                            'Password has been Changed!', parent=self)
             except:
                 pass
         else:
@@ -1414,11 +1427,13 @@ class Settings(tk.Frame):
                 try:
                     cfg['key'] = pswd.get().strip()
                     self.reg = Reg()
-                    self.reg.setx(ENV_KEY, Crypt().encrypt(str(cfg), SECRET_KEY))
+                    self.reg.setx(ENV_KEY, Crypt().encrypt(
+                        str(cfg), SECRET_KEY))
                     self.reg.close()
                     pswd.delete(0, tk.END)
                     pswd.insert(0, Access_Config().bse_config['key'])
-                    mg.showinfo('Voting Master', 'Key has been Changed!', parent=self)
+                    mg.showinfo('Voting Master',
+                                'Key has been Changed!', parent=self)
                 except:
                     pass
             else:

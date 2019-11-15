@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+"""Voting will be done through this"""
 
 import sys
 import ctypes
@@ -9,7 +9,6 @@ from datetime import date
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
-from ttkthemes import ThemedTk
 from tkinter import messagebox as mg
 from winerror import ERROR_ALREADY_EXISTS
 from votmapi.logic import Tokens
@@ -17,12 +16,13 @@ from votmapi.__main__ import __author__, __version__
 from votmapi import Write_Default, Access_Config, Sql_init, Ent_Box, About
 
 
-class Root(ThemedTk):
+class Root(tk.Tk):
     """Root Dummy Window."""
     DATAFILE = []
 
     def __init__(self):
-        super().__init__(theme='arc')
+        super().__init__()
+        ttk.Style().theme_use('vista')
         self.title('Voting Master-Vote')
         self.attributes('-alpha', 0.0)
         self.protocol('WM_DELETE_WINDOW', Win.s_cls)
@@ -31,7 +31,8 @@ class Root(ThemedTk):
             self.withdraw()
             self.attributes('-topmost', 1)
             self.title('Error')
-            mg.showwarning('Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.', parent=self)
+            mg.showwarning(
+                'Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.', parent=self)
             self.destroy()
             sys.exit()
         self.iconbitmap(default=Root.DATAFILE[0])
@@ -51,7 +52,7 @@ class Root(ThemedTk):
 
 class Win(tk.Toplevel):
     """Main Window container."""
-    SM_BG_HEX = '#F5F6F7'
+    SM_BG_HEX = '#F0F0F0'
 
     def __init__(self, master):
         super().__init__(master)
@@ -196,7 +197,7 @@ class Win(tk.Toplevel):
                           relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=self.ext, font=('Segoe UI', 10, 'bold'))
         btxlb.pack(side='left', fill='x', expand=1, anchor='s')
         bthlb = tk.Button(flb, text='?', highlightthickness=0, background='#303030', activebackground='#6D6D6D',
-                          relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=lambda: About(self), font=('Segoe UI', 10, 'bold'))
+                          relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=lambda: About(self, icn=Root.DATAFILE[0]), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
         # NAVBAR's Content______________________________
         self.home = tk.Label(fl, text='⚪ Home', foreground='#FFFFFF',
@@ -326,7 +327,7 @@ class Vote(tk.Frame):
 
         if self.n_val > 4:
             ttk.Style().configure('TNotebook', tabposition='s')
-            ttk.Style().configure('TNotebook.Tab', font=('Small Fonts', 14),
+            ttk.Style().configure('TNotebook.Tab', font=('Segoe UI', 14, 'bold'),
                                   focuscolor=ttk.Style().configure('.')['background'], width=20)
             self.tab = ttk.Notebook(self, padding=-1)
             p1 = tk.Frame(self.tab, background=Win.SM_BG_HEX)
@@ -521,8 +522,6 @@ class Vote(tk.Frame):
                 x = [eval(i) for i in list(Access_Config().cand_config.keys())]
                 for i in range(len(vte_lst)):
                     vte_lst[i] = f'{x[i][-1]}_{vte_lst[i]}'
-                # vte_lst[0], vte_lst[1], vte_lst[2], vte_lst[
-                #    3] = f'HB_{vte_lst[0]}', f'VHB_{vte_lst[1]}', f'HG_{vte_lst[2]}', f'VHG_{vte_lst[3]}'
                 if sel == 0:  # Staff
                     btnvt.config(state='disabled')
                     Sql_init(0).tchr_vte(vte_lst)

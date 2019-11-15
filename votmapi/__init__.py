@@ -1,4 +1,7 @@
-import sys, os
+"""Contains important definations of the program"""
+
+import sys
+import os
 import webbrowser
 import sqlite3 as sql
 import tkinter as tk
@@ -8,8 +11,8 @@ from datetime import date
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from votmapi.__main__ import SECRET_KEY, ENV_KEY, __version__, __author__, __license__
 from votmapi.logic import Crypt, Reg
+from votmapi.__main__ import SECRET_KEY, ENV_KEY, __version__, __author__, __license__
 
 
 class Sql_init:
@@ -337,6 +340,7 @@ class Ent_Box(tk.Toplevel):
         self.iconbitmap(icn)
         self.grab_set()
         self.lift()
+        self.focus_force()
         dsc = tk.Label(self, text=txt, font=(
             'Segoe UI', 12), background='#FF3232', foreground='#EFEFEF')
         dsc.pack(side='top', fill='x', pady=(0, 20), ipady=6)
@@ -388,70 +392,81 @@ class Ent_Box(tk.Toplevel):
     def get(self) -> bool:
         return self.flag
 
+
 class About(tk.Toplevel):
     """Dialog box containing information regarding the App."""
-    def __init__(self, master):
+
+    def __init__(self, master, icn=None):
         tk.Toplevel.__init__(self, master)
         self.transient(master)
+        self.master = master
+        x = self.winfo_screenwidth()/2 - 198
+        y = self.winfo_screenheight()/2 - 100
+        self.geometry('376x200+%d+%d' % (x, y))
+        self.title('About')
+        self.iconbitmap(icn)
+        self.resizable(0, 0)
+        self.grab_set()
+        self.lift()
+        self.focus_force()
+        logo_lt = tk.Frame(self)
+        logo_lt.pack(side='left', fill='y')
+        about_rt = tk.Frame(self)
+        about_rt.pack(side='left', fill='both', expand=1,
+                      pady=(10, 10), padx=(0, 10))
+        about_tp = tk.Frame(about_rt, bd=2, relief='groove')
+        about_tp.pack(side='top', fill='both', expand=1)
+
         DATAFILE = '..\\res\\logo.png'
+        #Change above to 'res\\logo.png' while using with pyinstaller
         if not hasattr(sys, 'frozen'):
             DATAFILE = os.path.join(os.path.dirname(__file__), DATAFILE)
         else:
             DATAFILE = os.path.join(sys.prefix, DATAFILE)
         self.img = tk.PhotoImage(file=DATAFILE)
 
-        self.master = master
-        self.focus_force()
-        x = self.winfo_screenwidth()/2 - 198
-        y = self.winfo_screenheight()/2 - 100
-        self.geometry('376x200+%d+%d' % (x, y))
-        self.title('About')
-        self.resizable(0, 0)
-        self.grab_set()
-        self.lift()
-        logo_lt = tk.Frame(self)
-        logo_lt.pack(side='left', fill='y')
-        about_rt = tk.Frame(self)
-        about_rt.pack(side='left', fill='both', expand=1, pady=(10,10), padx=(0,10))
-        about_tp = tk.Frame(about_rt, bd=2, relief='groove')
-        about_tp.pack(side='top', fill='both', expand=1)
-
         lgc = tk.Label(logo_lt, image=self.img)
-        lgc.pack(ipadx=14, pady=(10,0))
-        label = tk.Label(about_tp, text='VOTM - Voting Master', font=('Segoe UI', 10, 'bold'))
+        lgc.pack(ipadx=14, pady=(10, 0))
+        label = tk.Label(about_tp, text='VOTM - Voting Master',
+                         font=('Segoe UI', 10, 'bold'))
         label.pack(side='top', anchor='nw')
         ver = tk.Label(about_tp, text=f'Version {__version__}')
         ver.pack(side='top', anchor='nw')
         auth = tk.Label(about_tp, text=f'Author - {__author__}')
-        auth.pack(side='top', anchor='nw', pady=(10,0))
-        bug_ttl = tk.Label(about_tp, text='Report bugs or request enhancements at:')
-        bug_ttl.pack(side='top', anchor='nw', pady=(10,0))
-        url = 'https://github.com/srx2/votm/issues'
+        auth.pack(side='top', anchor='nw', pady=(10, 0))
+        bug_ttl = tk.Label(
+            about_tp, text='Report bugs or request enhancements at:')
+        bug_ttl.pack(side='top', anchor='nw', pady=(10, 0))
+        url = 'https://github.com/sgrkmr/votm/issues'
         bug_lnk = tk.Label(about_tp, text=url, fg='#6A00FF')
         bug_lnk.pack(side='top', anchor='nw')
         url_fnt = font.Font(bug_lnk, bug_lnk.cget('font'))
         url_fnt.configure(underline=1)
         bug_lnk.config(font=url_fnt)
-        bug_lnk.bind('<ButtonRelease-1>', lambda event: webbrowser.open_new(url))
+        bug_lnk.bind('<ButtonRelease-1>',
+                     lambda event: webbrowser.open_new(url))
         bug_lnk.bind('<Enter>', lambda e: bug_lnk.config(fg='#9E5EFF'))
         bug_lnk.bind('<Leave>', lambda e: bug_lnk.config(fg='#6A00FF'))
 
         btn_frm = tk.Frame(about_rt)
-        btn_frm.pack(side='top', pady=(10,0), fill='both', expand=1)
+        btn_frm.pack(side='top', pady=(10, 0), fill='both', expand=1)
 
-        lcnse = ttk.Button(btn_frm, text='License', command=lambda: License(self))
+        lcnse = ttk.Button(btn_frm, text='License',
+                           command=lambda: License(self, icn=icn))
         lcnse.pack(side='left')
         ok = ttk.Button(btn_frm, text='Ok', command=lambda: self.destroy())
         ok.pack(side='right')
         self.wait_window(self)
 
+
 class License(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, icn=None):
         tk.Toplevel.__init__(self, master)
         self.transient(master)
         self.master = master
         self.focus_force()
         self.title('Votm License')
+        self.iconbitmap(icn)
         self.resizable(0, 0)
         self.grab_set()
         self.lift()
@@ -460,18 +475,22 @@ class License(tk.Toplevel):
         self.geometry('560x440+%d+%d' % (x, y))
 
         lcn_frm = tk.Frame(self, relief='groove', bd=2)
-        lcn_frm.pack(side='top', fill='both', expand=1, pady=(10,10), padx=(10,10))
+        lcn_frm.pack(side='top', fill='both', expand=1,
+                     pady=(10, 10), padx=(10, 10))
         self.lcn = ScrolledText(lcn_frm, font=('Segoe UI', 9), relief='flat')
         self.lcn.pack(fill='both')
         self.lcn.insert(0.0, __license__)
         self.lcn.config(state='disabled')
 
         close_frm = tk.Frame(self)
-        close_frm.pack(side='top', fill='both', expand=1, padx=(0,10), pady=(0,10))
-        close = ttk.Button(close_frm, text='Close', command=lambda: self.destroy())
+        close_frm.pack(side='top', fill='both', expand=1,
+                       padx=(0, 10), pady=(0, 10))
+        close = ttk.Button(close_frm, text='Close',
+                           command=lambda: self.destroy())
         close.pack(side='right')
         close.focus_set()
         self.wait_window(self)
+
 
 class Yr_fle:
     """Creates a list of names of database files existing."""
@@ -573,10 +592,12 @@ class Access_Config:
 
 
 if __name__ == '__main__':
+    def do(win):
+        win.destroy()
+        sys.exit()
     Write_Default()
     root = tk.Tk()
     root.attributes('-alpha', 0.0)
-    mg.showinfo(
-        'VotmAPI', f'A logical subset part of the main application.\n\nVersion: {__version__}\nAuthor: {__author__}, 12\'A, 2019-20')
-    About(root)
+    ab = About(root)
+    ab.protocol('WM_DELTE_WINDOW', do(root))
     root.mainloop()

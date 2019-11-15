@@ -1,13 +1,13 @@
-"""Some information for the program."""
+"""Some informations for the program."""
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.39'
+__version__ = '1.0.4'
 
 ENV_KEY = 'BASE_VCON_CONFIG'
 SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
 
 __license__ = \
-"""
+    """
                     GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
