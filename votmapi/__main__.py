@@ -16,6 +16,10 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+"""
+Change ENV_KEY & SECRET_KEY below for use.
+"""
+
 __author__ = 'Sagar Kumar'
 __version__ = '1.0.4 (2019-2020)'
 
