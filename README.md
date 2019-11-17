@@ -1,5 +1,7 @@
 # VOTM - Voting Manager/Master
 A simple Voting Manager applicable for Schools use.
+This's actually my school project. So, this may 
+not be efficient or bug-free.
 
 # Screenshots
 <img src="/screen_shot2.png" width="50%" />
