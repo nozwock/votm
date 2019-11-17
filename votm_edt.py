@@ -1,5 +1,5 @@
 """
-For changing configurations which will be used at the time of voting
+For changing configurations which will be used at the time of voting.
 Copyright (C) 2019 Sagar Kumar
 
     This program is free software: you can redistribute it and/or modify
