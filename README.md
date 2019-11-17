@@ -10,3 +10,19 @@ A simple Voting Manager applicable for Schools use.
   * tkinter
   * tabulate
   * Crypto
+  
+## Usage
+ * Clone the repo, and then
+	```sh
+ $ cd votm
+ $ pip install -r requirements.txt
+	```
+ * For Edit App
+ ```sh
+ $ python votm_vte.py
+ ```
+ * For Vote App
+ ```sh
+ $ python votm_edt.py
+ ```
+ 
