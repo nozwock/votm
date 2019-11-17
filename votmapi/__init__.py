@@ -448,7 +448,7 @@ class About(tk.Toplevel):
         label.pack(side='top', anchor='nw')
         ver = tk.Label(about_tp, text=f'Version {__version__}')
         ver.pack(side='top', anchor='nw')
-        auth = tk.Label(about_tp, text=f'Author - {__author__}')
+        auth = tk.Label(about_tp, text=f'Copyright (C) 2019 {__author__}')
         auth.pack(side='top', anchor='nw', pady=(10, 0))
         bug_ttl = tk.Label(
             about_tp, text='Report bugs or request enhancements at:')
