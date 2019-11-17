@@ -13,10 +13,10 @@ A simple Voting Manager applicable for Schools use.
   
 ## Usage
  * Clone the repo, and then
-	```sh
+ ```sh
  $ cd votm
  $ pip install -r requirements.txt
-	```
+ ```
  * For Edit App
  ```sh
  $ python votm_vte.py
