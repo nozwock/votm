@@ -6,10 +6,9 @@ A simple Voting Manager applicable for Schools use.
 <img src="/screen_shot1.png" width="50%" />
 
 ## Specific Dependencies
-  * sqlite3
   * tkinter
   * tabulate
-  * Crypto
+  * pycrypto
   
 ## Usage
  * Clone the repo, and then
