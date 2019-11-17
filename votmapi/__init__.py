@@ -1,4 +1,20 @@
-"""Contains important definations of the program"""
+"""
+Contains important definations of the program.
+Copyright (C) 2019 Sagar Kumar
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or 
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 
 import sys
 import os
@@ -432,7 +448,7 @@ class About(tk.Toplevel):
         label.pack(side='top', anchor='nw')
         ver = tk.Label(about_tp, text=f'Version {__version__}')
         ver.pack(side='top', anchor='nw')
-        auth = tk.Label(about_tp, text=f'Author - {__author__}')
+        auth = tk.Label(about_tp, text=f'Copyright (C) 2019 {__author__}')
         auth.pack(side='top', anchor='nw', pady=(10, 0))
         bug_ttl = tk.Label(
             about_tp, text='Report bugs or request enhancements at:')

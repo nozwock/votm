@@ -1,4 +1,20 @@
-"""For changing configurations which will be used at the time of voting"""
+"""
+For changing configurations which will be used at the time of voting.
+Copyright (C) 2019 Sagar Kumar
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or 
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 
 import sys
 import ctypes
@@ -332,6 +348,8 @@ class Candidates(tk.Frame):
         cand_vw_ed_btn = ttk.Button(cand_vw_ed_btm, text='Edit', style='m.TButton', command=lambda: self.wrt_edt(
             self.cand_vw_ed_pst, self.cand_vw_ed_cand, self.cand_vw_ed_ent), takefocus=0)
         cand_vw_ed_btn.pack(side='left', padx=(0, 25))
+        self.cand_vw_ed_ent.bind('<Return>', lambda e: self.wrt_edt(
+            self.cand_vw_ed_pst, self.cand_vw_ed_cand, self.cand_vw_ed_ent))
 
         cand_add = ttk.LabelFrame(self, text='Add', padding=10)
         cand_add.pack(pady=(0, 10))
@@ -346,6 +364,8 @@ class Candidates(tk.Frame):
         cand_add_btn = ttk.Button(cand_add, text='Add', style='m.TButton', command=lambda: (
             self.wrt_add(cand_add_pst, cand_add_ent), cand_add_ent.delete(0, tk.END)), takefocus=0)
         cand_add_btn.pack(side='left')
+        cand_add_ent.bind('<Return>', lambda e: (self.wrt_add(
+            cand_add_pst, cand_add_ent), cand_add_ent.delete(0, tk.END)))
 
         cand_del = ttk.LabelFrame(self, text='Delete', padding=10)
         cand_del.pack(pady=(0, 20))
@@ -404,6 +424,8 @@ class Candidates(tk.Frame):
                     ).cand_config[Cand_Check(key.get()).get()])
                     if txt_val == self.cand_del_cand.get():
                         self.cand_del_cand.current(0)
+                mg.showinfo('Voting Master',
+                            'Candidate has been changed.', parent=self)
             except:
                 mg.showerror('Error', 'No Canidate was selected.', parent=self)
         else:
@@ -420,6 +442,8 @@ class Candidates(tk.Frame):
                 ).cand_config[Cand_Check(key.get()).get()])
                 self.cand_vw_ed_cand.config(values=Access_Config(
                 ).cand_config[Cand_Check(key.get()).get()])
+                mg.showinfo('Voting Master',
+                            'Candidate has been added.', parent=self)
             except:
                 mg.showerror('Error', 'Select a Post first.', parent=self)
         else:
@@ -441,6 +465,8 @@ class Candidates(tk.Frame):
                 self.cand_vw_ed_cand.current(0)
                 self.cand_vw_ed_ent.delete(0, 'end')
                 self.cand_vw_ed_ent.insert(0, self.cand_vw_ed_cand.get())
+            mg.showwarning('Voting Master',
+                           'Candidate has been removed.', parent=self)
         except (ValueError, KeyError):
             val.set('')
             mg.showerror('Error', 'Candidate doesn\'t exist.', parent=self)
@@ -1182,8 +1208,8 @@ class Result(tk.Frame):
             vals = ['STAFF', 'STUDENT', 'CLASS', 'SEC']
             for i in range(len(count)):
                 exec(
-                    f"{shrt[i].lower()}=(str([i for i in pst_cand if i.startswith('{shrt[i]}')]).lstrip('[').rstrip(']')).replace(\"'\", \"\")")
-                exec(f'vals.append({shrt[i].lower()})')
+                    f"{count[i].lower()}=(str([i for i in pst_cand if i.startswith('{count[i]}')]).lstrip('[').rstrip(']')).replace(\"'\", \"\")")
+                exec(f'vals.append({count[i].lower()})')
 
             args = []
             for i in range(len(self.var_val_lst)):
@@ -1366,7 +1392,7 @@ class Settings(tk.Frame):
     def imp_set(self):
         fdir = path.dirname(__file__)
         fnmes = askopenfilenames(
-            parent=self, initialdir=fdir, filetypes=(('Settings Files', '*.md'),))
+            parent=self, initialdir=fdir, filetypes=(('Settings Files', '*.vcon'),))
         if fnmes != '':
             try:
                 dest = rf'{Write_Default.loc}/'
