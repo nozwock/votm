@@ -1,4 +1,24 @@
-"""A logical subset part of the main application."""
+"""
+A logical subset part of the main application.
+Copyright (C) 2019 Sagar Kumar
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or 
+    any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
+
+"""
+Change Salt at line 114.
+"""
 
 import sys, os
 from random import choice
@@ -91,7 +111,7 @@ class Tokens:
 
 
 class Crypt:
-    def __init__(self, salt='SlTKeYOpHygTYkP3'):
+    def __init__(self, salt='<16-character-salt>'):
         self.salt = salt
         self.enc_dec_method = 'utf-8'
 
