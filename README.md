@@ -1,5 +1,5 @@
 # VOTM - Voting Manager/Master
-A simple Voting Manager applicable for Schools use.
+A simple Voting Manager for School purpose.
 This's actually my school project. So, this may 
 not be efficient or bug-free. Also, the source code 
 is not well documented either at the moment.
