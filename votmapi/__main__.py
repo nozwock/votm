@@ -21,7 +21,7 @@ Change ENV_KEY & SECRET_KEY below for use.
 """
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.4'
+__version__ = '1.0.41'
 
 ENV_KEY = 'KEY_NAME'
 SECRET_KEY = '<KEY_HERE>'
