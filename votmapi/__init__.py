@@ -494,7 +494,7 @@ class License(tk.Toplevel):
         lcn_frm.pack(side='top', fill='both', expand=1,
                      pady=(10, 10), padx=(10, 10))
         self.lcn = ScrolledText(lcn_frm, font=('Segoe UI', 9), relief='flat')
-        self.lcn.pack(fill='both')
+        self.lcn.pack(fill='both', expand=1)
         self.lcn.insert(0.0, __license__)
         self.lcn.config(state='disabled')
 
