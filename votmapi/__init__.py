@@ -331,6 +331,77 @@ class Sql_init:
                 """
                 self.cur.execute(__drp_sy)
 
+class Tr_View(tk.Frame):
+    def __init__(self, master, cols: list, data, mode=None):
+        super().__init__(master)
+        self.pack(fill='both', expand=1)
+        self.master = master
+        self.cols = cols
+        self.data = data
+
+        ttk.Style(self.master).map('Treeview', foreground=self.fixed_map('foreground'), background=self.fixed_map('background'))
+        ttk.Style(self.master).configure('Treeview', bd=0, highlightthickness=0, font=(None,12))
+        ttk.Style(self.master).configure('Treeview.Heading', font=(None,12))
+        ttk.Style(self.master).layout('Treeview', [('m.Treeview.treearea', {'sticky': 'nswe'})])
+
+        top_f = tk.Frame(self)
+        top_f.pack(side='top', fill='both', expand=1)
+        view_f = tk.Frame(top_f, width=0, height=0)
+        view_f.pack_propagate(0)
+        view_f.pack(side='left', fill='both', expand=1)
+
+        self.view = ttk.Treeview(view_f)
+        self.view.pack(fill='both', expand=1)
+        self.view.bind('<Button-1>', self.disable_col_resize)
+        self.view.tag_configure('alt1', background='#F4F4F4')
+        self.view.tag_configure('alt2', background='#EDEDED')
+
+        if mode:
+            if mode=='x':
+                self.xbar = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.view.xview)
+                self.xbar.pack(side='bottom', fill='x', padx=(0, 17))
+                self.view.configure(xscrollcommand=self.xbar.set)
+            elif mode=='y':
+                self.ybar = tk.Scrollbar(top_f, orient=tk.VERTICAL, command=self.view.yview)
+                self.ybar.pack(side='left', fill='y')
+                self.view.configure(yscrollcommand=self.ybar.set)
+            else:
+                pass
+        else:
+            self.xbar = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self.view.xview)
+            self.ybar = tk.Scrollbar(top_f, orient=tk.VERTICAL, command=self.view.yview)
+            self.xbar.pack(side='bottom', fill='x', padx=(0, 17))
+            self.ybar.pack(side='left', fill='y')
+
+            self.view.configure(xscrollcommand=self.xbar.set)
+            self.view.configure(yscrollcommand=self.ybar.set)
+
+        self.view['columns'] = self.cols
+        self.view['show'] = 'headings'
+
+        for _ in self.cols:
+            exec(f'self.view.heading(\'{_}\', text=\'{_}\')')
+            exec(f'self.view.column(\'{_}\', stretch=0)')
+
+        for _ in self.view['columns']:
+            self.view.column(_, anchor='center')
+
+        self.data = eval(str(self.data).replace('None', "'-'"))
+
+        for _ in range(len(self.data)):
+            if _%2==0:
+                self.view.insert('', 'end', values=self.data[_], tags='alt1')
+            if _%2!=0:
+                self.view.insert('', 'end', values=self.data[_], tags='alt2')
+
+    @staticmethod
+    def fixed_map(option):
+        return [elm for elm in ttk.Style().map('Treeview', query_opt=option) if elm[:2] != ('!disabled', '!selected')]
+
+    def disable_col_resize(self, event):
+        if self.view.identify_region(event.x, event.y) == 'separator':
+            return 'break'
+
 
 class Ent_Box(tk.Toplevel):
     """Constructs a toplevel frame whose master is Win,
@@ -494,7 +565,7 @@ class License(tk.Toplevel):
         lcn_frm.pack(side='top', fill='both', expand=1,
                      pady=(10, 10), padx=(10, 10))
         self.lcn = ScrolledText(lcn_frm, font=('Segoe UI', 9), relief='flat')
-        self.lcn.pack(fill='both')
+        self.lcn.pack(fill='both', expand=1)
         self.lcn.insert(0.0, __license__)
         self.lcn.config(state='disabled')
 
@@ -515,6 +586,7 @@ class Yr_fle:
 
     def __init__(self):
         fle = []
+        Yr_fle.fle = fle
         for _, _, f in os.walk(Write_Default.loc):
             for file in f:
                 if '.db' in file:
@@ -610,7 +682,7 @@ class Access_Config:
 if __name__ == '__main__':
     def do(win):
         win.destroy()
-        sys.exit()
+        sys.exit(0)
     Write_Default()
     root = tk.Tk()
     root.attributes('-alpha', 0.0)

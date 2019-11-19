@@ -44,7 +44,8 @@ class Tokens:
                 mg.showwarning(
                     'Voting Master', 'The previous Tokens are about to be overwriiten if exists.', parent=master)
             except:
-                mg.showerror('Error', 'Incorrect Value.', parent=master)
+                mg.showerror('Error', 'Input is not valid.', parent=master)
+                raise ValueError ('Invalid Input')
 
     def gen(self):
         def key_gen(size=8, chars=digits):
