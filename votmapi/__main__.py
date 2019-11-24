@@ -19,7 +19,7 @@ Copyright (C) 2019 Sagar Kumar
 """
 Version 1.0.52 changes:
 > Improved Interface for Result window.
-> Some exceptions handeled during merge.
+> Some exceptions handled during merge.
 > Added "Export to Excel" for tokens.
 > Some Bug fixes.
 """
