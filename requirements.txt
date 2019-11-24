@@ -1,3 +1,2 @@
-tkinter
 tabulate
 pycrypto

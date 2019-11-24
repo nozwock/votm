@@ -50,7 +50,7 @@ class Root(tk.Tk):
             mg.showwarning(
                 'Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.', parent=self)
             self.destroy()
-            sys.exit()
+            sys.exit(0)
         self.iconbitmap(default=Root.DATAFILE[0])
 
     @classmethod
@@ -119,7 +119,7 @@ class Win(tk.Toplevel):
             mg.showerror(
                 'Error', 'No Candidate found!, Add Candidate in Main App.', parent=self)
             self.master.destroy()
-            sys.exit()
+            sys.exit(0)
         else:
             pass
 
@@ -178,7 +178,7 @@ class Win(tk.Toplevel):
     def ext(self):
         if Ent_Box(self, icn=Root.DATAFILE[0]).get():
             self.master.destroy()
-            sys.exit()
+            sys.exit(0)
 
     @staticmethod
     def session() -> str:
@@ -261,7 +261,7 @@ class Home(tk.Frame):
         btn2.config(state='disabled')
         if Tokens(self).check() is False:
             root.destroy()
-            sys.exit()
+            sys.exit(0)
         Sql_init(1, master=self).tbl()
         if Ent_Box(self, 'Enter SuperKey & Confirm to Continue.', Root.DATAFILE[0], 'key').get() and Sql_init.NXT == 1:
             app.replace_frame(Vote)
@@ -278,7 +278,7 @@ class Home(tk.Frame):
         btn2.config(state='disabled')
         if Tokens(self).check() is False:
             root.destroy()
-            sys.exit()
+            sys.exit(0)
         Sql_init(1, master=self).tbl()
         if Ent_Box(self, 'Enter SuperKey & Confirm to Continue.', Root.DATAFILE[0], 'key').get() and Sql_init.NXT == 1:
             app.replace_frame(Class)
@@ -343,20 +343,20 @@ class Vote(tk.Frame):
 
         if self.n_val > 4:
             ttk.Style().configure('TNotebook', tabposition='s')
-            ttk.Style().configure('TNotebook.Tab', font=('Segoe UI', 14, 'bold'),
+            ttk.Style().configure('TNotebook.Tab', font=('Segoe UI', 14, 'bold'), foreground='#8C8C8C',
                                   focuscolor=ttk.Style().configure('.')['background'], width=20)
-            self.tab = ttk.Notebook(self, padding=-1)
+            self.tab = ttk.Notebook(self, padding=-3)
             p1 = tk.Frame(self.tab, background=Win.SM_BG_HEX)
             p2 = tk.Frame(self.tab, background=Win.SM_BG_HEX)
-            self.tab.add(p1, text='               Page 1')
-            self.tab.add(p2, text='               Page 2')
+            self.tab.add(p1, text=f"{' '*20}1")
+            self.tab.add(p2, text=f"{' '*20}2")
             self.tab.pack(side='right', expand=1, fill='both')
             self.tab.bind('<<NotebookTabChanged>>',
                           lambda event: self.updt(event))
             for i in range(1, 3):
                 exec(
                     f"cls_txt{i} = tk.Label(p{i}, text='', font=('Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')")
-                exec(f"cls_txt{i}.pack(side='top', anchor='n', fill='x')")
+                exec(f"cls_txt{i}.pack(side='top', anchor='n', fill='x', pady=(2,0))")
                 if sel == 1:
                     txt = f'{ch_clss}\' {ch_sec}'
                     exec(f"cls_txt{i}.config(text=txt)")
@@ -619,7 +619,7 @@ if __name__ == '__main__':
         msg.iconbitmap(Root.DATAFILE[0])
         mg.showwarning('Error', 'App instance already running.', parent=msg)
         msg.destroy()
-        sys.exit()
+        sys.exit(0)
     root = Root()
     root.lower()
     root.iconify()

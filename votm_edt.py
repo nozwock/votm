@@ -29,13 +29,14 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tabulate import tabulate
+from string import ascii_letters
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
 from votmapi.logic import Dicto, Reg, Tokens, Crypt
 from votmapi.__main__ import SECRET_KEY, ENV_KEY, __author__, __version__
 from votmapi import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
-                     Cand_Check, Ent_Box, About)
+                     Cand_Check, Ent_Box, About, Tr_View)
 
 
 class Root(tk.Tk):
@@ -56,7 +57,7 @@ class Root(tk.Tk):
             mg.showwarning(
                 'Error', 'This App requires Administrator Privileges to function properly.\nPlease Retry with Run as Administrator.', parent=self)
             self.destroy()
-            sys.exit()
+            sys.exit(0)
         self.iconbitmap(Root.DATAFILE[0])
 
     @classmethod
@@ -107,7 +108,7 @@ class Win(tk.Toplevel):
             '<Leave>', lambda event: min_btn.config(foreground='#9E5EFF'))
         min_btn.bind('<ButtonRelease-1>',
                      lambda event: (self.master.iconify(), self.withdraw()))
-        self.bind('<Alt-F4>', lambda event: (self.master.destroy(), sys.exit()))
+        self.bind('<Alt-F4>', lambda event: (self.master.destroy(), sys.exit(0)))
         self.master.bind('<FocusIn>', lambda event: self.lift())
         self.master.bind('<Map>', lambda event: (
             self.master.deiconify(), self.deiconify(), self.lift()))
@@ -122,7 +123,7 @@ class Win(tk.Toplevel):
             pass
         else:
             self.master.destroy()
-            sys.exit()
+            sys.exit(0)
 
         if Write_Default.exist is 1:
             mg.showinfo('Voting Master',
@@ -227,7 +228,7 @@ class Win(tk.Toplevel):
     def desexit(self):
         try:
             self.master.destroy()
-            sys.exit()
+            sys.exit(0)
         except:
             pass
 
@@ -272,7 +273,6 @@ class Edit(tk.Frame):
 
         self.tab = ttk.Notebook(self)
         cand = Candidates(self.tab)
-        #cand.bind('<Visibility>', lambda e: cand.update())
         self.tab.add(cand, text=' Candidates ')
         pst = Posts(self.tab)
         self.tab.add(pst, text=' Posts ')
@@ -315,8 +315,8 @@ class Edit(tk.Frame):
                     self.tab.insert(
                         c_ind, slave, text=' '+str(tab_ins[i]).split('.')[-1].strip("'>")+' ')
                 else:
-                    self.tab.add(slave, text=f'{tab_ins[i]}'.split(
-                        '.')[-1].strip("'>"))
+                    self.tab.add(slave, text=' '+f'{tab_ins[i]}'.split(
+                        '.')[-1].strip("'>")+' ')
                 self.tab.select(slave)
                 break
 
@@ -617,7 +617,7 @@ class Posts(tk.Frame):
                 self.pst_del_pst.config(values=self.flpost)
                 self.pst_del_pst.current(0)
         except:
-            raise
+            pass
 
     def move_down(self, *args):
         try:
@@ -646,7 +646,7 @@ class Posts(tk.Frame):
                 self.pst_del_pst.config(values=self.flpost)
                 self.pst_del_pst.current(0)
         except:
-            raise
+            pass
 
     def post_edt(self, key, ent, tag):
         if ent.get() != '' and tag.get() != '':
@@ -661,9 +661,7 @@ class Posts(tk.Frame):
                 con = cfg.get().get(key)
                 ind = list(cfg.get().keys()).index(key)
                 cfg.remove(key)
-                #del cfg.get()[key]
                 cfg.insert(ind, _key, con)
-                #cfg.get()[_key] = con
                 self.cfg = Dicto(cfg.get())
                 self.pst_list = [
                     f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(self.cfg.get().keys())]
@@ -1182,12 +1180,22 @@ class Result(tk.Frame):
             if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
                 mrg_tbl_n = [(sr.replace('.mrg', '').split('/'))[-1]
                              for sr in mrg]  # File Names
+                if any([(i[0] not in ascii_letters) for i in mrg_tbl_n]):
+                    mg.showerror(
+                        'Error', 'Filenames must start with an alphabet.', parent=self)
+                    return 'break'
                 mrg_tbl_data = []
-                for dirc in mrg:
-                    with open(dirc, 'r') as f:
-                        mrg_tbl_data.append(
-                            eval(Crypt().decrypt(str(f.read()), SECRET_KEY)))
+                try:
+                    for dirc in mrg:
+                        with open(dirc, 'r') as f:
+                            mrg_tbl_data.append(
+                                eval(Crypt().decrypt(str(f.read()), SECRET_KEY)))
+                except FileNotFoundError:
+                    mg.showerror(
+                        'Error', 'No such file(s) found.', parent=self)
+                    return 'break'
                 Sql_init(0, dtb=1).mrg_dtb_res(mrg_tbl_n, mrg_tbl_data)
+                self.shw_db.config(values=Yr_fle().yr)
                 mg.showinfo('Voting Master', 'Merging is Done.', parent=self)
         else:
             mg.showwarning('Voting Master',
@@ -1475,6 +1483,7 @@ class Result_Show_Sep(tk.Tk):
     def __init__(self, __yr: str, *__args: '(String of fields to be shown)', key=1):
         super().__init__()
         __args = str(__args).lstrip("('").rstrip("',)")
+        self.key = key
         x = self.winfo_screenwidth()/2 - 400
         y = self.winfo_screenheight()/2 - 300 - 40
         self.title('Result')
@@ -1484,15 +1493,15 @@ class Result_Show_Sep(tk.Tk):
 
         menu_bar = tk.Menu(self)
         self.configure(menu=menu_bar)
-        file_menu = tk.Menu(menu_bar, tearoff=0)
-        menu_bar.add_cascade(label='File', menu=file_menu)
-        file_menu.add_command(label='Save as Text',
-                              command=lambda: self.save())
+        self.file_menu = tk.Menu(menu_bar, tearoff=0)
+        menu_bar.add_cascade(label='File', menu=self.file_menu)
+        self.file_menu.add_command(label='Save as Text',
+                                   command=lambda: self.save())
         if key == 1:
-            file_menu.add_command(label='Export to Excel',
-                                  command=lambda: self._exp_exl(res, col))
-        file_menu.add_separator()
-        file_menu.add_command(label='Exit', command=self.destroy)
+            self.file_menu.add_command(label='Export to Excel',
+                                       command=lambda: self._exp_exl(self.res, self.col))
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label='Exit', command=self.destroy)
 
         if key == 1:
             __hedbar = tk.Frame(self)
@@ -1502,28 +1511,50 @@ class Result_Show_Sep(tk.Tk):
             __lblres.pack(fill='x', ipady=10)
         self.flval = 0
         self.r_navbar()
-        h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
-        h_scrlbar.pack(side='bottom', fill='x')
+        if key == 0:
+            h_scrlbar = tk.Scrollbar(self, orient=tk.HORIZONTAL)
+            h_scrlbar.pack(side='bottom', fill='x', padx=(0, 17))
 
-        self.res_tbl = ScrolledText(self, font=(
-            'Consolas', 14), wrap=tk.NONE, xscrollcommand=h_scrlbar.set)
-        self.res_tbl.pack(fill='both', expand=1)
-        h_scrlbar.config(command=self.res_tbl.xview)
+            self.res_tbl = ScrolledText(self, font=(
+                'Consolas', 14), wrap=tk.NONE, xscrollcommand=h_scrlbar.set)
+            self.res_tbl.pack(fill='both', expand=1)
+            h_scrlbar.config(command=self.res_tbl.xview)
+
         if key == 1:
             if __yr != 'merged':
-                res, col = Sql_init(0, yr=__yr).result(__args)
+                self.res, self.col = Sql_init(0, yr=__yr).result(__args)
             else:
-                res, col = Sql_init(0, dtb=1).result(__args)
-            _pr = tabulate(res, col, tablefmt='fancy_grid',
-                           missingval='-', numalign='center', stralign='center')
-            _total = self._total(
-                ['STAFF', 'STUDENT', 'CLASS', 'SEC'], res, col)
-            if self._ttl != []:
-                _pr += '\n'+tabulate([['TOTAL']], tablefmt='fancy_grid')
-            _pr += '\n'+tabulate(_total, headers='firstrow',
-                                 tablefmt='fancy_grid', numalign='center', stralign='center')
-            self.res_tbl.insert(0.0, _pr)
-            self.res_tbl.config(state='disabled')
+                self.res, self.col = Sql_init(0, dtb=1).result(__args)
+            Tr_View(self, self.col, self.res)
+
+            nrml = '#0077CC'
+            actv = '#2888CC'
+
+            self.ttl_toggel = 0
+            self.ttl_f = tk.Frame(self, relief='groove', height=26, bg=Win.SM_BG_HEX,
+                                  highlightbackground=nrml, highlightcolor=nrml, highlightthickness=4)
+            self.ttl_f.pack_propagate(0)
+            self.ttl_f.pack(fill='both')
+            ttl_top = tk.Frame(self.ttl_f, bg=nrml, height=26)
+            ttl_top.pack_propagate(0)
+            ttl_top.pack(side='top', fill='x', anchor='nw')
+            ttl_l = tk.Label(ttl_top, text='Total', font=(
+                'Segoe UI',), bg=ttl_top.cget('background'), fg='#FFFFFF')
+            ttl_l.pack(side='left')
+            self.ttl_focus = tk.Label(ttl_top, text='↑', font=(
+                'Segoe UI',), bg=ttl_top.cget('background'), fg='#FFFFFF')
+            self.ttl_focus.pack(side='right', padx=(0, 5))
+            _total = self._total(['CLASS', 'SEC'], self.res, self.col)
+
+            ttl_top.bind('<Enter>', lambda e: (self.ttl_f.config(highlightbackground=actv, highlightcolor=actv),
+                                               ttl_top.config(bg=actv), ttl_l.config(bg=actv), self.ttl_focus.config(bg=actv)))
+            ttl_top.bind('<Leave>', lambda e: (self.ttl_f.config(highlightbackground=nrml, highlightcolor=nrml),
+                                               ttl_top.config(bg=nrml), ttl_l.config(bg=nrml), self.ttl_focus.config(bg=nrml)))
+
+            Tr_View(self.ttl_f, _total[0], [tuple(_total[-1])], mode='x')
+
+            ttl_top.bind('<ButtonRelease-1>', lambda e: self.toggle())
+            self.ttl_focus.bind('<ButtonRelease-1>', lambda e: self.toggle())
 
     def _total(self, expt: list, *args: '(list, list)'):
         """To get total of result."""
@@ -1543,6 +1574,15 @@ class Result_Show_Sep(tk.Tk):
 
     def save(self):
         """Saves the fetched data through a dialog box."""
+        if self.key == 1:
+            _pr = tabulate(self.res, self.col, tablefmt='fancy_grid',
+                           missingval='-', numalign='center', stralign='center')
+            _total = self._total(['CLASS', 'SEC'], self.res, self.col)
+            if self._ttl != []:
+                _pr += '\n'+tabulate([['TOTAL']], tablefmt='fancy_grid')
+            _pr += '\n'+tabulate(_total, headers='firstrow',
+                                 tablefmt='fancy_grid', numalign='center', stralign='center')
+
         fdir = path.dirname(__file__)
         fname = asksaveasfilename(
             parent=self, initialdir=fdir, filetypes=(('Text Documents', '*.txt'),))
@@ -1551,7 +1591,10 @@ class Result_Show_Sep(tk.Tk):
             if not dir_fle.endswith('.txt'):
                 dir_fle += '.txt'
             with open(f'{dir_fle}', 'w', encoding='utf-8') as f:
-                f.write(self.res_tbl.get(1.0, tk.END))
+                if self.key == 1:
+                    f.write(_pr)
+                if self.key == 0:
+                    f.write(self.res_tbl.get(0.0, 'end'))
             mg.showinfo('Voting Master', 'File has been Saved.', parent=self)
 
     def _exp_exl(self, *args: '(list, list)'):
@@ -1620,6 +1663,16 @@ class Result_Show_Sep(tk.Tk):
             self.flval = 0
             self.attributes('-fullscreen', False)
 
+    def toggle(self):
+        if self.ttl_toggel == 0:
+            self.ttl_toggel = 1
+            self.ttl_focus.config(text='↓')
+            self.ttl_f.config(height=100)
+        else:
+            self.ttl_toggel = 0
+            self.ttl_focus.config(text='↑')
+            self.ttl_f.config(height=26)
+
     def r_navbar(self):
         """Bottom sided navbar for Result Window"""
         navbar = tk.Frame(self)
@@ -1638,28 +1691,63 @@ class Token_Show(Result_Show_Sep):
     def __init__(self):
         super().__init__(None, None, key=0)
         self.title('Tokens')
+        self.file_menu.insert_command(
+            1, label='Export to Excel', command=lambda: self._exp_exl())
         try:
+            self.tkns = []
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-                tkns = ''
+                _tkns = ''
                 try:
                     tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
-                    line = len(tkn_lst)//7
-                    if (len(tkn_lst)/7)-line > 0:
+                    line = len(tkn_lst)//8
+                    if (len(tkn_lst)/8)-line > 0:
                         line += 1
                     n = 0
+                    xl = 0
                     for _ in range(line):
-                        n += 7
-                        tkn_tab = tabulate([tkn_lst[n-7:n]],
-                                           tablefmt='fancy_grid', numalign='center', stralign='center')
-                        tkns += tkn_tab+'\n'
+                        n += 8
+                        xl += 9
+                        self.tkns.append(tuple([int(i)
+                                                for i in tkn_lst[xl-9:xl]]))
+                        tkn_tab = tabulate([tkn_lst[n-8:n]],
+                                           tablefmt='grid', numalign='center', stralign='center')
+                        _tkns += tkn_tab+'\n'
                 except:
                     pass
-            self.res_tbl.insert(0.0, tkns)
+            self.res_tbl.insert(0.0, _tkns)
             self.res_tbl.config(state='disabled')
         except FileNotFoundError:
             self.withdraw()
             mg.showerror('Error', 'Token file doesn\'t exists.', parent=self)
             self.destroy()
+
+    def _exp_exl(self):
+        """Exports the fetched data in a XLSX format."""
+        fdir = path.dirname(__file__)
+        fname = asksaveasfilename(
+            parent=self, initialdir=fdir, filetypes=(('XLSX File', '*.xlsx'),))
+        if fname != '':
+            dir_fle = f'{fname}'
+            if not dir_fle.endswith('.xlsx'):
+                dir_fle += '.xlsx'
+            wrkbk = xlsxwriter.Workbook(f'{dir_fle}')
+            wrksht = wrkbk.add_worksheet()
+            wrksht.set_column(0, len(self.tkns[0]), 9)
+            val_format = wrkbk.add_format({
+                'bold': False,
+                'align': 'centre',
+                'text_wrap': False,
+                'border': 1
+            })
+            row = 0
+            # Writing Values
+            for i in range(len(self.tkns)):
+                for j in range(len(self.tkns[i])):
+                    wrksht.write(row, j, self.tkns[i][j], val_format)
+                row += 1
+            row += 1+1
+            wrkbk.close()
+            mg.showinfo('Voting Master', 'File has been Saved.', parent=self)
 
 
 if __name__ == '__main__':
@@ -1674,7 +1762,7 @@ if __name__ == '__main__':
         msg.iconbitmap(Root.DATAFILE[0])
         mg.showwarning('Error', 'App instance already running.', parent=msg)
         msg.destroy()
-        sys.exit()
+        sys.exit(0)
     root = Root()
     root.lower()
     root.iconify()
