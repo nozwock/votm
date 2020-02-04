@@ -17,18 +17,16 @@ Copyright (C) 2019 Sagar Kumar
 """
 
 """
-Version 1.0.52 changes:
-> Improved Interface for Result window.
-> Some exceptions handeled during merge.
-> Added "Export to Excel" for tokens.
+Version 1.0.6 changes:
+> Improved some security measures.
 > Some Bug fixes.
 """
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.52'
+__version__ = '1.0.6'
 
 ENV_KEY = 'BASE_VCON_CONFIG'
-SECRET_KEY = 'SykO@qd5ADyx7FpAzOiH2yqoeoQEg300'
+SECRET_KEY = 'SEC_VCON_KEY'
 
 __license__ = \
     """

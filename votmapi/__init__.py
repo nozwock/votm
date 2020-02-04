@@ -615,17 +615,26 @@ class Default_Config:
 
 
 class Write_Default:
-    """Writes Default config file which doesn't exist already, in the /roaming directory."""
+    """Writes Default config file which doesn't exist already, in the /ProgramData directory."""
     exist = 0
-    loc = os.getenv('ALLUSERSPROFILE')
+    loc = os.getenv('ALLUSERSPROFILE')+r'\Votm'
     fles = ['cand.vcon', 'clss.vcon']
 
     def __init__(self):
         Write_Default.exist = 0
         self.crypt = Crypt()
         self.reg = Reg()
+        if not os.path.exists(Write_Default.loc):
+            os.mkdir(Write_Default.loc)
         eval_lst = [os.path.exists(rf'{Write_Default.loc}\{f}')
                     == False for f in Write_Default.fles]
+
+        try:
+            self.reg.get(SECRET_KEY)
+        except FileNotFoundError:
+            Write_Default.exist = 1
+            self.reg.setx(SECRET_KEY, self.rand(16))
+
         if any(eval_lst):
             Write_Default.exist = 1
             j = 0
@@ -636,24 +645,29 @@ class Write_Default:
                     else:
                         self.wrt_clss()
                 j += 1
+
         try:
             self.reg.get(ENV_KEY)
         except FileNotFoundError:
             Write_Default.exist = 1
             self.reg.setx(ENV_KEY, self.crypt.encrypt(
-                Default_Config.base_config, SECRET_KEY))
+                Default_Config.base_config, self.reg.get(SECRET_KEY)))
             self.reg.close()
+
+    @staticmethod
+    def rand(size=8, chars=__import__('string').ascii_letters + __import__('string').digits + "@#$&"):
+        return ''.join(__import__('random').choice(chars) for _ in range(size))
 
     def wrt_cand(self):
         """Writes Candidate file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[0]}', 'w') as f:
             f.write(self.crypt.encrypt(
-                Default_Config.candidate_config, SECRET_KEY))
+                Default_Config.candidate_config, self.reg.get(SECRET_KEY)))
 
     def wrt_clss(self):
         """Writes Class&Sec file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[1]}', 'w') as f:
-            f.write(self.crypt.encrypt(Default_Config.clss_config, SECRET_KEY))
+            f.write(self.crypt.encrypt(Default_Config.clss_config, self.reg.get(SECRET_KEY)))
 
 
 class Access_Config:
@@ -665,14 +679,13 @@ class Access_Config:
         self.crypt = Crypt()
         self.reg = Reg()
         bse_str = self.reg.get(ENV_KEY)
-        self.reg.close()
-        bse_str = self.crypt.decrypt(bse_str, SECRET_KEY)
+        bse_str = self.crypt.decrypt(bse_str, self.reg.get(SECRET_KEY))
         with open(rf'{loc}\{fles[0]}', 'r') as f:
             cand_str = f.read()
-            cand_str = self.crypt.decrypt(cand_str, SECRET_KEY)
+            cand_str = self.crypt.decrypt(cand_str, self.reg.get(SECRET_KEY))
         with open(rf'{loc}\{fles[1]}', 'r') as f:
             clss_str = f.read()
-            clss_str = self.crypt.decrypt(clss_str, SECRET_KEY)
+            clss_str = self.crypt.decrypt(clss_str, self.reg.get(SECRET_KEY))
 
         self.bse_config = eval(bse_str)
         self.cand_config = eval(cand_str)

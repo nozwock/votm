@@ -356,7 +356,8 @@ class Vote(tk.Frame):
             for i in range(1, 3):
                 exec(
                     f"cls_txt{i} = tk.Label(p{i}, text='', font=('Segoue UI', 12, 'bold'), bg='#C39EFF', fg='#FFFFFF')")
-                exec(f"cls_txt{i}.pack(side='top', anchor='n', fill='x', pady=(2,0))")
+                exec(
+                    f"cls_txt{i}.pack(side='top', anchor='n', fill='x', pady=(2,0))")
                 if sel == 1:
                     txt = f'{ch_clss}\' {ch_sec}'
                     exec(f"cls_txt{i}.config(text=txt)")

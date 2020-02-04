@@ -21,6 +21,8 @@ And, the source code is not well documented either at the moment.
 ## Specific Dependencies
   * tabulate
   * pycrypto
+  * tkinter
+  * xlsxwriter
   
 ## Usage
  * Clone the repo, and then

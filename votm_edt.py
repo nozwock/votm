@@ -287,7 +287,7 @@ class Edit(tk.Frame):
     def wrt(fle: int, cfg: str):
         """Writes Default config. files."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[fle]}', 'w') as f:
-            cfg = Crypt().encrypt(str(cfg), SECRET_KEY)
+            cfg = Crypt().encrypt(str(cfg), Reg().get(SECRET_KEY))
             f.write(cfg)
             f.flush()
 
@@ -1145,7 +1145,7 @@ class Result(tk.Frame):
                         f.flush()
                     f.write('))')
                 with open(dir_fle, 'r') as f:
-                    rd = Crypt().encrypt(str(f.read()), SECRET_KEY)
+                    rd = Crypt().encrypt(str(f.read()), Reg().get(SECRET_KEY))
                 with open(dir_fle, 'w') as f:
                     f.write(rd)
                     mg.showinfo(
@@ -1160,9 +1160,14 @@ class Result(tk.Frame):
         fdir = path.dirname(__file__)
         self.fname = askopenfilenames(
             parent=self, initialdir=fdir, filetypes=(('Merge Files', '*.mrg'),))
-        for item in range(len(self.fname)):
-            if self.fname[item] not in self.mrg_drctr.get(0, tk.END):
-                self.mrg_drctr.insert(tk.END, self.fname[item])
+        if len([j for j in [i.split('/')[-1].split('.')[0] for i in self.fname] if (j[0] in __import__('string').ascii_letters and all([_ in \
+        __import__('string').ascii_letters+__import__('string').digits for _ in j]))]) == len([i.split('/')[-1].split('.')[0] for i in self.fname]):
+            for item in range(len(self.fname)):
+                if self.fname[item] not in self.mrg_drctr.get(0, tk.END):
+                    self.mrg_drctr.insert(tk.END, self.fname[item])
+        else:
+            mg.showerror(
+                'Error', 'Make sure that the Filenames start with a Letter & also that they don\'t contain any Spaces or Special Characters!', parent=self)
 
     def rmv_item(self):
         """Removes selected merge file directory from the listbox."""
@@ -1189,7 +1194,7 @@ class Result(tk.Frame):
                     for dirc in mrg:
                         with open(dirc, 'r') as f:
                             mrg_tbl_data.append(
-                                eval(Crypt().decrypt(str(f.read()), SECRET_KEY)))
+                                eval(Crypt().decrypt(str(f.read()), Reg().get(SECRET_KEY))))
                 except FileNotFoundError:
                     mg.showerror(
                         'Error', 'No such file(s) found.', parent=self)
@@ -1439,7 +1444,7 @@ class Settings(tk.Frame):
             try:
                 cfg['passwd'] = pswd.get().strip()
                 self.reg = Reg()
-                self.reg.setx(ENV_KEY, Crypt().encrypt(str(cfg), SECRET_KEY))
+                self.reg.setx(ENV_KEY, Crypt().encrypt(str(cfg), self.reg.get(SECRET_KEY)))
                 self.reg.close()
                 pswd.delete(0, tk.END)
                 pswd.insert(0, Access_Config().bse_config['passwd'])
@@ -1462,7 +1467,7 @@ class Settings(tk.Frame):
                     cfg['key'] = pswd.get().strip()
                     self.reg = Reg()
                     self.reg.setx(ENV_KEY, Crypt().encrypt(
-                        str(cfg), SECRET_KEY))
+                        str(cfg), self.reg.get(SECRET_KEY)))
                     self.reg.close()
                     pswd.delete(0, tk.END)
                     pswd.insert(0, Access_Config().bse_config['key'])
@@ -1698,7 +1703,7 @@ class Token_Show(Result_Show_Sep):
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
                 _tkns = ''
                 try:
-                    tkn_lst = eval(Crypt().decrypt(str(f.read()), SECRET_KEY))
+                    tkn_lst = eval(Crypt().decrypt(str(f.read()), Reg().get(SECRET_KEY)))
                     line = len(tkn_lst)//8
                     if (len(tkn_lst)/8)-line > 0:
                         line += 1

@@ -20,23 +20,26 @@ import sys, os
 from random import choice
 from string import digits
 from Crypto.Cipher import AES
+from Crypto.Hash import SHA256
+from Crypto import Random
 from collections import OrderedDict
 from tkinter import messagebox as mg
 from base64 import b64encode, b64decode
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from votmapi.__main__ import SECRET_KEY
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from winreg import (ConnectRegistry, OpenKey, SetValueEx, DeleteKeyEx,
                     QueryValueEx, CloseKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_EXPAND_SZ)
 
 
 class Tokens:
     """Handles Tokens generation, saving and to get a specific token."""
-    LOC = os.getenv('ALLUSERSPROFILE')
+    LOC = os.getenv('ALLUSERSPROFILE')+r'\Votm'
     FL = 'tkn.vcon'
 
     def __init__(self, master, entries=None):
         self.master = master
         self.crypt = Crypt()
+        self.reg = Reg()
 
         if entries != None:
             try:
@@ -53,7 +56,7 @@ class Tokens:
                 try:
                     self.tkn_read = eval(f.read())
                     self.tkn_read = self.crypt.decrypt(
-                        str(self.tkn_read), SECRET_KEY)
+                        str(self.tkn_read), self.reg.get(SECRET_KEY))
                 except:
                     self.tkn_read = []
 
@@ -70,7 +73,7 @@ class Tokens:
                     val = key_gen()
                     if val is not None:
                         tkn.append(val)
-                tkn = self.crypt.encrypt(str(tkn), SECRET_KEY)
+                tkn = self.crypt.encrypt(str(tkn), self.reg.get(SECRET_KEY))
                 f.write(f'{tkn}')
             mg.showinfo(
                 'Voting Master', f'{self.entries} Token(s) Generated.', parent=self.master)
@@ -79,12 +82,12 @@ class Tokens:
 
     def get(self, val: str):
         with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-            tkn_lst = eval(self.crypt.decrypt(str(f.read()), SECRET_KEY))
+            tkn_lst = eval(self.crypt.decrypt(str(f.read()), self.reg.get(SECRET_KEY)))
         try:
             ind = tkn_lst.index(val)
             del tkn_lst[ind]
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'w') as f:
-                tkn_lst = self.crypt.encrypt(str(tkn_lst), SECRET_KEY)
+                tkn_lst = self.crypt.encrypt(str(tkn_lst), self.reg.get(SECRET_KEY))
                 f.write(str(tkn_lst))
             return True
         except:
@@ -96,7 +99,7 @@ class Tokens:
         try:
             with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
                 tkn_lst = f.read()
-                tkn_lst = eval(self.crypt.decrypt(str(tkn_lst), SECRET_KEY))
+                tkn_lst = eval(self.crypt.decrypt(str(tkn_lst), self.reg.get(SECRET_KEY)))
             if len(tkn_lst) == 0:
                 mg.showerror('Error', 'No Tokens in the Token file.',
                              parent=self.master)
@@ -107,29 +110,32 @@ class Tokens:
             return False
 
 
+#CBC method with PKCS#7 padding
 class Crypt:
-    def __init__(self, salt='SlTKeYOpHygTYkP3'):
+    def __init__(self, salt=Random.new().read(AES.block_size)):
         self.salt = salt
-        self.enc_dec_method = 'utf-8'
+        self.enc_dec_method = 'latin-1'
 
-    def encrypt(self, str_to_enc, str_key):
-        try:
-            aes_obj = AES.new(str_key, AES.MODE_CFB, self.salt)
-            hx_enc = aes_obj.encrypt(str_to_enc)
-            mret = b64encode(hx_enc).decode(self.enc_dec_method)
-            return mret
-        except:
-            pass
+    def encrypt(self, src, key, encode=True):
+        src = src.encode()
+        key = SHA256.new(key.encode()).digest()
+        aes_obj = AES.new(key, AES.MODE_CBC, self.salt)
+        padd = AES.block_size - len(src) % AES.block_size
+        src += bytes([padd]) * padd
+        hx_enc = self.salt + aes_obj.encrypt(src)
+        return b64encode(hx_enc).decode(self.enc_dec_method) if encode else hx_enc
 
-    def decrypt(self, enc_str, str_key):
-        try:
-            aes_obj = AES.new(str_key, AES.MODE_CFB, self.salt)
-            str_tmp = b64decode(enc_str.encode(self.enc_dec_method))
-            str_dec = aes_obj.decrypt(str_tmp)
-            mret = str_dec.decode(self.enc_dec_method)
-            return mret
-        except:
+    def decrypt(self, src, key, decode=True):
+        if decode:
+            str_tmp = b64decode(src.encode(self.enc_dec_method))
+        key = SHA256.new(key.encode()).digest()
+        salt = str_tmp[:AES.block_size]
+        aes_obj = AES.new(key, AES.MODE_CBC, salt)
+        str_dec = aes_obj.decrypt(str_tmp[AES.block_size:])
+        padd = str_dec[-1]
+        if str_dec[-padd:] != bytes([padd]) * padd:
             pass
+        return str_dec[:-padd].decode(self.enc_dec_method)
 
 
 class Dicto:
