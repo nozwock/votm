@@ -1,41 +1,39 @@
-# VOTM - Voting Manager/Master
-A simple Voting Manager applicable for Schools use.
-This's actually my first project I ever worked on & it's intended for my 
-School's use specifically. Also, this may not be efficient or bug-free. 
-And, the source code is not well documented either at the moment.
-
+# VOTM: Voting Manager
+---------
 ####
-[![GitHub release](https://img.shields.io/github/release/sgrkmr/votm.svg)](https://GitHub.com/sgrkmr/votm/releases/)
-[![Github all releases](https://img.shields.io/github/downloads/sgrkmr/votm/total.svg)](https://GitHub.com/sgrkmr/votm/releases/)
-[![GitHub forks](https://img.shields.io/github/forks/sgrkmr/votm.svg?style=social&label=Fork&maxAge=2592000)](https://GitHub.com/sgrkmr/votm/network/)
-[![GitHub stars](https://img.shields.io/github/stars/sgrkmr/votm.svg?style=social&label=Star&maxAge=2592000)](https://GitHub.com/sgrkmr/votm/stargazers/)
-[![GitHub followers](https://img.shields.io/github/followers/sgrkmr.svg?style=social&label=Follow&maxAge=2592000)](https://github.com/sgrkmr?tab=followers)
-[![GitHub contributors](https://img.shields.io/github/contributors/sgrkmr/votm.svg)](https://GitHub.com/sgrkmr/votm/graphs/contributors/)
+[![version](https://img.shields.io/github/release/sgrkmr/votm.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
+[![downloads](https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
+[![Latest GitHub commit](https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square)]
+[![contributors](https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/graphs/contributors/)
+[![license](https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square)]
+
+<img align="left" src="/res/logo.png" width="40"/>
+VOTM is a full-featured voting manager desktop app which is also my first project, originally developed to automate the labrous procedure of voting which happens once a year in schools for some specific posts which are appointed to those students with most votes in their respective posts, earlier this was done through ballot box system which tooks a lot of time and work to yield results contrary to what votm can provide.
 
 # Screenshots
-<img src="/screen_shot1.png" width="50%" />
-<img src="/screen_shot2.png" width="50%" />
-<img src="/screen_shot3.png" width="50%" />
-<img src="/screen_shot4.png" width="50%" />
+<img src="/scrn_a.png" width="100%" />
+<img src="/scrn_b.png" width="100%" />
 
-## Specific Dependencies
+## Download
+You can manually download the latest release [here](https://github.com/sgrkmr/votm/releases).</br>
+**Note:** binaries are only available for the Windows platform.
+
+## Dependencies
+Modules:
   * tabulate
   * pycrypto
   * tkinter
   * xlsxwriter
+  * sqlite3
   
-## Usage
- * Clone the repo, and then
+## Development
+ * Clone the repo, and checkout to `./votm`
  ```sh
+ $ git clone https://github.com/sgrkmr/votm.git
  $ cd votm
+ ```
+ * Install dependencies.
+ ```sh
  $ pip install -r requirements.txt
  ```
- * For Edit App
- ```sh
- $ python votm_vte.py
- ```
- * For Vote App
- ```sh
- $ python votm_edt.py
- ```
- 
+ **Note:** run `votm_edt.py` to configure the voting session for the first time and run `votm_vte.py` for voting.
