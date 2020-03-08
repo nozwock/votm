@@ -1,4 +1,4 @@
-# VOTM: Voting Manage
+# VOTM: Voting Manager
 ---------
 ####
 [![version](https://img.shields.io/github/release/sgrkmr/votm.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
