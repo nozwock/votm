@@ -2,3 +2,4 @@ tabulate
 pycrypto
 tkinter
 xlsxwriter
+sqlite3
