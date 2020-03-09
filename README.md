@@ -1,12 +1,25 @@
-<p align="center"><img src="https://user-images.githubusercontent.com/57829219/76256135-6d241b80-6275-11ea-96dc-f512f4a0c91a.png")</p>
 <p align="center">
- <a href="https://GitHub.com/sgrkmr/votm/releases/", alt="version">
-  <img src="https://img.shields.io/github/release/sgrkmr/votm.svg?style=flat-square&color=blueviolet", alt="version"></a>
- <a href="https://GitHub.com/sgrkmr/votm/releases/", alt="downloads"><img src="https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square", alt="downloads"></a>
- <a href="https://github.com/sgrkmr/votm/commits/master", alt="commit"><img src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square", alt="commit"></a>
- <img src="https://img.shields.io/badge/Python-3.7-blue?style=flat-square", alt="python3">
- <a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/", alt="contributors"><img src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square", alt="contributors"></a>
- <img src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square", alt="license">
+    <a href="https://github.com/sgrkmr/votm", alt="votm">
+        <img src="https://user-images.githubusercontent.com/57829219/76256135-6d241b80-6275-11ea-96dc-f512f4a0c91a.png", alt="votm">
+    </a>
+</p>
+<p align="center">
+    <a href="https://GitHub.com/sgrkmr/votm/releases/", alt="version">
+        <img src="https://img.shields.io/github/release/sgrkmr/votm.svg?style=flat-square&color=blueviolet", alt="version">
+    </a>
+    <a href="https://GitHub.com/sgrkmr/votm/releases/", alt="downloads">
+        <img src="https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square", alt="downloads">
+    </a>
+    <a href="https://github.com/sgrkmr/votm/commits/master", alt="commit">
+        <img src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square", alt="commit">
+    </a>
+    <a href="https://www.python.org/downloads/release/python-374/">
+        <img src="https://img.shields.io/badge/Python-3.7-blue?style=flat-square", alt="python3">
+    </a>
+    <a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/", alt="contributors">
+        <img src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square", alt="contributors">
+    </a>
+    <img src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square", alt="license">
 </p>
 
 VOTM is a full-featured voting manager desktop app which is also my first project, It's developed to automate the labrous procedure of voting which happens once a year in schools for some specific posts which are appointed to those students with most votes in their respective posts, earlier this was done through ballot box system which tooks a lot of time and work to yield results contrary to what votm can provide.
@@ -20,12 +33,12 @@ You can manually download the latest release [here](https://github.com/sgrkmr/vo
 >**Note:** binaries are only available for the Windows platform.
 
 ## Dependencies
-Modules:
-  * tabulate
-  * pycrypto
-  * tkinter
-  * xlsxwriter
-  * sqlite3
+* Modules:
+    * tabulate`>=0.8.3`
+    * pycrypt`>=2.6.1`
+    * xlsxwriter`>=1.2.1`
+* Misc:
+    * pyinstaller`>=3.5`
   
 ## Development
  * Clone the repo, and checkout to `./votm`

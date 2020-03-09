@@ -1,5 +1,3 @@
-tabulate
-pycrypto
-tkinter
-xlsxwriter
-sqlite3
+tabulate>=0.8.3
+pycrypto>=2.6.1
+xlsxwriter>=1.2.1
