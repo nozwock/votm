@@ -1135,18 +1135,14 @@ class Result(tk.Frame):
                 if not dir_fle.endswith('.mrg'):
                     dir_fle += '.mrg'
                 with open(dir_fle, 'w') as f:
-                    f.write('((\n')
+                    rd = '((\n'
                     for i in cols:
-                        f.write(f'{str(tuple(i))},\n')
-                    f.write('),\n(\n')
-                    f.flush()
+                        rd += f'{str(tuple(i))},\n'
+                    rd += '),\n(\n'
                     for i in fle:
-                        f.write(f'{str(i)},\n')
-                        f.flush()
-                    f.write('))')
-                with open(dir_fle, 'r') as f:
-                    rd = Crypt().encrypt(str(f.read()), Reg().get(SECRET_KEY))
-                with open(dir_fle, 'w') as f:
+                        rd += f'{str(i)},\n'
+                    rd += '))'
+                    rd = Reg().get(SECRET_KEY)+Crypt().encrypt(rd, Reg().get(SECRET_KEY))
                     f.write(rd)
                     mg.showinfo(
                         'Voting Master', 'Merge file has been generated.', parent=self)
@@ -1193,8 +1189,9 @@ class Result(tk.Frame):
                 try:
                     for dirc in mrg:
                         with open(dirc, 'r') as f:
+                            rd = f.read()
                             mrg_tbl_data.append(
-                                eval(Crypt().decrypt(str(f.read()), Reg().get(SECRET_KEY))))
+                                eval(Crypt().decrypt(rd[16:], rd[:16])))
                 except FileNotFoundError:
                     mg.showerror(
                         'Error', 'No such file(s) found.', parent=self)

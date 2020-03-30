@@ -661,13 +661,14 @@ class Write_Default:
     def wrt_cand(self):
         """Writes Candidate file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[0]}', 'w') as f:
-            f.write(self.crypt.encrypt(
+            f.write(self.reg.get(SECRET_KEY)+self.crypt.encrypt(
                 Default_Config.candidate_config, self.reg.get(SECRET_KEY)))
 
     def wrt_clss(self):
         """Writes Class&Sec file."""
         with open(rf'{Write_Default.loc}\{Write_Default.fles[1]}', 'w') as f:
-            f.write(self.crypt.encrypt(Default_Config.clss_config, self.reg.get(SECRET_KEY)))
+            f.write(self.reg.get(SECRET_KEY)+self.crypt.encrypt(
+                Default_Config.clss_config, self.reg.get(SECRET_KEY)))
 
 
 class Access_Config:
@@ -682,10 +683,10 @@ class Access_Config:
         bse_str = self.crypt.decrypt(bse_str, self.reg.get(SECRET_KEY))
         with open(rf'{loc}\{fles[0]}', 'r') as f:
             cand_str = f.read()
-            cand_str = self.crypt.decrypt(cand_str, self.reg.get(SECRET_KEY))
+            cand_str = self.crypt.decrypt(cand_str[16:], cand_str[:16])
         with open(rf'{loc}\{fles[1]}', 'r') as f:
             clss_str = f.read()
-            clss_str = self.crypt.decrypt(clss_str, self.reg.get(SECRET_KEY))
+            clss_str = self.crypt.decrypt(clss_str[16:], clss_str[:16])
 
         self.bse_config = eval(bse_str)
         self.cand_config = eval(cand_str)

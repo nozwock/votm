@@ -134,40 +134,40 @@ class Win(tk.Toplevel):
 
         if cont == Home:
             self.home.config(
-                text='⚫ Home', background='#EFEFEF', foreground='#0077CC')
+                text='Home', background='#EFEFEF', foreground='#0077CC')
             self.vote.config(
-                text='⚪ Vote  ', background='#0077CC', foreground='#EFEFEF')
+                text='Vote', background='#0077CC', foreground='#EFEFEF')
             self.clss.config(
-                text='⚪ Class*', background='#0077CC', foreground='#EFEFEF')
+                text='Class', background='#0077CC', foreground='#EFEFEF')
             self.done.config(
-                text='⚪ Done ', background='#0077CC', foreground='#EFEFEF')
+                text='Done', background='#0077CC', foreground='#EFEFEF')
         elif cont == Class:
             self.clss.config(
-                text='⚫ Class*', background='#EFEFEF', foreground='#0077CC')
+                text='Class', background='#EFEFEF', foreground='#0077CC')
             self.home.config(
-                text='⚪ Home', background='#0077CC', foreground='#EFEFEF')
+                text='Home', background='#0077CC', foreground='#EFEFEF')
             self.vote.config(
-                text='⚪ Vote  ', background='#0077CC', foreground='#EFEFEF')
+                text='Vote', background='#0077CC', foreground='#EFEFEF')
             self.done.config(
-                text='⚪ Done ', background='#0077CC', foreground='#EFEFEF')
+                text='Done', background='#0077CC', foreground='#EFEFEF')
         elif cont == Vote:
             self.vote.config(
-                text='⚫ Vote  ', background='#EFEFEF', foreground='#0077CC')
+                text='Vote', background='#EFEFEF', foreground='#0077CC')
             self.home.config(
-                text='⚪ Home', background='#0077CC', foreground='#EFEFEF')
+                text='Home', background='#0077CC', foreground='#EFEFEF')
             self.clss.config(
-                text='⚪ Class*', background='#0077CC', foreground='#EFEFEF')
+                text='Class', background='#0077CC', foreground='#EFEFEF')
             self.done.config(
-                text='⚪ Done ', background='#0077CC', foreground='#EFEFEF')
+                text='Done', background='#0077CC', foreground='#EFEFEF')
         else:
             self.done.config(
-                text='⚫ Done ', background='#EFEFEF', foreground='#0077CC')
+                text='Done', background='#EFEFEF', foreground='#0077CC')
             self.home.config(
-                text='⚪ Home', background='#0077CC', foreground='#EFEFEF')
+                text='Home', background='#0077CC', foreground='#EFEFEF')
             self.clss.config(
-                text='⚪ Class*', background='#0077CC', foreground='#EFEFEF')
+                text='Class*', background='#0077CC', foreground='#EFEFEF')
             self.vote.config(
-                text='⚪ Vote  ', background='#0077CC', foreground='#EFEFEF')
+                text='Vote', background='#0077CC', foreground='#EFEFEF')
 
         if self.frame_n is not None:
             self.frame_n.pack_forget()
