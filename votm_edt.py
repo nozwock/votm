@@ -1119,6 +1119,7 @@ class Result(tk.Frame):
     def crt_mrg_fle(self):
         """Creates a merge file through a dialog box."""
         try:
+            Result_Diag(self, txt='Select a Database.', icn=Root.DATAFILE[0], mod=1)
             _, cols = Sql_init(0).cols(date.today().strftime('%Y'))
             fle = Sql_init(0).gen_mrg_fle()
             _ = [list(tup) for tup in list(cols)]
@@ -1176,6 +1177,7 @@ class Result(tk.Frame):
 
     def do_mrg(self):
         """Performs merging in the logic module, from the data proccessed in main."""
+        Result_Diag(self, txt='Type a name for merged database.', icn=Root.DATAFILE[0], mod=2)
         mrg = self.mrg_drctr.get(0, tk.END)
         if mrg != ():
             if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
@@ -1477,6 +1479,62 @@ class Settings(tk.Frame):
                     pswd.delete(0, tk.END)
                 mg.showerror(
                     'Error', 'Same Key found,\nType in a different Key.', parent=self)
+
+
+class Result_Diag(tk.Toplevel):
+    def __init__(self, master, txt: str = 'Head', icn: dir = None, mod: int = 1):
+        tk.Toplevel.__init__(self, master)
+        self.transient(master)
+        self.master = master
+        self.protocol('WM_DELETE_WINDOW', self.cncl)
+        x = self.winfo_screenwidth()/2 - 150
+        y = self.winfo_screenheight()/2 - 80
+        self.geometry('300x100+%d+%d' % (x, y))
+        self.resizable(0, 0)
+        self.config(background='#F5F6F7')
+        self.iconbitmap(icn)
+        self.grab_set()
+        self.lift()
+        self.focus_force()
+        self.dsc = tk.Label(self, text=txt, font=('Segoe UI', 12), background='#6A00FF', foreground='#EFEFEF')
+        self.dsc.pack(side='top', fill='x', pady=(0, 20), ipady=6)
+        self.act_frm = tk.Frame(self)
+        self.act_frm.pack(side='top')
+        if mod==1:
+            self.Exp_Fle_Mod()
+        elif mod==2:
+            self.Mrg_Mod()
+        else:
+            self.cncl()
+        self.wait_window(self)
+
+    def Exp_Fle_Mod(self):
+        self.title('Export Merge file')
+        exp_opt = ttk.Combobox(self.act_frm, values=Yr_fle().yr, state='readonly')
+        exp_opt.pack(side='left', padx=(0, 30))
+        exp_opt.set('Database')
+        exp_opt.focus_set()
+        exp_ok = ttk.Button(self.act_frm, text='Ok', command=None)
+        exp_ok.pack(side='left')
+
+    def Mrg_Mod(self):
+        self.title('Merge')
+        mrg_chk = self.register(self.mrg_check)
+        mrg_nm = ttk.Entry(self.act_frm, validate='key', validatecommand=(mrg_chk, '%S'))
+        mrg_nm.pack(side='left', padx=(0, 30))
+        mrg_nm.focus_set()
+        mrg_ok = ttk.Button(self.act_frm, text='Ok', command=None)
+        mrg_ok.pack(side='left')
+
+    @staticmethod
+    def mrg_check(inp: str):
+        if inp in ascii_letters:
+            return True
+        else:
+            return False
+
+    def cncl(self):
+        self.destroy()
 
 
 class Result_Show_Sep(tk.Tk):

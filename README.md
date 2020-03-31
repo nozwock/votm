@@ -30,7 +30,7 @@ VOTM is a full-featured voting manager desktop app which is also my first projec
 
 ## Download
 You can manually download the latest release [here](https://github.com/sgrkmr/votm/releases).</br>
->**Note:** binaries are only available for the Windows platform.
+>**NOTE:** binaries are only available for the Windows platform.
 
 ## Dependencies
 * Modules:
@@ -50,4 +50,4 @@ You can manually download the latest release [here](https://github.com/sgrkmr/vo
  ```sh
  $ pip install -r requirements.txt
  ```
- >**Note:** run `votm_edt.py` to configure the voting session for the first time and run `votm_vte.py` for voting.
+ >**NOTE:** run `votm_edt.py` to configure the voting session for the first time and run `votm_vte.py` for voting.

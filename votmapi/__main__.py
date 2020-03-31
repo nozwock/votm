@@ -17,13 +17,14 @@ Copyright (C) 2019 Sagar Kumar
 """
 
 """
-Version 1.0.6p changes:
-> Some Bug fixes which were caused due to some implementaions in the earlier version.
-(not been able to import the exported settings on any other system, same goes for the exported merge files.)
+Version 1.0.7b changes:
+** "b" version - broken/incomplete
+> Dialog to use custom name for the merged database.
+> Dialog to choose the database from which the merge file is to be created.
 """
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.6p'
+__version__ = '1.0.7b'
 
 ENV_KEY = 'BASE_VCON_CONFIG'
 SECRET_KEY = 'SEC_VCON_KEY'
