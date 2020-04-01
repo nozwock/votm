@@ -17,14 +17,14 @@ Copyright (C) 2019 Sagar Kumar
 """
 
 """
-Version 1.0.7b changes:
-** "b" version - broken/incomplete
-> Dialog to use custom name for the merged database.
-> Dialog to choose the database from which the merge file is to be created.
+*Version 1.0.8 changes:
+!> Dialog to use custom name for the merged database.
+!> Dialog to choose the database from which the merge file is to be created.
+!> Fixed merged db's datatypes.
 """
 
 __author__ = 'Sagar Kumar'
-__version__ = '1.0.7b'
+__version__ = '1.0.8'
 
 ENV_KEY = 'BASE_VCON_CONFIG'
 SECRET_KEY = 'SEC_VCON_KEY'

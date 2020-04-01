@@ -110,7 +110,7 @@ class Tokens:
             return False
 
 
-#CBC method with PKCS#7 padding
+#! CBC method with PKCS#7 padding
 class Crypt:
     def __init__(self, salt=Random.new().read(AES.block_size)):
         self.salt = salt

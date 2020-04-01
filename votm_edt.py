@@ -167,7 +167,7 @@ class Win(tk.Toplevel):
         fl = tk.Frame(self, bg='#0077CC', width=223)
         fl.pack(side='left', expand=0, fill='y')
         fl.pack_propagate(0)
-        # items_____________________________
+        #? items_____________________________
         flt = tk.Frame(fl)
         flt.pack(side='top', fill='both', expand=1)
         flt.pack_propagate(0)
@@ -186,7 +186,7 @@ class Win(tk.Toplevel):
         bthlb = tk.Button(flb, text='?', highlightthickness=0, bg='#303030', activebackground='#6D6D6D', takefocus=0,
                           relief='flat', bd=1, fg='#EFEFEF', height=2, command=lambda: About(self, Root.DATAFILE[0]), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
-        # contents_____________________________
+        #? contents_____________________________
         self.edt_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[2]))
         self.edtb_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[5]))
         self.edit = tk.Button(fl, text='  Edit      ', image=self.edt_img, compound='left', highlightthickness=0, activeforeground='#FFFFFF',
@@ -512,7 +512,7 @@ class Posts(tk.Frame):
         pst_edt_btn.pack(side='left')
         self.pst_edt_pst.bind('<<ComboboxSelected>>', lambda event: (self.pst_edt_ent.config(state='enabled'), self.pst_edt_tag.config(state='enabled'), self.pst_edt_ent.config(validate='key', validatecommand=(pst_reg, '%P')), self.pst_edt_tag.config(validate='key', validatecommand=(tag_reg, '%P')), self.pst_edt_pst.config(values=[
             f'{eval(i)[0]}; {eval(i)[-1]}' for i in list(Access_Config().cand_config.keys())]), self.pst_edt_ent.delete(0, 'end'), self.pst_edt_tag.delete(0, 'end'), self.pst_edt_ent.insert(0, self.pst_edt_pst.get().split(';')[0].strip()), self.pst_edt_tag.insert(0, self.pst_edt_pst.get().split(';')[-1].strip())))
-        ######################################
+        #* _________________________________
         pst_add = ttk.LabelFrame(self, text='Add', padding=10)
         pst_add.pack(pady=(0, 10))
         self.pst_add_ent = ttk.Entry(pst_add)
@@ -528,7 +528,7 @@ class Posts(tk.Frame):
             validate='key', validatecommand=(pst_reg, '%P')), self.pst_add_ent.unbind('<Enter>')))
         self.pst_add_tag.bind('<Enter>', lambda e: (self.pst_add_tag.delete(0, 'end'), self.pst_add_tag.config(
             validate='key', validatecommand=(tag_reg, '%P')), self.pst_add_tag.unbind('<Enter>')))
-        ######################################
+        #* _________________________________
         btm_frm = tk.Frame(self, bg=Win.SM_BG_HEX)
         btm_frm.pack(pady=(0, 20))
         left_btm = tk.Frame(btm_frm, bg=Win.SM_BG_HEX)
@@ -550,7 +550,7 @@ class Posts(tk.Frame):
         pst_clr = ttk.Button(left_btm, text='Default', padding=10,
                              style='m.TButton', command=lambda: self.clr(), takefocus=0)
         pst_clr.pack(side='top', fill='y', expand=1, pady=(20, 20))
-        ########################################
+        #* _________________________________
         self.cfg = Dicto(Access_Config().cand_config)
         keys = list(self.cfg.get().keys())
 
@@ -974,8 +974,8 @@ class Result(tk.Frame):
         ttk.Style().configure('TLabelframe.Label', font=('Segoe UI', 14))
         ttk.Style().configure('m.TButton', font=('Segoe UI', 10))
         self.config(bg=Win.SM_BG_HEX)
-        # Merge Frame______________________
-        self.mrg_lblfrm = ttk.Labelframe(self, text='Merge', padding=10)
+        #? Merge Frame______________________
+        self.mrg_lblfrm = ttk.Labelframe(self, text='Merge/Import', padding=10)
         self.shw_lblfrm = ttk.Labelframe(self, text='Show', padding=10)
         self.mrg_lblfrm.pack(pady=(60, 10))
         self.shw_lblfrm.pack()
@@ -993,13 +993,13 @@ class Result(tk.Frame):
         mrg_brws = ttk.Button(mrg_right, text='Browse',
                               command=lambda: self.opn_mrg_fles(), takefocus=0)
         mrg_brws.pack(side='top', pady=(10, 10), fill='x')
-        mrg_shw = ttk.Button(mrg_right, text='Merge',
+        mrg_shw = ttk.Button(mrg_right, text='Merge/Import',
                              command=lambda: self.do_mrg(), takefocus=0)
         mrg_shw.pack(side='top', pady=(0, 10), fill='x')
         mrg_conv_exl = ttk.Button(
             mrg_right, text='Export Merge File', command=lambda: self.crt_mrg_fle(), takefocus=0)
         mrg_conv_exl.pack(side='top', pady=(0, 10))
-        # Show Frame______________________
+        #? Show Frame______________________
         self.shw_db = ttk.Combobox(
             self.shw_lblfrm, state='readonly', values=Yr_fle().yr)
         self.shw_db.set('Database')
@@ -1052,10 +1052,7 @@ class Result(tk.Frame):
 
     def do_upd(self):
         self.mrg_lblfrm.pack(pady=(40, 10))
-        if self.shw_db.get() != 'merged':
-            cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
-        else:
-            cnd = Sql_init(0, dtb=1).db_cands()
+        cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
         lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
         cn = 1
 
@@ -1098,10 +1095,7 @@ class Result(tk.Frame):
             cn += 1
 
     def crt_args(self):
-        if self.shw_db.get() != 'merged':
-            cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
-        else:
-            cnd = Sql_init(0, dtb=1).db_cands()
+        cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
         del self.args
         self.args = []
         try:
@@ -1119,9 +1113,12 @@ class Result(tk.Frame):
     def crt_mrg_fle(self):
         """Creates a merge file through a dialog box."""
         try:
-            Result_Diag(self, txt='Select a Database.', icn=Root.DATAFILE[0], mod=1)
-            _, cols = Sql_init(0).cols(date.today().strftime('%Y'))
-            fle = Sql_init(0).gen_mrg_fle()
+            db_name = Result_Diag(self, txt='Select a Database.',
+                                icn=Root.DATAFILE[0], mod=1).get()
+            if not db_name:
+                return -1
+            _, cols = Sql_init(0).cols(db_name)
+            fle = Sql_init(0, yr=db_name).gen_mrg_fle()
             _ = [list(tup) for tup in list(cols)]
             cols = []
             for i in range(len(_)):
@@ -1177,7 +1174,6 @@ class Result(tk.Frame):
 
     def do_mrg(self):
         """Performs merging in the logic module, from the data proccessed in main."""
-        Result_Diag(self, txt='Type a name for merged database.', icn=Root.DATAFILE[0], mod=2)
         mrg = self.mrg_drctr.get(0, tk.END)
         if mrg != ():
             if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
@@ -1198,7 +1194,20 @@ class Result(tk.Frame):
                     mg.showerror(
                         'Error', 'No such file(s) found.', parent=self)
                     return 'break'
-                Sql_init(0, dtb=1).mrg_dtb_res(mrg_tbl_n, mrg_tbl_data)
+                try:
+                    _ = []
+                    for i in range(len(mrg_tbl_data)):
+                        _.append([j[0] for j in mrg_tbl_data[i][0]])
+                    assert (all([_[0]==_[i] for i in range(1,len(_))]))
+                except:
+                    mg.showerror('Error',
+                                'Selected Files are Incompaitable. (Different data, can\'t be merged!)', parent=self)
+                    return -1
+                mrg_nm = Result_Diag(self, txt='Type a name for merged database.',
+                                    icn=Root.DATAFILE[0], mod=2).get()
+                if not mrg_nm:
+                    return -1
+                Sql_init(0, yr=mrg_nm).mrg_dtb_res(mrg_tbl_n, mrg_tbl_data, name=mrg_nm)
                 self.shw_db.config(values=Yr_fle().yr)
                 mg.showinfo('Voting Master', 'Merging is Done.', parent=self)
         else:
@@ -1208,10 +1217,7 @@ class Result(tk.Frame):
     def shw_res(self):
         """Creates a string from a list of columns to be shown and it is passed to the Result window."""
         try:
-            if self.shw_db.get() != 'merged':
-                pst_cand = Sql_init(0).cols(self.shw_db.get())[0][4:]
-            else:
-                pst_cand = Sql_init(0, dtb=1).cols(self.shw_db.get())[0][4:]
+            pst_cand = Sql_init(0).cols(self.shw_db.get())[0][4:]
             shrt = [i[:3].strip('_') for i in pst_cand]
             count = []
             for i in shrt:
@@ -1231,7 +1237,7 @@ class Result(tk.Frame):
 
             _ = Sql_init(0, yr=self.shw_db.get()).result(args)[0]
             assert (_ != [])
-            # Abobe just to check for exception
+            #? Above is just to check for exception (duh)
 
             Result_Show_Sep(self.shw_db.get(), args).mainloop()
         except:
@@ -1292,7 +1298,7 @@ class Settings(tk.Frame):
             frm_top, text='Delete Database', padding=10)
         lbl_hed_dtb.pack(side='left', padx=(0, 40))
 
-        # Import/Export_______________________________
+        #? Import/Export_______________________________
         lbl_hed_imp_exp = ttk.LabelFrame(
             frm_btm, text='Import/Export', padding=10)
         lbl_hed_imp_exp.pack(side='left', padx=(0, 20), fill='both')
@@ -1305,7 +1311,7 @@ class Settings(tk.Frame):
 
         lbl_hed_bse = ttk.LabelFrame(frm_btm, text='Advanced', padding=10)
         lbl_hed_bse.pack(side='left')
-        # Database Settings_______________________________
+        #? Database Settings_______________________________
         dtb_yr = ttk.Combobox(
             lbl_hed_dtb, values=Yr_fle().yr, state='readonly')
         dtb_yr.set('Database')
@@ -1313,7 +1319,7 @@ class Settings(tk.Frame):
         del_yr = ttk.Button(lbl_hed_dtb, text='Delete', command=lambda: self.dtb_del(
             dtb_yr.get(), dtb_yr, del_yr), state='disabled', takefocus=0)
         del_yr.pack(side='bottom')
-        # Tokens Settings_______________________________
+        #? Tokens Settings_______________________________
         lbfrm_tkn = ttk.LabelFrame(frm_top, text='Tokens', padding=10)
         lbfrm_tkn.pack(side='left')
         lbfrm_tkn_top = tk.Frame(lbfrm_tkn, bg=Win.SM_BG_HEX)
@@ -1337,7 +1343,7 @@ class Settings(tk.Frame):
         del_tkn = ttk.Button(
             lbfrm_tkn_btm, text='Delete Tokens', command=lambda: self.tkn_del())
         del_tkn.pack(side='left')
-        # Base Settings_______________________________
+        #? Base Settings_______________________________
         lbfrm_bse_passwd = ttk.LabelFrame(
             lbl_hed_bse, text='Password', padding=10)
         lbfrm_bse_passwd.pack(side='top')
@@ -1363,7 +1369,7 @@ class Settings(tk.Frame):
         btn_key_sub.pack(side='left')
         dtb_yr.bind('<<ComboboxSelected>>',
                     lambda event: del_yr.config(state='enabled'))
-        # _______________________________
+        #? _______________________________
 
     @staticmethod
     def spc_check(inp: str) -> bool:
@@ -1482,6 +1488,8 @@ class Settings(tk.Frame):
 
 
 class Result_Diag(tk.Toplevel):
+    """Creates a Dialog box with either Entry(2) or Combobox(1) widget."""
+
     def __init__(self, master, txt: str = 'Head', icn: dir = None, mod: int = 1):
         tk.Toplevel.__init__(self, master)
         self.transient(master)
@@ -1496,7 +1504,8 @@ class Result_Diag(tk.Toplevel):
         self.grab_set()
         self.lift()
         self.focus_force()
-        self.dsc = tk.Label(self, text=txt, font=('Segoe UI', 12), background='#6A00FF', foreground='#EFEFEF')
+        self.dsc = tk.Label(self, text=txt, font=('Segoe UI', 12),
+                        background='#6A00FF', foreground='#EFEFEF')
         self.dsc.pack(side='top', fill='x', pady=(0, 20), ipady=6)
         self.act_frm = tk.Frame(self)
         self.act_frm.pack(side='top')
@@ -1509,33 +1518,56 @@ class Result_Diag(tk.Toplevel):
         self.wait_window(self)
 
     def Exp_Fle_Mod(self):
-        self.title('Export Merge file')
+        """Creates a dialog box with a Combobox widget to get input db for exported merge file."""
+        self.title('Export Merge')
         exp_opt = ttk.Combobox(self.act_frm, values=Yr_fle().yr, state='readonly')
         exp_opt.pack(side='left', padx=(0, 30))
         exp_opt.set('Database')
-        exp_opt.focus_set()
-        exp_ok = ttk.Button(self.act_frm, text='Ok', command=None)
+        exp_opt.focus_force()
+        exp_opt.bind('<Return>', lambda event: self.ok_do(exp_opt,'Database'))
+        exp_ok = ttk.Button(self.act_frm, text='Ok',
+                    command=lambda: self.ok_do(exp_opt,'Database'))
         exp_ok.pack(side='left')
 
     def Mrg_Mod(self):
-        self.title('Merge')
+        """Creates a dialog box with a Entry widget to get input for merged db."""
+        self.title('Merge/Import')
         mrg_chk = self.register(self.mrg_check)
-        mrg_nm = ttk.Entry(self.act_frm, validate='key', validatecommand=(mrg_chk, '%S'))
+        mrg_nm = ttk.Entry(self.act_frm, validate='key',
+                        validatecommand=(mrg_chk, '%P'))
         mrg_nm.pack(side='left', padx=(0, 30))
-        mrg_nm.focus_set()
-        mrg_ok = ttk.Button(self.act_frm, text='Ok', command=None)
+        mrg_nm.focus_force()
+        mrg_nm.bind('<Return>', lambda event: self.ok_do(mrg_nm,''))
+        mrg_ok = ttk.Button(self.act_frm, text='Ok',
+                    command=lambda: self.ok_do(mrg_nm,''))
         mrg_ok.pack(side='left')
 
     @staticmethod
     def mrg_check(inp: str):
-        if inp in ascii_letters:
-            return True
-        else:
+        """Allows only letters, numerics and a '_'."""
+        if all([(i in ascii_letters+'_0123456789') for i in inp]):
+            if not inp.startswith('_') and len(inp)<=24:
+                return True
             return False
+        return False
+
+    def ok_do(self, inp, chk):
+        """Func to execute for ok button."""
+        if inp.get()!=chk:
+            self.name=inp.get()
+            self.destroy()
+            self.flag=True
 
     def cncl(self):
+        """Destroy the dialog box."""
         self.destroy()
+        self.flag=False
 
+    def get(self):
+        """Returns bool for failure or input from the dialog box."""
+        if not self.flag:
+            return self.flag
+        return self.name
 
 class Result_Show_Sep(tk.Tk):
     """Constructs a Result window to the show the fetched data and to save it."""
@@ -1581,10 +1613,7 @@ class Result_Show_Sep(tk.Tk):
             h_scrlbar.config(command=self.res_tbl.xview)
 
         if key == 1:
-            if __yr != 'merged':
-                self.res, self.col = Sql_init(0, yr=__yr).result(__args)
-            else:
-                self.res, self.col = Sql_init(0, dtb=1).result(__args)
+            self.res, self.col = Sql_init(0, yr=__yr).result(__args)
             Tr_View(self, self.col, self.res)
 
             nrml = '#0077CC'
@@ -1686,11 +1715,11 @@ class Result_Show_Sep(tk.Tk):
                 'border': 1
             })
             row = 0
-            # Writing coloumns
+            #? Writing coloumns
             for i in range(len(col)):
                 wrksht.write(row, i, col[i], head_format)
             row += 1
-            # Writing Values
+            #? Writing Values
             for i in range(len(val)):
                 for j in range(len(val[i])):
                     if val[i][j] is None:
@@ -1699,7 +1728,7 @@ class Result_Show_Sep(tk.Tk):
                         wrksht.write(row, j, val[i][j], val_format)
                 row += 1
             row += 1+1
-            # Writing Total
+            #? Writing Total
             ind = [i for i in range(len(col)) if col[i]
                    not in ['CLASS', 'SEC']]
             ttl = self._total(['CLASS', 'SEC'], val, col)
@@ -1800,7 +1829,7 @@ class Token_Show(Result_Show_Sep):
                 'border': 1
             })
             row = 0
-            # Writing Values
+            #? Writing Values
             for i in range(len(self.tkns)):
                 for j in range(len(self.tkns[i])):
                     wrksht.write(row, j, self.tkns[i][j], val_format)

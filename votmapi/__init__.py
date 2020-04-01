@@ -30,19 +30,17 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from votmapi.logic import Crypt, Reg
 from votmapi.__main__ import SECRET_KEY, ENV_KEY, __version__, __author__, __license__
 
-
+#! have a look at line_538 when compiling.
 class Sql_init:
     """Establishes connection with the requested database."""
     TBL_NM = 'votm_vte'
     NXT = 1
 
-    def __init__(self, _key: int, dtb=None, yr=None, master=None):
+    def __init__(self, _key: int, yr=None, master=None):
         self.master = master
         Sql_init.NXT = 1
         self.yr = date.today().strftime('%Y')
-        if dtb:
-            self.db = rf'{Write_Default.loc}\votm_merged.db'
-        elif yr:
+        if yr:
             self.db = rf'{Write_Default.loc}\votm_{yr}.db'
         else:
             self.db = rf'{Write_Default.loc}\votm_{self.yr}.db'
@@ -111,7 +109,7 @@ class Sql_init:
             WHERE STAFF IS NOT NULL
             """
             self.cur.execute(__tbl_upd_sy)
-        else:  # does not exist i.e Create
+        else:  #! does not exist i.e Create
             tbl_cand, _ = Sql_init(0).cols(self.yr)
             tbl_cand = tbl_cand[4:len(tbl_cand)]
             temp, _ = Sql_init(0).cols(self.yr)
@@ -124,8 +122,8 @@ class Sql_init:
             cand = str(tbl_cand).lstrip('[').rstrip(']')
             cand = cand.replace("'", "")
             '''
-            This can be used too for above requirements->
-            <str>.translate(str.marktrans({"'":None}))
+            *This can be used too for above requirements->
+            !<str>.translate(str.marktrans({"'":None}))
             '''
             __tbl_ins_sy = f"""INSERT INTO {Sql_init.TBL_NM}(
                 STAFF, {cand}
@@ -143,7 +141,7 @@ class Sql_init:
         WHERE CLASS = {clss} AND SEC LIKE '{sec}'"""
         self.cur.execute(__tbl_chk_sy)
         val = self.cur.fetchone()
-        if val is not None:  # UPDATE block
+        if val is not None:  #! UPDATE block
             vte_lst = [f"{i} = {i} + 1" for i in vte_lst]
             vte_lst = (str(vte_lst).lstrip('[').rstrip(']')).replace("'", "")
             __tbl_upd_sy = f"""
@@ -152,7 +150,7 @@ class Sql_init:
             WHERE CLASS = {clss} AND SEC LIKE '{sec}'
             """
             self.cur.execute(__tbl_upd_sy)
-        else:  # CREATE block
+        else:  #! CREATE block
             tbl_cand, _ = Sql_init(0).cols(self.yr)
             tbl_cand = tbl_cand[4:len(tbl_cand)]
             temp, _ = Sql_init(0).cols(self.yr)
@@ -253,7 +251,7 @@ class Sql_init:
         cols = [tup[1] for tup in desc if tup[1] not in [
             'STAFF', 'CLASS', 'SEC', 'STUDENT']]
         cols = [i.split('_') for i in cols]
-        #dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
+        #? dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
         dfl = {}
         _ = []
         for i in range(len(cols)):
@@ -278,7 +276,7 @@ class Sql_init:
             vals.append(_)
         return vals
 
-    def mrg_dtb_res(self, *args: '(list of tables, list of (tables desc, records))'):
+    def mrg_dtb_res(self, *args: '(list of tables, list of (tables desc, records))', name='merged'):
         """Creates "merged" named database consisting merged result."""
         tbl, vals, = args
         __fnl_sy = f"""CREATE TABLE {Sql_init.TBL_NM} \nAS """
@@ -315,6 +313,39 @@ class Sql_init:
         __fnl_sy += '\n)\nGROUP BY CLASS, SEC'
         try:
             self.cur.execute(__fnl_sy)
+            #!###########################
+            #!## Recreating the tabel ###
+            #!###########################
+            cols, _ = Sql_init(0).cols(name)
+            cols = [i for i in cols if not i in ['CLASS', 'SEC', 'STAFF', 'STUDENT']]
+            val = self.gen_mrg_fle()
+            if len(val)>1:
+                val = str(val).replace('None', 'NULL').replace("'",'"').strip('[]')
+            else:
+                val = str(val).replace('None', 'NULL').replace("'",'"').strip('[]').rstrip(',')
+            """
+            Ot_ways:
+            val = [tuple(map(lambda x: "NULL" if x==None else x, i)) for i in self.gen_mrg_fle()]
+            """
+            __drp_sy = f'DROP TABLE {Sql_init.TBL_NM}'
+            self.cur.execute(__drp_sy)
+            __tbl_sy = f"""CREATE TABLE IF NOT EXISTS {Sql_init.TBL_NM}(
+                CLASS INT(2) DEFAULT(NULL),
+                SEC VARCHAR(1) DEFAULT(NULL),
+                STAFF INT DEFAULT(NULL),
+                STUDENT INT DEFAULT(NULL))"""
+            self.cur.execute(__tbl_sy)
+            for i in cols:
+                __tbl_upd_sy = f'ALTER TABLE {Sql_init.TBL_NM} ADD {i} INT DEFAULT(NULL)'
+                self.cur.execute(__tbl_upd_sy)
+            __ins_sy = f"""
+            INSERT INTO {Sql_init.TBL_NM}
+            VALUES {val}
+            """
+            self.cur.execute(__ins_sy)
+            #!###########
+            #!## DONE ###
+            #!###########
         except:
             __drp_sy = f'DROP TABLE {Sql_init.TBL_NM}'
             self.cur.execute(__drp_sy)
@@ -323,7 +354,7 @@ class Sql_init:
                 DROP TABLE IF EXISTS {i}
                 """
                 self.cur.execute(__drp_sy)
-            Sql_init(0, dtb=1).mrg_dtb_res(tbl, vals)
+            Sql_init(0, yr=name).mrg_dtb_res(tbl, vals, name=name)
         finally:
             for i in tbl:
                 __drp_sy = f"""
@@ -415,11 +446,11 @@ class Ent_Box(tk.Toplevel):
         self.protocol('WM_DELETE_WINDOW', self.s_cls)
         x = self.winfo_screenwidth()/2 - 175
         y = self.winfo_screenheight()/2 - 120
-        '''
-        For Center of Main Window->
-        app.winfo_x() + 400 - 175
-        app.winfo_y() + 225 - 70
-        '''
+        """
+        *For Center of Main Window->
+        !app.winfo_x() + 400 - 175
+        !app.winfo_y() + 225 - 70
+        """
         self.geometry('350x140+%d+%d' % (x, y))
         self.title('Confirm')
         self.resizable(0, 0)
@@ -505,7 +536,9 @@ class About(tk.Toplevel):
         about_tp.pack(side='top', fill='both', expand=1)
 
         DATAFILE = '..\\res\\logo.png'
-        #Change above to 'res\\logo.png' while using with pyinstaller
+        #!###################################################################
+        #!## Change above to 'res\\logo.png' while using with pyinstaller ###
+        #!###################################################################
         if not hasattr(sys, 'frozen'):
             DATAFILE = os.path.join(os.path.dirname(__file__), DATAFILE)
         else:

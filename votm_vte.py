@@ -183,17 +183,17 @@ class Win(tk.Toplevel):
     @staticmethod
     def session() -> str:
         """Return current session."""
-        yr = date.today().strftime('%Y')  # Return Year only
+        yr = date.today().strftime('%Y')  #! Return Year only
         ssn = str(yr) + ' - ' + f'{int(yr) + 1}'
         return ssn
 
-    # NAVBAR______________________________
+    #? NAVBAR______________________________
     def navbar(self):
         """Left sided navbar for main window."""
         fl = tk.Frame(self, background='#0077CC', width=223)
         fl.pack(side='left', expand=0, fill='y')
         fl.pack_propagate(0)
-        # NAVBAR's internal items______________________________
+        #? NAVBAR's internal items______________________________
         flt = tk.Frame(fl, height=55)
         flt.pack(side='top', fill='both', expand=1)
         flt.pack_propagate(0)
@@ -215,7 +215,7 @@ class Win(tk.Toplevel):
         bthlb = tk.Button(flb, text='?', highlightthickness=0, background='#303030', activebackground='#6D6D6D',
                           relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=lambda: About(self, icn=Root.DATAFILE[0]), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
-        # NAVBAR's Content______________________________
+        #? NAVBAR's Content______________________________
         self.home = tk.Label(fl, text='⚪ Home', foreground='#FFFFFF',
                              background='#0077CC', font=('Segoe UI', 16, 'bold'))
         self.home.pack(side='top', ipady=20, fill='x')
@@ -256,7 +256,7 @@ class Home(tk.Frame):
         """Takes to Vote frame if Staff selected."""
         global sel
         btn1, btn2, = args
-        sel = 0  # for Staff, direct to Vote
+        sel = 0  #! for Staff, direct to Vote
         btn1.config(state='disabled')
         btn2.config(state='disabled')
         if Tokens(self).check() is False:
@@ -273,7 +273,7 @@ class Home(tk.Frame):
         """Takes to Class frame if Students selected."""
         global sel
         btn1, btn2, = args
-        sel = 1  # for students, move to Class frame
+        sel = 1  #! for students, move to Class frame
         btn1.config(state='disabled')
         btn2.config(state='disabled')
         if Tokens(self).check() is False:
@@ -532,18 +532,18 @@ class Vote(tk.Frame):
     def mv_Done(self, btnvt: ttk.Button, tkn, *args: str):
         """Move to Done frame while saving votes in database through the logic module."""
         args, = args
-        global vte_lst  # Votes of 1 turn
+        global vte_lst  #! Votes of 1 turn
         if mg.askokcancel('Confirm', 'Are you sure?', parent=self):
             if Tokens(self).get(tkn.get()):
                 vte_lst = list(args)
                 x = [eval(i) for i in list(Access_Config().cand_config.keys())]
                 for i in range(len(vte_lst)):
                     vte_lst[i] = f'{x[i][-1]}_{vte_lst[i]}'
-                if sel == 0:  # Staff
+                if sel == 0:  #! Staff
                     btnvt.config(state='disabled')
                     Sql_init(0).tchr_vte(vte_lst)
                     app.replace_frame(Done_0)
-                else:  # Students
+                else:  #! Students
                     btnvt.config(state='disabled')
                     Sql_init(0).std_vte(vte_lst, ch_clss, ch_sec)
                     app.replace_frame(Done_1)
