@@ -414,6 +414,7 @@ class Candidates(tk.Frame):
             try:
                 cfg[Cand_Check(key.get()).get()][cfg[Cand_Check(key.get()).get()].index(
                     pos.get())] = val.get().strip()
+                #!Hell is above
                 Edit.wrt(0, cfg)
                 txt_val = pos.get()
                 pos.set(val.get())

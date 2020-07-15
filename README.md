@@ -22,7 +22,8 @@
     <img src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square", alt="license">
 </p>
 
-VOTM is a full-featured voting manager desktop app which is also my first project, It's developed to automate the labrous procedure of voting which happens once a year in schools for some specific posts which are appointed to those students with most votes in their respective posts, earlier this was done through ballot box system which tooks a lot of time and work to yield results contrary to what votm can provide.
+VOTM is a full-featured voting manager desktop app which is also my first project to ever work on, It's developed to automate the laborious procedure of voting which happens once every year in schools(at least in my school!) for some specific posts(for eg. HeadBoy/Girl, etc.) which are appointed to those students with the most votes attained in the respective posts they're competing for, earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what VOTM or automation can offer with ease.
+>Sorry for the terrible grammer, I think?
 
 # Screenshots
 ![scrn_a](https://user-images.githubusercontent.com/57829219/76254956-57155b80-6273-11ea-82ec-984872c89c4a.png)
