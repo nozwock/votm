@@ -23,12 +23,13 @@
 </p>
 
 <p align="center">
+    <b><code>VOTM</code> is a full-featured voting manager desktop app for school use</b><br/>
     <sub>
-        <code>VOTM</code> is a full-featured voting manager desktop app which is also my first project to ever work on, It's developed to automate the laborious procedure of voting which happens once every year in schools(at least in my school!) for some specific posts(for eg. HeadBoy/Girl, etc.) which are appointed to those students with the most votes attained in the respective posts they're competing for, earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <code>VOTM</code> or automation can offer with ease.
+        It also happens to be my first project to ever work on, It's developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some specific posts (for eg. HeadBoy/Girl, etc.) which are appointed to those students with the most votes attained in the respective posts they're competing for, earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <code>VOTM</code> or automation can offer with ease.
     </sub>
 </p>
 
-> Sorry for the terrible grammer, I think?
+<p align="center"><sub><code>Sorry for the terrible grammer, I guess?</code></sub></p>
 
 # Screenshots
 ![scrn_a](https://user-images.githubusercontent.com/57829219/76254956-57155b80-6273-11ea-82ec-984872c89c4a.png)
