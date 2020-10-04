@@ -1,5 +1,4 @@
 """
-A logical subset part of the main application.
 Copyright (C) 2019 Sagar Kumar
 
     This program is free software: you can redistribute it and/or modify
@@ -16,98 +15,16 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import sys, os
-from random import choice
-from string import digits
+import os
+import sys
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto import Random
 from collections import OrderedDict
-from tkinter import messagebox as mg
 from base64 import b64encode, b64decode
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.etc import SECRET_KEY
 from winreg import (ConnectRegistry, OpenKey, SetValueEx, DeleteKeyEx,
                     QueryValueEx, CloseKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_EXPAND_SZ)
-
-
-class Tokens:
-    """Handles Tokens generation, saving and to get a specific token."""
-    LOC = os.getenv('ALLUSERSPROFILE')+r'\Votm'
-    FL = 'tkn.vcon'
-
-    def __init__(self, master, entries=None):
-        self.master = master
-        self.crypt = Crypt()
-        self.reg = Reg()
-
-        if entries != None:
-            try:
-                self.entries = int(entries)
-                mg.showwarning(
-                    'Voting Master', 'The previous Tokens are about to be overwriiten if exists.', parent=master)
-            except:
-                mg.showerror('Error', 'Input is not valid.', parent=master)
-                raise ValueError ('Invalid Input')
-
-    def gen(self):
-        def key_gen(size=8, chars=digits):
-            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-                try:
-                    self.tkn_read = eval(f.read())
-                    self.tkn_read = self.crypt.decrypt(
-                        str(self.tkn_read), self.reg.get(SECRET_KEY))
-                except:
-                    self.tkn_read = []
-
-            key = ''.join(choice(chars) for _ in range(size))
-            if key not in self.tkn_read:
-                return key
-            else:
-                return None
-
-        try:
-            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'w') as f:
-                tkn = []
-                for _ in range(self.entries):
-                    val = key_gen()
-                    if val is not None:
-                        tkn.append(val)
-                tkn = self.crypt.encrypt(str(tkn), self.reg.get(SECRET_KEY))
-                f.write(f'{tkn}')
-            mg.showinfo(
-                'Voting Master', f'{self.entries} Token(s) Generated.', parent=self.master)
-        except:
-            pass
-
-    def get(self, val: str):
-        with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-            tkn_lst = eval(self.crypt.decrypt(str(f.read()), self.reg.get(SECRET_KEY)))
-        try:
-            ind = tkn_lst.index(val)
-            del tkn_lst[ind]
-            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'w') as f:
-                tkn_lst = self.crypt.encrypt(str(tkn_lst), self.reg.get(SECRET_KEY))
-                f.write(str(tkn_lst))
-            return True
-        except:
-            mg.showwarning(
-                'Error', 'The Key is either wrong or has been used.', parent=self.master)
-            return False
-
-    def check(self):
-        try:
-            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
-                tkn_lst = f.read()
-                tkn_lst = eval(self.crypt.decrypt(str(tkn_lst), self.reg.get(SECRET_KEY)))
-            if len(tkn_lst) == 0:
-                mg.showerror('Error', 'No Tokens in the Token file.',
-                             parent=self.master)
-                return False
-        except:
-            mg.showerror('Error', 'Token file doesn\'t exists!',
-                         parent=self.master)
-            return False
 
 
 #! CBC method with PKCS#7 padding
@@ -194,7 +111,7 @@ class Dicto:
     def __repr__(self):
         return repr(dict(self.state))
 
-
+#For Windows ONLY
 class Reg:
     def __init__(self):
         self.path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'

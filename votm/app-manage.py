@@ -33,10 +33,11 @@ from string import ascii_letters
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from utils.model import Dicto, Reg, Tokens, Crypt
+from component.model import Tokens, Default_Config, Cand_Check, Write_Default, Access_Config
+from component.ui import Ent_Box, About, Tr_View
+from component.db import Sql_init, Yr_fle
 from utils.etc import SECRET_KEY, ENV_KEY, __author__, __version__
-from utils.view import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
-                     Cand_Check, Ent_Box, About, Tr_View)
+from utils.tools import Dicto, Reg, Crypt
 
 
 class Root(tk.Tk):

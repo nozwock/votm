@@ -27,9 +27,10 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from winerror import ERROR_ALREADY_EXISTS
-from utils.model import Tokens
 from utils.etc import __author__, __version__
-from utils.view import Write_Default, Access_Config, Sql_init, Ent_Box, About
+from component.model import Tokens, Write_Default, Access_Config
+from component.db import Sql_init
+from component.ui import Ent_Box, About
 
 
 class Root(tk.Tk):

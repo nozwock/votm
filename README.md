@@ -57,4 +57,4 @@ You can manually download the latest release [here](https://github.com/sgrkmr/vo
  ```sh
  $ pip install -r requirements.txt
  ```
- >**NOTE:** run `votm_edt.py` to configure the voting session for the first time and run `votm_vte.py` for voting.
+ >**NOTE:** run `app-manage.py` to configure the voting session for the first time and run `app-vote.py` for voting.
