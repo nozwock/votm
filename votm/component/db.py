@@ -34,9 +34,9 @@ class Sql_init:
         Sql_init.NXT = 1
         self.yr = date.today().strftime('%Y')
         if yr:
-            self.db = rf'{Write_Default.loc}\votm_{yr}.db'
+            self.db = os.path.join(Write_Default.loc,f"votm_{yr}.db")
         else:
-            self.db = rf'{Write_Default.loc}\votm_{self.yr}.db'
+            self.db = os.path.join(Write_Default.loc,f"votm_{self.yr}.db")
 
         self.con = sql.connect(self.db, isolation_level=None)
         if _key:
@@ -227,7 +227,7 @@ class Sql_init:
         """Return list of columns, and table description."""
         yr, = args
         self.con.close()
-        db = rf'{Write_Default.loc}\votm_{yr}.db'
+        db = os.path.join(Write_Default.loc,f"votm_{yr}.db")
         con = sql.connect(db, isolation_level=None)
         cur = con.cursor()
         __dsc_sy = f'PRAGMA table_info({Sql_init.TBL_NM})'

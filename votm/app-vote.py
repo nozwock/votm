@@ -16,6 +16,7 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import os
 import sys
 import ctypes
 import win32api
@@ -43,7 +44,7 @@ class Root(tk.Tk):
         self.title('Voting Master-Vote')
         self.attributes('-alpha', 0.0)
         self.protocol('WM_DELETE_WINDOW', Win.s_cls)
-        self.ins_dat(['assets\\v_r.ico', 'assets\\bg.png'])
+        self.ins_dat([os.path.join('assets',i) for i in ['v_r.ico','bg.png']])
         if not ctypes.windll.shell32.IsUserAnAdmin():
             self.withdraw()
             self.attributes('-topmost', 1)
@@ -135,7 +136,7 @@ class Win(tk.Toplevel):
 
         if cont == Home:
             self.home.config(
-                text='Home', background='#EFEFEF', foreground='#0077CC')
+                text='Category', background='#EFEFEF', foreground='#0077CC')
             self.vote.config(
                 text='Vote', background='#0077CC', foreground='#EFEFEF')
             self.clss.config(
@@ -146,7 +147,7 @@ class Win(tk.Toplevel):
             self.clss.config(
                 text='Class', background='#EFEFEF', foreground='#0077CC')
             self.home.config(
-                text='Home', background='#0077CC', foreground='#EFEFEF')
+                text='Category', background='#0077CC', foreground='#EFEFEF')
             self.vote.config(
                 text='Vote', background='#0077CC', foreground='#EFEFEF')
             self.done.config(
@@ -155,7 +156,7 @@ class Win(tk.Toplevel):
             self.vote.config(
                 text='Vote', background='#EFEFEF', foreground='#0077CC')
             self.home.config(
-                text='Home', background='#0077CC', foreground='#EFEFEF')
+                text='Category', background='#0077CC', foreground='#EFEFEF')
             self.clss.config(
                 text='Class', background='#0077CC', foreground='#EFEFEF')
             self.done.config(
@@ -164,9 +165,9 @@ class Win(tk.Toplevel):
             self.done.config(
                 text='Done', background='#EFEFEF', foreground='#0077CC')
             self.home.config(
-                text='Home', background='#0077CC', foreground='#EFEFEF')
+                text='Category', background='#0077CC', foreground='#EFEFEF')
             self.clss.config(
-                text='Class*', background='#0077CC', foreground='#EFEFEF')
+                text='Class', background='#0077CC', foreground='#EFEFEF')
             self.vote.config(
                 text='Vote', background='#0077CC', foreground='#EFEFEF')
 
@@ -217,16 +218,17 @@ class Win(tk.Toplevel):
                           relief='flat', borderwidth=1, foreground='#EFEFEF', height=2, command=lambda: About(self, icn=Root.DATAFILE[0]), font=('Segoe UI', 10, 'bold'))
         bthlb.pack(side='left', fill='x', expand=1, anchor='s')
         #? NAVBAR's Content______________________________
-        self.home = tk.Label(fl, text='⚪ Home', foreground='#FFFFFF',
+        #!Todo: Just have 1 corresponding Label at a time instead of all 4 on NAVBAR
+        self.home = tk.Label(fl, text='Category', foreground='#FFFFFF',
                              background='#0077CC', font=('Segoe UI', 16, 'bold'))
         self.home.pack(side='top', ipady=20, fill='x')
-        self.clss = tk.Label(fl, text='⚪ Class*', foreground='#FFFFFF',
+        self.clss = tk.Label(fl, text='Class', foreground='#FFFFFF',
                              background='#0077CC', font=('Segoe UI', 16, 'bold'))
         self.clss.pack(side='top', ipady=20, fill='x')
-        self.vote = tk.Label(fl, text='⚪ Vote  ', foreground='#FFFFFF',
+        self.vote = tk.Label(fl, text='Vote', foreground='#FFFFFF',
                              background='#0077CC', font=('Segoe UI', 16, 'bold'))
         self.vote.pack(side='top', ipady=20, fill='x')
-        self.done = tk.Label(fl, text='⚪ Done ', foreground='#FFFFFF',
+        self.done = tk.Label(fl, text='Done', foreground='#FFFFFF',
                              background='#0077CC', font=('Segoe UI', 16, 'bold'))
         self.done.pack(side='top', ipady=20, fill='x')
 
@@ -613,7 +615,7 @@ if __name__ == '__main__':
     mutex = win32event.CreateMutex(None, False, 'name')
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
-        Root.ins_dat(['assets\\v_r.ico'])
+        Root.ins_dat([os.path.join('assets','v_r.ico')])
         msg = tk.Tk()
         msg.attributes('-topmost', 1)
         msg.withdraw()

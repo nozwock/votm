@@ -19,6 +19,7 @@ import os
 import sys
 from random import choice
 from string import digits
+from platform import system
 from tkinter import messagebox as mg
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.tools import Reg, Crypt
@@ -27,9 +28,12 @@ from utils.etc import SECRET_KEY, ENV_KEY
 
 class Tokens:
     """Handles Tokens generation, saving and to get a specific token."""
-    LOC = os.path.join(os.getenv('ALLUSERSPROFILE'),'Votm')
+    if system().lower()=='windows':
+    	LOC = os.path.join(os.getenv('ALLUSERSPROFILE'),'votm-data')
+    else:
+   		LOC = os.path.join(os.path.expanduser('~'),'.votm-data')
     FL = 'tkn.vcon'
-    TPath=os.path.join(LOC,FL)
+    TPath = os.path.join(LOC,FL)
 
     def __init__(self, master, entries=None):
         self.master = master
@@ -125,7 +129,11 @@ class Default_Config:
 class Write_Default:
     """Writes Default config file which doesn't exist already, in the /ProgramData directory."""
     exist = 0
-    loc = os.getenv('ALLUSERSPROFILE')+r'\Votm'
+    loc = None
+    if system().lower()=='windows':
+    	loc = os.path.join(os.getenv('ALLUSERSPROFILE'),'votm-data')
+    else:
+   		loc = os.path.join(os.path.expanduser('~'),'.votm-data')
     fles = ['cand.vcon', 'clss.vcon']
 
     def __init__(self):
@@ -134,7 +142,7 @@ class Write_Default:
         self.reg = Reg()
         if not os.path.exists(Write_Default.loc):
             os.mkdir(Write_Default.loc)
-        eval_lst = [os.path.exists(rf'{Write_Default.loc}\{f}')
+        eval_lst = [os.path.exists(os.path.join(Write_Default.loc,f))
                     == False for f in Write_Default.fles]
 
         try:
@@ -168,13 +176,13 @@ class Write_Default:
 
     def wrt_cand(self):
         """Writes Candidate file."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[0]}', 'w') as f:
+        with open(os.path.join(Write_Default.loc,Write_Default.fles[0]), 'w') as f:
             f.write(self.reg.get(SECRET_KEY)+self.crypt.encrypt(
                 Default_Config.candidate_config, self.reg.get(SECRET_KEY)))
 
     def wrt_clss(self):
         """Writes Class&Sec file."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[1]}', 'w') as f:
+        with open(os.path.join(Write_Default.loc,Write_Default.fles[1]), 'w') as f:
             f.write(self.reg.get(SECRET_KEY)+self.crypt.encrypt(
                 Default_Config.clss_config, self.reg.get(SECRET_KEY)))
 
@@ -189,10 +197,10 @@ class Access_Config:
         self.reg = Reg()
         bse_str = self.reg.get(ENV_KEY)
         bse_str = self.crypt.decrypt(bse_str, self.reg.get(SECRET_KEY))
-        with open(rf'{loc}\{fles[0]}', 'r') as f:
+        with open(os.path.join(loc,fles[0]), 'r') as f:
             cand_str = f.read()
             cand_str = self.crypt.decrypt(cand_str[16:], cand_str[:16])
-        with open(rf'{loc}\{fles[1]}', 'r') as f:
+        with open(os.path.join(loc,fles[1]), 'r') as f:
             clss_str = f.read()
             clss_str = self.crypt.decrypt(clss_str[16:], clss_str[:16])
 

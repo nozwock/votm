@@ -16,6 +16,7 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import os
 import sys
 import ctypes
 import win32api
@@ -49,8 +50,8 @@ class Root(tk.Tk):
         ttk.Style().theme_use('vista')
         self.title('Voting Master-Edit')
         self.attributes('-alpha', 0.0)
-        self.ins_dat(['assets\\v_r.ico', 'assets\\ttle.png', 'assets\\edtw.png', 'assets\\rslw.png',
-                      'assets\\sttw.png', 'assets\\edtb.png', 'assets\\rslb.png', 'assets\\sttb.png'])
+        self.ins_dat([os.path.join('assets',i) for i in ['v_r.ico','ttle.png',
+            'edtw.png','rslw.png','sttw.png','edtb.png','rslb.png','sttb.png']])
         if not ctypes.windll.shell32.IsUserAnAdmin():
             self.withdraw()
             self.attributes('-topmost', 1)
@@ -287,7 +288,7 @@ class Edit(tk.Frame):
     @staticmethod
     def wrt(fle: int, cfg: str):
         """Writes Default config. files."""
-        with open(rf'{Write_Default.loc}\{Write_Default.fles[fle]}', 'w') as f:
+        with open(os.path.join(Write_Default.loc,Write_Default.fles[fle]), 'w') as f:
             cfg = Crypt().encrypt(str(cfg), Reg().get(SECRET_KEY))
             f.write(cfg)
             f.flush()
@@ -1398,11 +1399,11 @@ class Settings(tk.Frame):
         dest = askdirectory(parent=self, initialdir=fdir)
         if dest != '':
             try:
-                src = rf'{Write_Default.loc}/'
+                src = Write_Default.loc
                 fles = Write_Default.fles
                 for i in fles:
-                    fsrc = src+i
-                    copyfile(fsrc, dest+f'/{i}')
+                    fsrc = os.path.join(src,i)
+                    copyfile(fsrc, os.path.join(dest,i))
                 mg.showinfo(
                     'Voting Master', f'Settings Exported successfuly to-\n{dest}', parent=self)
             except:
@@ -1415,13 +1416,14 @@ class Settings(tk.Frame):
             parent=self, initialdir=fdir, filetypes=(('Settings Files', '*.vcon'),))
         if fnmes != '':
             try:
-                dest = rf'{Write_Default.loc}/'
+                dest = Write_Default.loc
+                #eg. ('D:/cand.vcon', 'D:/clss.vcon')
                 fsrc = [i for i in fnmes if i.split(
                     '/')[-1] in Write_Default.fles]
                 for i in fsrc:
-                    copyfile(i, dest+(i.split('/')[-1]))
-                repr_dir = ''.join(fsrc[0].split('/')[:-1])+'/'
+                    copyfile(i, os.path.join(dest,i.split('/')[-1]))
                 if fsrc != []:
+                    repr_dir = ''.join(fsrc[0].split('/')[:-1])+'/'
                     mg.showinfo(
                         'Voting Master', f'Settings Imported successfuly from-\n{repr_dir}', parent=self)
             except:
@@ -1437,12 +1439,12 @@ class Settings(tk.Frame):
             btn.config(state='disabled')
             ind = yr.index(sel_yr)
             fl_dl = fle[ind]
-            remove(rf'{Write_Default.loc}\{fl_dl}')
+            remove(os.path.join(Write_Default.loc,fl_dl))
             bx_up.config(values=Yr_fle().yr)
 
     def tkn_del(self):
         if mg.askokcancel('Voting Master', 'You are about to delete the Token file!', parent=self):
-            remove(rf'{Tokens.LOC}\{Tokens.FL}')
+            remove(Tokens.TPath)
 
     def chng_pswd(self, pswd: tk.Entry):
         """Changes the password in base config file."""
@@ -1786,7 +1788,7 @@ class Token_Show(Result_Show_Sep):
             1, label='Export to Excel', command=lambda: self._exp_exl())
         try:
             self.tkns = []
-            with open(rf'{Tokens.LOC}\{Tokens.FL}', 'r') as f:
+            with open(Tokens.TPath, 'r') as f:
                 _tkns = ''
                 try:
                     tkn_lst = eval(Crypt().decrypt(str(f.read()), Reg().get(SECRET_KEY)))
@@ -1845,7 +1847,7 @@ if __name__ == '__main__':
     mutex = win32event.CreateMutex(None, False, 'name')
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
-        Root.ins_dat(['assets\\v_r.ico'])
+        Root.ins_dat([os.path.join('assets','v_r.ico')])
         msg = tk.Tk()
         msg.attributes('-topmost', 1)
         msg.withdraw()
