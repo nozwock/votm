@@ -33,9 +33,9 @@ from string import ascii_letters
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-from votmapi.logic import Dicto, Reg, Tokens, Crypt
-from votmapi.__main__ import SECRET_KEY, ENV_KEY, __author__, __version__
-from votmapi import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
+from utils.model import Dicto, Reg, Tokens, Crypt
+from utils.etc import SECRET_KEY, ENV_KEY, __author__, __version__
+from utils.view import (Default_Config, Write_Default, Access_Config, Sql_init, Yr_fle,
                      Cand_Check, Ent_Box, About, Tr_View)
 
 
@@ -48,8 +48,8 @@ class Root(tk.Tk):
         ttk.Style().theme_use('vista')
         self.title('Voting Master-Edit')
         self.attributes('-alpha', 0.0)
-        self.ins_dat(['res\\v_r.ico', 'res\\ttle.png', 'res\\edtw.png', 'res\\rslw.png',
-                      'res\\sttw.png', 'res\\edtb.png', 'res\\rslb.png', 'res\\sttb.png'])
+        self.ins_dat(['assets\\v_r.ico', 'assets\\ttle.png', 'assets\\edtw.png', 'assets\\rslw.png',
+                      'assets\\sttw.png', 'assets\\edtb.png', 'assets\\rslb.png', 'assets\\sttb.png'])
         if not ctypes.windll.shell32.IsUserAnAdmin():
             self.withdraw()
             self.attributes('-topmost', 1)
@@ -1844,7 +1844,7 @@ if __name__ == '__main__':
     mutex = win32event.CreateMutex(None, False, 'name')
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
-        Root.ins_dat(['res\\v_r.ico'])
+        Root.ins_dat(['assets\\v_r.ico'])
         msg = tk.Tk()
         msg.attributes('-topmost', 1)
         msg.withdraw()

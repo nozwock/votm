@@ -27,8 +27,8 @@ from datetime import date
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from votmapi.logic import Crypt, Reg
-from votmapi.__main__ import SECRET_KEY, ENV_KEY, __version__, __author__, __license__
+from utils.model import Crypt, Reg
+from utils.etc import SECRET_KEY, ENV_KEY, __version__, __author__, __license__
 
 #! have a look at line_538 when compiling.
 class Sql_init:
@@ -535,9 +535,9 @@ class About(tk.Toplevel):
         about_tp = tk.Frame(about_rt, bd=2, relief='groove')
         about_tp.pack(side='top', fill='both', expand=1)
 
-        DATAFILE = '..\\res\\logo.png'
+        DATAFILE = '..\\assets\\logo.png'
         #!###################################################################
-        #!## Change above to 'res\\logo.png' while using with pyinstaller ###
+        #!## Change above to 'assets\logo.png' while using with pyinstaller ###
         #!###################################################################
         if not hasattr(sys, 'frozen'):
             DATAFILE = os.path.join(os.path.dirname(__file__), DATAFILE)

@@ -25,8 +25,8 @@ from Crypto import Random
 from collections import OrderedDict
 from tkinter import messagebox as mg
 from base64 import b64encode, b64decode
-from votmapi.__main__ import SECRET_KEY
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.etc import SECRET_KEY
 from winreg import (ConnectRegistry, OpenKey, SetValueEx, DeleteKeyEx,
                     QueryValueEx, CloseKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_EXPAND_SZ)
 
