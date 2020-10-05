@@ -22,16 +22,26 @@ from Crypto.Hash import SHA256
 from Crypto import Random
 from collections import OrderedDict
 from base64 import b64encode, b64decode
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from winreg import (ConnectRegistry, OpenKey, SetValueEx, DeleteKeyEx,
-                    QueryValueEx, CloseKey, HKEY_LOCAL_MACHINE, KEY_ALL_ACCESS, REG_EXPAND_SZ)
+from winreg import (
+    ConnectRegistry,
+    OpenKey,
+    SetValueEx,
+    DeleteKeyEx,
+    QueryValueEx,
+    CloseKey,
+    HKEY_LOCAL_MACHINE,
+    KEY_ALL_ACCESS,
+    REG_EXPAND_SZ,
+)
 
 
 #! CBC method with PKCS#7 padding
 class Crypt:
     def __init__(self, salt=Random.new().read(AES.block_size)):
         self.salt = salt
-        self.enc_dec_method = 'latin-1'
+        self.enc_dec_method = "latin-1"
 
     def encrypt(self, src, key, encode=True):
         src = src.encode()
@@ -46,9 +56,9 @@ class Crypt:
         if decode:
             str_tmp = b64decode(src.encode(self.enc_dec_method))
         key = SHA256.new(key.encode()).digest()
-        salt = str_tmp[:AES.block_size]
+        salt = str_tmp[: AES.block_size]
         aes_obj = AES.new(key, AES.MODE_CBC, salt)
-        str_dec = aes_obj.decrypt(str_tmp[AES.block_size:])
+        str_dec = aes_obj.decrypt(str_tmp[AES.block_size :])
         padd = str_dec[-1]
         if str_dec[-padd:] != bytes([padd]) * padd:
             pass
@@ -78,7 +88,7 @@ class Dicto:
                     break
         else:
             flag = 1
-            for i in range(-1, -len(dict(self.state))-1, -1):
+            for i in range(-1, -len(dict(self.state)) - 1, -1):
                 if keys[i] == keys[pos]:
                     pos = keys[i]
                     break
@@ -103,7 +113,7 @@ class Dicto:
             self.state = self.dict
             return OrderedDict(self.dict)
         except:
-            print('Error, No such key exists.')
+            print("Error, No such key exists.")
 
     def get(self):
         return dict(self.state)
@@ -111,10 +121,11 @@ class Dicto:
     def __repr__(self):
         return repr(dict(self.state))
 
-#For Windows ONLY
+
+# For Windows ONLY
 class Reg:
     def __init__(self):
-        self.path = r'SYSTEM\CurrentControlSet\Control\Session Manager\Environment'
+        self.path = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
         self.reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
         self.key = OpenKey(self.reg, self.path, 0, KEY_ALL_ACCESS)
 
