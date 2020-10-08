@@ -24,9 +24,6 @@ Copyright (C) 2019 Sagar Kumar
 
 import os
 
-__author__ = "Sagar Kumar"
-__version__ = "1.0.8"
-
 ENV_KEY = "BASE_VCON_CONFIG"
 SECRET_KEY = "SEC_VCON_KEY"
 

@@ -20,8 +20,7 @@ import sys
 import sqlite3 as sql
 from datetime import date
 from tkinter import messagebox as mg
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from component.model import Write_Default, Access_Config
+from .model import Write_Default, Access_Config
 
 
 class Sql_init:

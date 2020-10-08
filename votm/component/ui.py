@@ -25,10 +25,10 @@ from datetime import date
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from component.model import Write_Default, Access_Config
-from utils.etc import __version__, __author__, __license__
-from utils.tools import Reg
+from .model import Write_Default, Access_Config
+from votm.utils.tools import Reg
+from votm.utils.etc import __license__
+from votm import __version__, __author__
 
 
 class Tr_View(tk.Frame):

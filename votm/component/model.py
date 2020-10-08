@@ -22,9 +22,8 @@ from string import digits
 from platform import system
 from tkinter import messagebox as mg
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from utils.tools import Reg, Crypt
-from utils.etc import SECRET_KEY, ENV_KEY
+from votm.utils.tools import Reg, Crypt
+from votm.utils.etc import SECRET_KEY, ENV_KEY
 
 
 class Tokens:
