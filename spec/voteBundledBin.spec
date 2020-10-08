@@ -6,8 +6,8 @@ from pathlib import Path
 # inserting current dir where votm package exists
 sys.path.insert(0, str(Path(".").resolve()))
 
-from spec_data import *
-from spec_data import __version__
+from spec._data import *
+from spec._data import __version__
 
 block_cipher = None
 

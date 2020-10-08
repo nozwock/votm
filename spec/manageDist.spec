@@ -6,13 +6,14 @@ from pathlib import Path
 # inserting current dir where votm package exists
 sys.path.insert(0, str(Path(".").resolve()))
 
-from spec_data import *
-from spec_data import __version__
+from spec._data import *
+from spec._data import __version__
 
 block_cipher = None
 
+
 a = Analysis(
-    [BASE_DIR.resolve().joinpath("vote.py")],
+    [BASE_DIR.resolve().joinpath("manage.py")],
     pathex=[BASE_DIR_ABS],
     binaries=[],
     datas=[],
@@ -31,7 +32,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="vote",
+    name="manage",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -42,16 +43,11 @@ exe = EXE(
 )
 coll = COLLECT(
     exe,
-    a.binaries
-    + [
-        DATA_FILES[i]
-        for i in DATA_FILES
-        if i in ["v_r.ico", "bg.png", "logo.png", "LICENSE"]
-    ],
+    a.binaries + DATA_FILES_ALL,
     a.zipfiles,
     a.datas,
     strip=False,
     upx=True,
     upx_exclude=["vcruntime140.dll"],
-    name="votm_dist_" + __version__ + "_vote",
+    name="votm_dist_" + __version__ + "_manage",
 )

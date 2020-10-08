@@ -2,16 +2,14 @@ import sys
 from pathlib import Path
 
 # inserting current dir where votm package exists
-sys.path.insert(0, str(Path(__file__).resolve()))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from votm import __version__
 
 # locations
-BASE_DIR = Path(__file__).resolve().parent
-# print(BASE_DIR)
+BASE_DIR = Path(__file__).resolve().parents[1]
 BASE_DIR_ABS = str(BASE_DIR)
 PKG_DIR = BASE_DIR.joinpath("votm")
-# print(PKG_DIR)
 ASSETS_DIR = PKG_DIR.joinpath("assets")
 LICENSE_FILE = BASE_DIR.joinpath("LICENSE")
 # data
@@ -35,5 +33,3 @@ ICON_PATH = str(PKG_DIR.resolve().joinpath("assets/v_r.ico"))
 DATA_FILES_ALL = list(DATA_FILES.values())
 # cleanup
 del LICENSE_FILE, ASSETS_DIR
-
-# print(DATA_FILES)
