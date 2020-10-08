@@ -2500,7 +2500,8 @@ class Token_Show(Result_Show_Sep):
             mg.showinfo("Voting Master", "File has been Saved.", parent=self)
 
 
-if __name__ == "__main__":
+def main():
+    global app
     mutex = win32event.CreateMutex(None, False, "name")
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
@@ -2519,3 +2520,7 @@ if __name__ == "__main__":
 
     app = Win(root)
     app.mainloop()
+
+
+if __name__ == "__main__":
+    main()

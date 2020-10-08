@@ -748,7 +748,8 @@ class Done_1(Done):
         bcktoclss.pack(side="left")
 
 
-if __name__ == "__main__":
+def main():
+    global app
     mutex = win32event.CreateMutex(None, False, "name")
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
@@ -767,3 +768,7 @@ if __name__ == "__main__":
 
     app = Win(root)
     app.mainloop()
+
+
+if __name__ == "__main__":
+    main()
