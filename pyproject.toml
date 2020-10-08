@@ -16,8 +16,7 @@ exclude = '''
     | buck-out
     | build
     | dist
-
-    | votm\component\db.py
   )/                     # the root of the project
+  | db.\py #sensitive of single quote mark & double quote mark, will fix that later
 )
 '''
