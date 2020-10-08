@@ -28,6 +28,7 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from winerror import ERROR_ALREADY_EXISTS
+from .locations import ASSETS_PATH
 from .component.model import Tokens, Write_Default, Access_Config
 from .component.db import Sql_init
 from .component.ui import Ent_Box, About
@@ -45,7 +46,7 @@ class Root(tk.Tk):
         self.title("Voting Master-Vote")
         self.attributes("-alpha", 0.0)
         self.protocol("WM_DELETE_WINDOW", Win.s_cls)
-        self.ins_dat([os.path.join("assets", i) for i in ["v_r.ico", "bg.png"]])
+        self.ins_dat([ASSETS_PATH.joinpath(i) for i in ["v_r.ico", "bg.png"]])
         if not ctypes.windll.shell32.IsUserAnAdmin():
             self.withdraw()
             self.attributes("-topmost", 1)
@@ -751,7 +752,7 @@ if __name__ == "__main__":
     mutex = win32event.CreateMutex(None, False, "name")
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
-        Root.ins_dat([os.path.join("assets", "v_r.ico")])
+        Root.ins_dat([ASSETS_PATH.joinpath("v_r.ico")])
         msg = tk.Tk()
         msg.attributes("-topmost", 1)
         msg.withdraw()

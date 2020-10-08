@@ -34,6 +34,7 @@ from string import ascii_letters
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
+from .locations import ASSETS_PATH
 from .component.model import (
     Tokens,
     Default_Config,
@@ -60,7 +61,7 @@ class Root(tk.Tk):
         self.attributes("-alpha", 0.0)
         self.ins_dat(
             [
-                os.path.join("assets", i)
+                ASSETS_PATH.joinpath(i)
                 for i in [
                     "v_r.ico",
                     "ttle.png",
@@ -2503,7 +2504,7 @@ if __name__ == "__main__":
     mutex = win32event.CreateMutex(None, False, "name")
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:
-        Root.ins_dat([os.path.join("assets", "v_r.ico")])
+        Root.ins_dat([ASSETS_PATH.joinpath("v_r.ico")])
         msg = tk.Tk()
         msg.attributes("-topmost", 1)
         msg.withdraw()

@@ -15,20 +15,11 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-"""
-*Version 1.0.8 changes:
-!> Dialog to use custom name for the merged database.
-!> Dialog to choose the database from which the merge file is to be created.
-!> Fixed merged db's datatypes.
-"""
-
 import os
+from votm.locations import LICNESE_PATH
 
 ENV_KEY = "BASE_VCON_CONFIG"
 SECRET_KEY = "SEC_VCON_KEY"
 
-__up = lambda i: os.path.dirname(i)
-__path = __up(__up(__up(os.path.abspath(__file__))))
-
-with open(os.path.join(__path, "LICENSE"), "r") as f:
+with open(LICNESE_PATH, "r") as f:
     __license__ = f.read()

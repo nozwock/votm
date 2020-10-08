@@ -23,7 +23,6 @@ from Crypto import Random
 from collections import OrderedDict
 from base64 import b64encode, b64decode
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from winreg import (
     ConnectRegistry,
     OpenKey,
