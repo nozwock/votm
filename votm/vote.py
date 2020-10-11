@@ -751,7 +751,7 @@ class Done_1(Done):
 
 
 def main():
-    global app
+    global app, root
     mutex = win32event.CreateMutex(None, False, "name")
     last_error = win32api.GetLastError()
     if last_error == ERROR_ALREADY_EXISTS:

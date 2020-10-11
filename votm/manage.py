@@ -415,7 +415,9 @@ class Edit(tk.Frame):
     def wrt(fle: int, cfg: str):
         """Writes Default config. files."""
         with open(os.path.join(Write_Default.loc, Write_Default.fles[fle]), "w") as f:
-            cfg = Crypt().encrypt(str(cfg), Reg().get(SECRET_KEY))
+            cfg = Reg().get(SECRET_KEY) + Crypt().encrypt(
+                str(cfg), Reg().get(SECRET_KEY)
+            )
             f.write(cfg)
             f.flush()
 

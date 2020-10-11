@@ -106,9 +106,7 @@ class Access_Config:
         bse_str = self.crypt.decrypt(bse_str, self.reg.get(SECRET_KEY))
         with open(os.path.join(loc, fles[0]), "r") as f:
             cand_str = f.read()
-            print(cand_str)
             cand_str = self.crypt.decrypt(cand_str[16:], cand_str[:16])
-            print(cand_str)
         with open(os.path.join(loc, fles[1]), "r") as f:
             clss_str = f.read()
             clss_str = self.crypt.decrypt(clss_str[16:], clss_str[:16])
