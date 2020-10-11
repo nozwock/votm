@@ -36,7 +36,7 @@ It also happens to be my first project to ever work on, It's developed to automa
 
 | Platform | Version | Download |
 | :---: | :---: | :---: |
-| Windows_x86 | `1.0.9` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.0.9/votm_x86_32_1.0.9.exe">Download</a></kbd></br> |
+| Windows_x86 | `1.1.0` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.1.0/votm_x86_32_1.1.0.exe">Download</a></kbd></br> |
 
 ## Development
 
