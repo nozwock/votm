@@ -36,17 +36,15 @@ from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
 
 from .locations import ASSETS_PATH
-from .core.model import Tokens
-from .core._config import (
+from .config._config import (
     Default_Config,
     Write_Default,
     Access_Config,
-    SECRET_KEY,
-    ENV_KEY,
 )
+from .config.env import SECRET_KEY, ENV_KEY
 from .core.ui import Ent_Box, About, Tr_View
 from .core.db import Sql_init, Yr_fle
-from .utils.extras import Dicto, Reg, Crypt
+from .utils.extras import Dicto, Reg, Crypt, Tokens
 from .utils.helpers import cand_check
 from . import __author__, __version__
 

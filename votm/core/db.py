@@ -21,7 +21,7 @@ import sqlite3 as sql
 from datetime import date
 from tkinter import messagebox as mg
 
-from ._config import Write_Default, Access_Config
+from votm.config._config import Write_Default, Access_Config
 
 
 class Sql_init:

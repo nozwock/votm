@@ -1,4 +1,4 @@
-from votm.core._config import Access_Config
+from votm.config._config import Access_Config
 
 
 def cand_check(key):

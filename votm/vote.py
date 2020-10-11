@@ -30,10 +30,10 @@ from tkinter import messagebox as mg
 from winerror import ERROR_ALREADY_EXISTS
 
 from .locations import ASSETS_PATH
-from .core.model import Tokens
-from .core._config import Write_Default, Access_Config
+from .config._config import Write_Default, Access_Config
 from .core.db import Sql_init
 from .core.ui import Ent_Box, About
+from .utils.extras import Tokens
 from . import __author__, __version__
 
 
@@ -743,7 +743,7 @@ class Done_1(Done):
         bcktovote.pack(side="left", padx=(0, 40))
         bcktoclss = ttk.Button(
             self.lowos,
-            text="Change Class*",
+            text="Change Class",
             style="1.TButton",
             command=self.bck_chng_clss_save,
         )

@@ -2,9 +2,7 @@ import os
 from platform import system
 
 from votm.utils.extras import Reg, Crypt
-
-ENV_KEY = "BASE_VCON_CONFIG"
-SECRET_KEY = "SEC_VCON_KEY"
+from .env import ENV_KEY, SECRET_KEY
 
 
 class Default_Config:

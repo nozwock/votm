@@ -25,7 +25,7 @@ from datetime import date
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 
-from ._config import Write_Default, Access_Config
+from votm.config._config import Write_Default, Access_Config
 from votm.utils.extras import Reg
 from votm import __version__, __author__, __license__
 
