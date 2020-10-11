@@ -25,10 +25,9 @@ from datetime import date
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 
-from .model import Write_Default, Access_Config
-from votm.utils.tools import Reg
-from votm.utils.etc import __license__
-from votm import __version__, __author__
+from ._config import Write_Default, Access_Config
+from votm.utils.extras import Reg
+from votm import __version__, __author__, __license__
 
 
 class Tr_View(tk.Frame):

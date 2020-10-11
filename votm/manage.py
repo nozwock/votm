@@ -34,18 +34,20 @@ from string import ascii_letters
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
 from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
+
 from .locations import ASSETS_PATH
-from .component.model import (
-    Tokens,
+from .core.model import Tokens
+from .core._config import (
     Default_Config,
-    Cand_Check,
     Write_Default,
     Access_Config,
+    SECRET_KEY,
+    ENV_KEY,
 )
-from .component.ui import Ent_Box, About, Tr_View
-from .component.db import Sql_init, Yr_fle
-from .utils.etc import SECRET_KEY, ENV_KEY
-from .utils.tools import Dicto, Reg, Crypt
+from .core.ui import Ent_Box, About, Tr_View
+from .core.db import Sql_init, Yr_fle
+from .utils.extras import Dicto, Reg, Crypt
+from .utils.helpers import cand_check
 from . import __author__, __version__
 
 
@@ -556,7 +558,7 @@ class Candidates(tk.Frame):
             lambda event: (
                 self.cand_vw_ed_cand.config(
                     values=Access_Config().cand_config[
-                        Cand_Check(self.cand_vw_ed_pst.get()).get()
+                        cand_check(self.cand_vw_ed_pst.get())
                     ]
                 ),
                 self.cand_vw_ed_cand.set(""),
@@ -585,7 +587,7 @@ class Candidates(tk.Frame):
             lambda event: (
                 self.cand_del_cand.config(
                     values=Access_Config().cand_config[
-                        Cand_Check(self.cand_del_pst.get()).get()
+                        cand_check(self.cand_del_pst.get())
                     ]
                 ),
                 self.cand_del_cand.set(""),
@@ -612,19 +614,17 @@ class Candidates(tk.Frame):
         cfg = Access_Config().cand_config
         if val.get().strip() != "":
             try:
-                cfg[Cand_Check(key.get()).get()][
-                    cfg[Cand_Check(key.get()).get()].index(pos.get())
+                cfg[cand_check(key.get())][
+                    cfg[cand_check(key.get())].index(pos.get())
                 ] = val.get().strip()
                 #!Hell is above
                 Edit.wrt(0, cfg)
                 txt_val = pos.get()
                 pos.set(val.get())
-                pos.config(
-                    values=Access_Config().cand_config[Cand_Check(key.get()).get()]
-                )
+                pos.config(values=Access_Config().cand_config[cand_check(key.get())])
                 if self.cand_vw_ed_pst.get() == self.cand_del_pst.get():
                     self.cand_del_cand.config(
-                        values=Access_Config().cand_config[Cand_Check(key.get()).get()]
+                        values=Access_Config().cand_config[cand_check(key.get())]
                     )
                     if txt_val == self.cand_del_cand.get():
                         self.cand_del_cand.current(0)
@@ -639,13 +639,13 @@ class Candidates(tk.Frame):
         cfg = Access_Config().cand_config
         if val.get().strip() != "":
             try:
-                cfg[Cand_Check(key.get()).get()].append(val.get().strip())
+                cfg[cand_check(key.get())].append(val.get().strip())
                 Edit.wrt(0, cfg)
                 self.cand_del_cand.config(
-                    values=Access_Config().cand_config[Cand_Check(key.get()).get()]
+                    values=Access_Config().cand_config[cand_check(key.get())]
                 )
                 self.cand_vw_ed_cand.config(
-                    values=Access_Config().cand_config[Cand_Check(key.get()).get()]
+                    values=Access_Config().cand_config[cand_check(key.get())]
                 )
                 mg.showinfo("Voting Master", "Candidate has been added.", parent=self)
             except:
@@ -657,14 +657,14 @@ class Candidates(tk.Frame):
         """Deletes value from candidate file."""
         cfg = Access_Config().cand_config
         try:
-            cfg[Cand_Check(key.get()).get()].remove(val.get())
+            cfg[cand_check(key.get())].remove(val.get())
             Edit.wrt(0, cfg)
             val.set("")
-            val.config(values=Access_Config().cand_config[Cand_Check(key.get()).get()])
+            val.config(values=Access_Config().cand_config[cand_check(key.get())])
             val.current(0)
             if self.cand_vw_ed_pst.get() == self.cand_del_pst.get():
                 self.cand_vw_ed_cand.config(
-                    values=Access_Config().cand_config[Cand_Check(key.get()).get()]
+                    values=Access_Config().cand_config[cand_check(key.get())]
                 )
                 self.cand_vw_ed_cand.current(0)
                 self.cand_vw_ed_ent.delete(0, "end")

@@ -28,10 +28,12 @@ from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from winerror import ERROR_ALREADY_EXISTS
+
 from .locations import ASSETS_PATH
-from .component.model import Tokens, Write_Default, Access_Config
-from .component.db import Sql_init
-from .component.ui import Ent_Box, About
+from .core.model import Tokens
+from .core._config import Write_Default, Access_Config
+from .core.db import Sql_init
+from .core.ui import Ent_Box, About
 from . import __author__, __version__
 
 

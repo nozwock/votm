@@ -20,7 +20,8 @@ import sys
 import sqlite3 as sql
 from datetime import date
 from tkinter import messagebox as mg
-from .model import Write_Default, Access_Config
+
+from ._config import Write_Default, Access_Config
 
 
 class Sql_init:

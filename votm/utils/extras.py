@@ -15,8 +15,6 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-import os
-import sys
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 from Crypto import Random

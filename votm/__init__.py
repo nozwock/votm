@@ -1,6 +1,9 @@
+from . import locations
+
 __author__ = "Sagar Kumar"
 __version__ = "1.0.9"
+with open(locations.LICNESE_PATH, "r") as f:
+    __license__ = f.read()
 
-from . import component
+from . import core
 from . import utils
-from . import locations
