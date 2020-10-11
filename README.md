@@ -28,15 +28,15 @@ It also happens to be my first project to ever work on, It's developed to automa
 
 ---
 
-# Screenshots
+# Preview
 ![scrn_a](https://user-images.githubusercontent.com/57829219/76254956-57155b80-6273-11ea-82ec-984872c89c4a.png)
 ![scrn_b](https://user-images.githubusercontent.com/57829219/76254969-5f6d9680-6273-11ea-9eb9-6dee2628f1f0.png)
 
-## Downloads
+## Download
 
-You can manually download the **installer** for the latest release here: <kbd><a href="https://github.com/sgrkmr/votm/releases">Download</a></kbd></br>
-
->**NOTE:** **`bins`** are only available for the **`windows`** platform.
+| Platform | Version | Download |
+| :---: | :---: | :---: |
+| Windows_x86 | `1.0.9` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.0.9/votm_x86_32_1.0.9.exe">Download</a></kbd></br> |
 
 ## Development
 
@@ -59,13 +59,13 @@ $ pip install -r requirements.txt
 
 Run `manage.py` for configuration (such as Candidate Names, Tokens generation, etc.), using:
 
-`python -m votm.manage`
+`python -m votm.manage` **or** `python manage.py`
 
 #### Voting
 
 Now, you may run `vote.py` to start voting, using:
 
-`python -m votm.vote`
+`python -m votm.vote` **or** `python vote.py`
 
 ## License
 Licensed under [GPLv3+](https://opensource.org/licenses/GPL-3.0).
