@@ -605,7 +605,7 @@ class Candidates(tk.Frame):
 
     def clr(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(0, Default_Config.candidate_config)
+            Edit.wrt(0, Default_Config.CANDIDATE_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Cleared, And set to default.", parent=self)
 
@@ -890,7 +890,7 @@ class Posts(tk.Frame):
 
     def clr(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(0, Default_Config.candidate_config)
+            Edit.wrt(0, Default_Config.CANDIDATE_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Cleared, And set to default.", parent=self)
 
@@ -1159,7 +1159,7 @@ class Classes(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(1, Default_Config.clss_config)
+            Edit.wrt(1, Default_Config.CLASS_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Set to Default.", parent=self)
 
@@ -1312,7 +1312,7 @@ class Sections(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(1, Default_Config.clss_config)
+            Edit.wrt(1, Default_Config.CLASS_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Set to Default.", parent=self)
 
