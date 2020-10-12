@@ -29,14 +29,16 @@ It also happens to be my first project to ever work on, It's developed to automa
 ---
 
 # Preview
+
 ![scrn_a](https://user-images.githubusercontent.com/57829219/76254956-57155b80-6273-11ea-82ec-984872c89c4a.png)
 ![scrn_b](https://user-images.githubusercontent.com/57829219/76254969-5f6d9680-6273-11ea-9eb9-6dee2628f1f0.png)
 
 ## Download
 
+
 | Platform | Version | Download |
-| :---: | :---: | :---: |
-| Windows_x86 | `1.1.0` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.1.0/votm_x86_32_1.1.0.exe">Download</a></kbd></br> |
+| :-: | :-: | :-: |
+| Windows_x86 | `1.1.1b0` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.1.1b0/votm_x86_32_1.1.1b0.exe">Download</a></kbd></br> |
 
 ## Development
 
@@ -68,4 +70,5 @@ Now, you may run `vote.py` to start voting, using:
 `python -m votm.vote` **or** `python vote.py`
 
 ## License
+
 Licensed under [GPLv3+](https://opensource.org/licenses/GPL-3.0).
