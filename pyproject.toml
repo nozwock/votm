@@ -17,6 +17,5 @@ exclude = '''
     | build
     | dist
   )/                     # the root of the project
-  | db.\py #sensitive of single quote mark & double quote mark, will fix that later
 )
 '''

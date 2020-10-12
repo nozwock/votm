@@ -26,22 +26,26 @@ from votm.config._config import Write_Default, Access_Config
 
 class Sql_init:
     """Establishes connection with the requested database."""
-    TBL_NM = 'votm_vte'
+
+    TBL_NM = "votm_vte"
     NXT = 1
 
     def __init__(self, _key: int, yr=None, master=None):
         self.master = master
         Sql_init.NXT = 1
-        self.yr = date.today().strftime('%Y')
+        self.yr = date.today().strftime("%Y")
         if yr:
-            self.db = os.path.join(Write_Default.loc,f"votm_{yr}.db")
+            self.db = os.path.join(Write_Default.loc, f"votm_{yr}.db")
         else:
-            self.db = os.path.join(Write_Default.loc,f"votm_{self.yr}.db")
+            self.db = os.path.join(Write_Default.loc, f"votm_{self.yr}.db")
 
         self.con = sql.connect(self.db, isolation_level=None)
         if _key:
-            mg.showinfo('Connection Established',
-                        'Connection to the Database has been successfully established.', parent=master)
+            mg.showinfo(
+                "Connection Established",
+                "Connection to the Database has been successfully established.",
+                parent=master,
+            )
         self.cur = self.con.cursor()
 
     def tbl(self):
@@ -54,23 +58,30 @@ class Sql_init:
                 SEC VARCHAR(1) DEFAULT(NULL),
                 STUDENT INT DEFAULT(NULL))"""
             self.cur.execute(__tbl_sy)
-            cand_lst = [[eval(x)[-1], Access_Config().cand_config[x]]
-                        for x in list(Access_Config().cand_config.keys())]
+            cand_lst = [
+                [eval(x)[-1], Access_Config().cand_config[x]]
+                for x in list(Access_Config().cand_config.keys())
+            ]
             tbl_cand = Sql_init(0).cols(self.yr)[0]
-            tbl_cand = tbl_cand[4:len(tbl_cand)]
+            tbl_cand = tbl_cand[4 : len(tbl_cand)]
             if tbl_cand == []:
                 pass
             else:
                 chk_cand = []
                 for i in range(len(cand_lst)):
                     for j in range(len(cand_lst[i][1])):
-                        pst_cand = f'{cand_lst[i][0]}_{cand_lst[i][1][j]}'
+                        pst_cand = f"{cand_lst[i][0]}_{cand_lst[i][1][j]}"
                         chk_cand.append(pst_cand)
-                if any([i not in tbl_cand for i in chk_cand]) or any([i not in chk_cand for i in tbl_cand]):
+                if any([i not in tbl_cand for i in chk_cand]) or any(
+                    [i not in chk_cand for i in tbl_cand]
+                ):
                     ch = mg.askyesnocancel(
-                        'Voting Master', 'The Data in the Settings and in the Database are different.\nDo you want to Recreate the Database with the New Data<Yes>, Or Continue with the Data in the Database<No>?', parent=self.master)
+                        "Voting Master",
+                        "The Data in the Settings and in the Database are different.\nDo you want to Recreate the Database with the New Data<Yes>, Or Continue with the Data in the Database<No>?",
+                        parent=self.master,
+                    )
                     if ch is True:
-                        __drp_sy = f'DROP TABLE {Sql_init.TBL_NM}'
+                        __drp_sy = f"DROP TABLE {Sql_init.TBL_NM}"
                         self.cur.execute(__drp_sy)
                         self.con.close()
                         Sql_init(0).tbl()
@@ -82,8 +93,8 @@ class Sql_init:
             if EXEC:
                 for i in range(len(cand_lst)):
                     for j in range(len(cand_lst[i][1])):
-                        pst_cand = f'{cand_lst[i][0]}_{cand_lst[i][1][j]}'
-                        __tbl_upd_sy = f'ALTER TABLE {Sql_init.TBL_NM} ADD {pst_cand} INT DEFAULT(NULL)'
+                        pst_cand = f"{cand_lst[i][0]}_{cand_lst[i][1][j]}"
+                        __tbl_upd_sy = f"ALTER TABLE {Sql_init.TBL_NM} ADD {pst_cand} INT DEFAULT(NULL)"
                         self.cur.execute(__tbl_upd_sy)
         except:
             pass
@@ -104,9 +115,9 @@ class Sql_init:
             self.cur.execute(__tbl_upd_sy)
         else:  #! does not exist i.e Create
             tbl_cand, _ = Sql_init(0).cols(self.yr)
-            tbl_cand = tbl_cand[4:len(tbl_cand)]
+            tbl_cand = tbl_cand[4 : len(tbl_cand)]
             temp, _ = Sql_init(0).cols(self.yr)
-            temp = temp[4:len(temp)]
+            temp = temp[4 : len(temp)]
             for i in range(len(temp)):
                 if temp[i] in vte_lst:
                     temp[i] = 1
@@ -114,10 +125,10 @@ class Sql_init:
                     temp[i] = 0
             cand = str(tbl_cand).strip("[]")
             cand = cand.replace("'", "")
-            '''
+            """
             *This can be used too for above requirements->
             !<str>.translate(str.marktrans({"'":None}))
-            '''
+            """
             __tbl_ins_sy = f"""INSERT INTO {Sql_init.TBL_NM}(
                 STAFF, {cand}
                 )
@@ -127,7 +138,7 @@ class Sql_init:
             """
             self.cur.execute(__tbl_ins_sy)
 
-    def std_vte(self, *args: '(list, str, str)'):
+    def std_vte(self, *args: "(list, str, str)"):
         """Updates database with selected entries."""
         vte_lst, clss, sec = args
         __tbl_chk_sy = f"""SELECT CLASS, SEC FROM {Sql_init.TBL_NM}
@@ -145,9 +156,9 @@ class Sql_init:
             self.cur.execute(__tbl_upd_sy)
         else:  #! CREATE block
             tbl_cand, _ = Sql_init(0).cols(self.yr)
-            tbl_cand = tbl_cand[4:len(tbl_cand)]
+            tbl_cand = tbl_cand[4 : len(tbl_cand)]
             temp, _ = Sql_init(0).cols(self.yr)
-            temp = temp[4:len(temp)]
+            temp = temp[4 : len(temp)]
             for i in range(len(temp)):
                 if temp[i] in vte_lst:
                     temp[i] = 1
@@ -164,38 +175,76 @@ class Sql_init:
             #! Single qoutes in string above
             self.cur.execute(__tbl_ins_sy)
 
-    def result(self, *args: '(String of fields to be shown)'):
+    def result(self, *args: "(String of fields to be shown)"):
         """Provides result in the form of list containing Records & Fields."""
-        #? args -> ('STAFF, STUDENT, CLASS, SEC, HB_A, HB_C...',)
-        #* args = str(args).lstrip("('").rstrip("',)")
+        # ? args -> ('STAFF, STUDENT, CLASS, SEC, HB_A, HB_C...',)
+        # * args = str(args).lstrip("('").rstrip("',)")
         args = args[0]
-        if args.find('CLASS', 0, len(args)) == -1 and args.find('SEC', 0, len(args)) == -1 and args.find('STUDENT', 0, len(args)) == -1 and args.find('STAFF', 0, len(args)) != -1:
+        if (
+            args.find("CLASS", 0, len(args)) == -1
+            and args.find("SEC", 0, len(args)) == -1
+            and args.find("STUDENT", 0, len(args)) == -1
+            and args.find("STAFF", 0, len(args)) != -1
+        ):
             __res_sel_sy = f"""
             SELECT {args} FROM {Sql_init.TBL_NM}
             WHERE STAFF IS NOT NULL
             ORDER BY CLASS
             """
-        elif args.find('CLASS', 0, len(args)) == -1 and args.find('SEC', 0, len(args)) == -1 and args.find('STUDENT', 0, len(args)) != -1:
-            if args.find('STAFF', 0, len(args)) == -1:
-                args = repr([f'SUM({i}) AS {i}' for i in [
-                           i.strip() for i in args.split(',')]]).replace("'","").strip("[]")
+        elif (
+            args.find("CLASS", 0, len(args)) == -1
+            and args.find("SEC", 0, len(args)) == -1
+            and args.find("STUDENT", 0, len(args)) != -1
+        ):
+            if args.find("STAFF", 0, len(args)) == -1:
+                args = (
+                    repr(
+                        [
+                            f"SUM({i}) AS {i}"
+                            for i in [i.strip() for i in args.split(",")]
+                        ]
+                    )
+                    .replace("'", "")
+                    .strip("[]")
+                )
                 __res_sel_sy = f"""
                 SELECT {args} FROM {Sql_init.TBL_NM}
                 WHERE STUDENT IS NOT NULL
                 ORDER BY CLASS
                 """
             else:
-                args = repr([f'SUM({i}) AS {i}' for i in [i.strip() for i in args.split(
-                    ',')] if i != 'STAFF']).replace("'","").strip("[]")
+                args = (
+                    repr(
+                        [
+                            f"SUM({i}) AS {i}"
+                            for i in [i.strip() for i in args.split(",")]
+                            if i != "STAFF"
+                        ]
+                    )
+                    .replace("'", "")
+                    .strip("[]")
+                )
                 __res_sel_sy = f"""
                 SELECT STAFF, {args} FROM {Sql_init.TBL_NM}
                 GROUP BY STAFF
                 ORDER BY CLASS
                 """
-        elif args.find('SEC', 0, len(args)) == -1 and args.find('CLASS', 0, len(args)) != -1:
-            if args.find('STAFF', 0, len(args)) == -1:
-                args = repr([f'SUM({i}) AS {i}' for i in [i.strip() for i in args.split(
-                    ',')] if i != 'CLASS' and i != 'STAFF']).replace("'","").strip("[]")
+        elif (
+            args.find("SEC", 0, len(args)) == -1
+            and args.find("CLASS", 0, len(args)) != -1
+        ):
+            if args.find("STAFF", 0, len(args)) == -1:
+                args = (
+                    repr(
+                        [
+                            f"SUM({i}) AS {i}"
+                            for i in [i.strip() for i in args.split(",")]
+                            if i != "CLASS" and i != "STAFF"
+                        ]
+                    )
+                    .replace("'", "")
+                    .strip("[]")
+                )
                 __res_sel_sy = f"""
                 SELECT CLASS, {args} FROM {Sql_init.TBL_NM}
                 WHERE STUDENT IS NOT NULL
@@ -203,14 +252,27 @@ class Sql_init:
                 ORDER BY CLASS
                 """
             else:
-                args = repr([f'SUM({i}) AS {i}' for i in [i.strip() for i in args.split(
-                    ',')] if i != 'CLASS' and i != 'STAFF']).replace("'","").strip("[]")
+                args = (
+                    repr(
+                        [
+                            f"SUM({i}) AS {i}"
+                            for i in [i.strip() for i in args.split(",")]
+                            if i != "CLASS" and i != "STAFF"
+                        ]
+                    )
+                    .replace("'", "")
+                    .strip("[]")
+                )
                 __res_sel_sy = f"""
                 SELECT STAFF ,CLASS, {args} FROM {Sql_init.TBL_NM}
                 GROUP BY CLASS
                 ORDER BY CLASS
                 """
-        elif (args.find('CLASS', 0, len(args)) != -1 or args.find('SEC', 0, len(args)) != -1 or args.find('STUDENT', 0, len(args)) != -1) and args.find('STAFF', 0, len(args)) == -1:
+        elif (
+            args.find("CLASS", 0, len(args)) != -1
+            or args.find("SEC", 0, len(args)) != -1
+            or args.find("STUDENT", 0, len(args)) != -1
+        ) and args.find("STAFF", 0, len(args)) == -1:
             __res_sel_sy = f"""
             SELECT {args} FROM {Sql_init.TBL_NM}
             WHERE STUDENT IS NOT NULL
@@ -227,12 +289,12 @@ class Sql_init:
 
     def cols(self, *args: str):
         """Return list of columns, and table description."""
-        yr, = args
+        (yr,) = args
         self.con.close()
-        db = os.path.join(Write_Default.loc,f"votm_{yr}.db")
+        db = os.path.join(Write_Default.loc, f"votm_{yr}.db")
         con = sql.connect(db, isolation_level=None)
         cur = con.cursor()
-        __dsc_sy = f'PRAGMA table_info({Sql_init.TBL_NM})'
+        __dsc_sy = f"PRAGMA table_info({Sql_init.TBL_NM})"
         cur.execute(__dsc_sy)
         desc = cur.fetchall()
         cols = [tup[1] for tup in desc]
@@ -243,10 +305,11 @@ class Sql_init:
         """Returns candidates in the database."""
         self.cur.execute("PRAGMA table_info(votm_vte)")
         desc = self.cur.fetchall()
-        cols = [tup[1] for tup in desc if tup[1] not in [
-            'STAFF', 'CLASS', 'SEC', 'STUDENT']]
-        cols = [i.split('_') for i in cols]
-        #? dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
+        cols = [
+            tup[1] for tup in desc if tup[1] not in ["STAFF", "CLASS", "SEC", "STUDENT"]
+        ]
+        cols = [i.split("_") for i in cols]
+        # ? dfl = {'HB': [], 'VHB': [], 'HG': [], 'VHG': []}
         dfl = {}
         _ = []
         for i in range(len(cols)):
@@ -271,25 +334,69 @@ class Sql_init:
             vals.append(_)
         return vals
 
-    def mrg_dtb_res(self, *args: '(list of tables, list of (tables desc, records))', name='merged'):
+    def mrg_dtb_res(
+        self, *args: "(list of tables, list of (tables desc, records))", name="merged"
+    ):
         """Creates "merged" named database consisting merged result."""
-        tbl, vals, = args
+        (
+            tbl,
+            vals,
+        ) = args
         __fnl_sy = f"""CREATE TABLE {Sql_init.TBL_NM} \nAS """
         datype, _ = vals[0]
-        lst = repr([f'SUM({j}) AS {j}' for j in [i[0] for i in list(
-            datype)] if j != 'CLASS' and j != 'SEC']).replace("'","").strip("[]")
+        lst = (
+            repr(
+                [
+                    f"SUM({j}) AS {j}"
+                    for j in [i[0] for i in list(datype)]
+                    if j != "CLASS" and j != "SEC"
+                ]
+            )
+            .replace("'", "")
+            .strip("[]")
+        )
         __fnl_sy += f"""SELECT CLASS, SEC, {lst}\nFROM (\n"""
         for i in range(len(tbl)):
-            datype, rcrds, = vals[i]
-            #* datype = str(tuple([(repr(i).replace(',', ' ')).strip("()") for i in datype])).replace(
-            #*     '"', "").replace("'", '')
-            datype = repr(tuple([(repr(i).replace(',', ' ')).strip("()").replace("'","") for i in datype])).replace("'","")
+            (
+                datype,
+                rcrds,
+            ) = vals[i]
+            # * datype = str(tuple([(repr(i).replace(',', ' ')).strip("()") for i in datype])).replace(
+            # *     '"', "").replace("'", '')
+            datype = repr(
+                tuple(
+                    [
+                        (repr(i).replace(",", " ")).strip("()").replace("'", "")
+                        for i in datype
+                    ]
+                )
+            ).replace("'", "")
             if len(rcrds) > 1:
-                rcrds = ('('+repr(tuple([repr(b).replace('None', 'NULL').replace(
-                    "'", '"') for b in rcrds])).replace("'", '').strip("()")+')')
+                rcrds = (
+                    "("
+                    + repr(
+                        tuple(
+                            [
+                                repr(b).replace("None", "NULL").replace("'", '"')
+                                for b in rcrds
+                            ]
+                        )
+                    )
+                    .replace("'", "")
+                    .strip("()")
+                    + ")"
+                )
             else:
-                rcrds = ('('+tuple([repr(b).replace('None', 'NULL').replace(
-                    "'", '"') for b in rcrds])[0].replace("'", '')+')')
+                rcrds = (
+                    "("
+                    + tuple(
+                        [
+                            repr(b).replace("None", "NULL").replace("'", '"')
+                            for b in rcrds
+                        ]
+                    )[0].replace("'", "")
+                    + ")"
+                )
             try:
                 __tbl_sy = f"""
                 CREATE TABLE {tbl[i]}{datype}
@@ -305,25 +412,25 @@ class Sql_init:
             finally:
                 __fnl_sy += f"""SELECT * FROM {tbl[i]}\nUNION ALL\n"""
 
-        __fnl_sy = __fnl_sy.rstrip('UNION ALL\n')
-        __fnl_sy += '\n)\nGROUP BY CLASS, SEC'
+        __fnl_sy = __fnl_sy.rstrip("UNION ALL\n")
+        __fnl_sy += "\n)\nGROUP BY CLASS, SEC"
         try:
             self.cur.execute(__fnl_sy)
             #!###########################
             #!## Recreating the tabel ###
             #!###########################
             cols, _ = Sql_init(0).cols(name)
-            cols = [i for i in cols if not i in ['CLASS', 'SEC', 'STAFF', 'STUDENT']]
+            cols = [i for i in cols if not i in ["CLASS", "SEC", "STAFF", "STUDENT"]]
             val = self.gen_mrg_fle()
-            if len(val)>1:
-                val = repr(val).replace('None', 'NULL').replace("'",'"').strip('[]')
+            if len(val) > 1:
+                val = repr(val).replace("None", "NULL").replace("'", '"').strip("[]")
             else:
-                val = repr(val[0]).replace('None', 'NULL').replace("'",'"')
+                val = repr(val[0]).replace("None", "NULL").replace("'", '"')
             """
             Ot_ways:
             val = [tuple(map(lambda x: "NULL" if x==None else x, i)) for i in self.gen_mrg_fle()]
             """
-            __drp_sy = f'DROP TABLE {Sql_init.TBL_NM}'
+            __drp_sy = f"DROP TABLE {Sql_init.TBL_NM}"
             self.cur.execute(__drp_sy)
             __tbl_sy = f"""CREATE TABLE IF NOT EXISTS {Sql_init.TBL_NM}(
                 CLASS INT(2) DEFAULT(NULL),
@@ -332,7 +439,9 @@ class Sql_init:
                 STUDENT INT DEFAULT(NULL))"""
             self.cur.execute(__tbl_sy)
             for i in cols:
-                __tbl_upd_sy = f'ALTER TABLE {Sql_init.TBL_NM} ADD {i} INT DEFAULT(NULL)'
+                __tbl_upd_sy = (
+                    f"ALTER TABLE {Sql_init.TBL_NM} ADD {i} INT DEFAULT(NULL)"
+                )
                 self.cur.execute(__tbl_upd_sy)
             __ins_sy = f"""
             INSERT INTO {Sql_init.TBL_NM}
@@ -343,7 +452,7 @@ class Sql_init:
             #!## DONE ###
             #!###########
         except:
-            __drp_sy = f'DROP TABLE {Sql_init.TBL_NM}'
+            __drp_sy = f"DROP TABLE {Sql_init.TBL_NM}"
             self.cur.execute(__drp_sy)
             for i in tbl:
                 __drp_sy = f"""
@@ -361,6 +470,7 @@ class Sql_init:
 
 class Yr_fle:
     """Creates a list of names of database files existing."""
+
     yr = []
     fle = []
 
@@ -369,9 +479,9 @@ class Yr_fle:
         Yr_fle.fle = fle
         for _, _, f in os.walk(Write_Default.loc):
             for file in f:
-                if '.db' in file:
-                    if 'votm_' in file:
+                if ".db" in file:
+                    if "votm_" in file:
                         fle.append(file)
-        yr = [i.replace('votm_', '').replace('.db', '') for i in fle]
+        yr = [i.replace("votm_", "").replace(".db", "") for i in fle]
         Yr_fle.yr = yr
         Yr_fle.fle = fle
