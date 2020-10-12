@@ -28,7 +28,7 @@ votm
 
 ### Todo
 
-- [ ] move `wrt` method for config from `vtom/manage.py` -> `config/_config.py`
+- [X] move `wrt` method for config from `vtom/manage.py` -> `config/_config.py`
 - [ ] `fix:` cleanup string related issues in `db.py` <kbd>1.1.1</kbd>
 - [ ] `feat:` make config interface better with toml `config.toml` (all config in a single toml file, password too) <kbd>1.2.0</kbd>
 - [ ] ~~move on to `cryptography`~~ <kbd>~~1.3.0~~</kbd>

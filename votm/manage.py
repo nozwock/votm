@@ -40,6 +40,7 @@ from .config._config import (
     Default_Config,
     Write_Default,
     Access_Config,
+    write_config,
 )
 from .config.env import SECRET_KEY, ENV_KEY
 from .core.ui import Ent_Box, About, Tr_View
@@ -410,16 +411,6 @@ class Edit(tk.Frame):
         self.tab.bind("<ButtonRelease-1>", lambda event: self.updt(event))
 
     @staticmethod
-    def wrt(fle: int, cfg: str):
-        """Writes Default config. files."""
-        with open(os.path.join(Write_Default.loc, Write_Default.fles[fle]), "w") as f:
-            cfg = Reg().get(SECRET_KEY) + Crypt().encrypt(
-                str(cfg), Reg().get(SECRET_KEY)
-            )
-            f.write(cfg)
-            f.flush()
-
-    @staticmethod
     def cur(cand: ttk.Combobox):
         """Selects 1st value in a combobox."""
         try:
@@ -605,7 +596,7 @@ class Candidates(tk.Frame):
 
     def clr(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(0, Default_Config.CANDIDATE_CONFIG)
+            write_config(0, Default_Config.CANDIDATE_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Cleared, And set to default.", parent=self)
 
@@ -618,7 +609,7 @@ class Candidates(tk.Frame):
                     cfg[cand_check(key.get())].index(pos.get())
                 ] = val.get().strip()
                 #!Hell is above
-                Edit.wrt(0, cfg)
+                write_config(0, cfg)
                 txt_val = pos.get()
                 pos.set(val.get())
                 pos.config(values=Access_Config().cand_config[cand_check(key.get())])
@@ -640,7 +631,7 @@ class Candidates(tk.Frame):
         if val.get().strip() != "":
             try:
                 cfg[cand_check(key.get())].append(val.get().strip())
-                Edit.wrt(0, cfg)
+                write_config(0, cfg)
                 self.cand_del_cand.config(
                     values=Access_Config().cand_config[cand_check(key.get())]
                 )
@@ -658,7 +649,7 @@ class Candidates(tk.Frame):
         cfg = Access_Config().cand_config
         try:
             cfg[cand_check(key.get())].remove(val.get())
-            Edit.wrt(0, cfg)
+            write_config(0, cfg)
             val.set("")
             val.config(values=Access_Config().cand_config[cand_check(key.get())])
             val.current(0)
@@ -890,7 +881,7 @@ class Posts(tk.Frame):
 
     def clr(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(0, Default_Config.CANDIDATE_CONFIG)
+            write_config(0, Default_Config.CANDIDATE_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Cleared, And set to default.", parent=self)
 
@@ -913,7 +904,7 @@ class Posts(tk.Frame):
                 self.cfg.remove(key)
                 self.cfg.insert(pos - 1, key, item)
 
-                Edit.wrt(0, self.cfg)
+                write_config(0, self.cfg)
                 self.flpost = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Access_Config().cand_config.keys())
@@ -943,7 +934,7 @@ class Posts(tk.Frame):
                 item = self.cfg.get()[key]
                 self.cfg.remove(key)
                 self.cfg.insert(pos + 1, key, item)
-                Edit.wrt(0, self.cfg)
+                write_config(0, self.cfg)
                 self.flpost = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Access_Config().cand_config.keys())
@@ -985,7 +976,7 @@ class Posts(tk.Frame):
                         for i in list(self.cfg.get().keys())
                     ][ind],
                 )
-                Edit.wrt(0, cfg.get())
+                write_config(0, cfg.get())
                 val = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Access_Config().cand_config.keys())
@@ -1018,7 +1009,7 @@ class Posts(tk.Frame):
                             for i in list(self.cfg.get().keys())
                         ][-1],
                     )
-                    Edit.wrt(0, cfg)
+                    write_config(0, cfg)
                     val = [
                         f"{eval(i)[0]}; {eval(i)[-1]}"
                         for i in list(Access_Config().cand_config.keys())
@@ -1057,7 +1048,7 @@ class Posts(tk.Frame):
                 self.cfg = Dicto(cfg.get())
                 self.pst_list = list(self.cfg.get().keys())
                 self.ordr_posts.delete(ind)
-                Edit.wrt(0, cfg)
+                write_config(0, cfg)
                 val = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Access_Config().cand_config.keys())
@@ -1159,7 +1150,7 @@ class Classes(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(1, Default_Config.CLASS_CONFIG)
+            write_config(1, Default_Config.CLASS_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Set to Default.", parent=self)
 
@@ -1173,7 +1164,7 @@ class Classes(tk.Frame):
                 clss.sort()
                 ind = clss.index(int(val))
                 cfg.insert(ind, int(val), ["A", "B", "C", "D"])
-                Edit.wrt(1, str(cfg.get()))
+                write_config(1, str(cfg.get()))
                 self.clss_del_clss.config(
                     values=list(Access_Config().clss_config.keys())
                 )
@@ -1187,7 +1178,7 @@ class Classes(tk.Frame):
         if val != "Class":
             if len(cfg) > 4:
                 del cfg[int(val)]
-                Edit.wrt(1, str(cfg))
+                write_config(1, str(cfg))
                 self.clss_del_clss.config(
                     values=list(Access_Config().clss_config.keys())
                 )
@@ -1312,7 +1303,7 @@ class Sections(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            Edit.wrt(1, Default_Config.CLASS_CONFIG)
+            write_config(1, Default_Config.CLASS_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Set to Default.", parent=self)
 
@@ -1321,7 +1312,7 @@ class Sections(tk.Frame):
         cfg = Access_Config().clss_config
         try:
             cfg[int(key.get())].remove(val.get())
-            Edit.wrt(1, cfg)
+            write_config(1, cfg)
             val.set("")
             val.config(values=Access_Config().clss_config[int(key.get())])
             val.current(0)
@@ -1346,7 +1337,7 @@ class Sections(tk.Frame):
                 try:
                     cfg[int(key.get())].append(val.get().upper())
                     cfg[int(key.get())].sort()
-                    Edit.wrt(1, cfg)
+                    write_config(1, cfg)
                     if key.get() == self.clss_vw_clss.get():
                         self.clss_vw_sec.config(state="normal")
                         self.clss_vw_sec.delete(0.0, "end")
