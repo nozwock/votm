@@ -95,7 +95,7 @@ class Sql_init:
         val = self.cur.fetchone()
         if val is not None:  # Exists i.e Update
             vte_lst = [f"{i} = {i} + 1" for i in vte_lst]
-            vte_lst = (str(vte_lst).lstrip('[').rstrip(']')).replace("'", "")
+            vte_lst = repr(vte_lst).replace("'", "").strip("[]")
             __tbl_upd_sy = f"""
             UPDATE {Sql_init.TBL_NM}
             SET STAFF = STAFF + 1, {vte_lst}
@@ -112,7 +112,7 @@ class Sql_init:
                     temp[i] = 1
                 else:
                     temp[i] = 0
-            cand = str(tbl_cand).lstrip('[').rstrip(']')
+            cand = str(tbl_cand).strip("[]")
             cand = cand.replace("'", "")
             '''
             *This can be used too for above requirements->
@@ -122,7 +122,7 @@ class Sql_init:
                 STAFF, {cand}
                 )
             VALUES(
-                1, {str(temp).lstrip('[').rstrip(']')}
+                1, {str(temp).strip("[]")}
             )
             """
             self.cur.execute(__tbl_ins_sy)
@@ -136,7 +136,7 @@ class Sql_init:
         val = self.cur.fetchone()
         if val is not None:  #! UPDATE block
             vte_lst = [f"{i} = {i} + 1" for i in vte_lst]
-            vte_lst = (str(vte_lst).lstrip('[').rstrip(']')).replace("'", "")
+            vte_lst = repr(vte_lst).replace("'", "").strip("[]")
             __tbl_upd_sy = f"""
             UPDATE {Sql_init.TBL_NM}
             SET STUDENT = STUDENT + 1, {vte_lst}
@@ -153,20 +153,22 @@ class Sql_init:
                     temp[i] = 1
                 else:
                     temp[i] = 0
-            cand = str(tbl_cand).lstrip('[').rstrip(']')
-            cand = cand.replace("'", "")
+            cand = str(tbl_cand).replace("'", "").strip("[]")
             __tbl_ins_sy = f"""INSERT INTO {Sql_init.TBL_NM}(
                 CLASS, SEC, STUDENT, {cand}
                 )
             VALUES(
-                {clss}, '{sec}', 1, {str(temp).lstrip('[').rstrip(']')}
+                {clss}, '{sec}', 1, {str(temp).strip("[]")}
             )
             """
+            #! Single qoutes in string above
             self.cur.execute(__tbl_ins_sy)
 
     def result(self, *args: '(String of fields to be shown)'):
         """Provides result in the form of list containing Records & Fields."""
-        args = str(args).lstrip("('").rstrip("',)")
+        #? args -> ('STAFF, STUDENT, CLASS, SEC, HB_A, HB_C...',)
+        #* args = str(args).lstrip("('").rstrip("',)")
+        args = args[0]
         if args.find('CLASS', 0, len(args)) == -1 and args.find('SEC', 0, len(args)) == -1 and args.find('STUDENT', 0, len(args)) == -1 and args.find('STAFF', 0, len(args)) != -1:
             __res_sel_sy = f"""
             SELECT {args} FROM {Sql_init.TBL_NM}
@@ -175,16 +177,16 @@ class Sql_init:
             """
         elif args.find('CLASS', 0, len(args)) == -1 and args.find('SEC', 0, len(args)) == -1 and args.find('STUDENT', 0, len(args)) != -1:
             if args.find('STAFF', 0, len(args)) == -1:
-                args = str([f'SUM({i}) AS {i}' for i in [i for i in [
-                           i.strip() for i in args.split(',')]]]).lstrip("['").rstrip("']").replace("'", "")
+                args = repr([f'SUM({i}) AS {i}' for i in [
+                           i.strip() for i in args.split(',')]]).replace("'","").strip("[]")
                 __res_sel_sy = f"""
                 SELECT {args} FROM {Sql_init.TBL_NM}
                 WHERE STUDENT IS NOT NULL
                 ORDER BY CLASS
                 """
             else:
-                args = str([f'SUM({i}) AS {i}' for i in [i for i in [i.strip() for i in args.split(
-                    ',')] if i != 'STAFF']]).lstrip("['").rstrip("']").replace("'", "")
+                args = repr([f'SUM({i}) AS {i}' for i in [i.strip() for i in args.split(
+                    ',')] if i != 'STAFF']).replace("'","").strip("[]")
                 __res_sel_sy = f"""
                 SELECT STAFF, {args} FROM {Sql_init.TBL_NM}
                 GROUP BY STAFF
@@ -192,8 +194,8 @@ class Sql_init:
                 """
         elif args.find('SEC', 0, len(args)) == -1 and args.find('CLASS', 0, len(args)) != -1:
             if args.find('STAFF', 0, len(args)) == -1:
-                args = str([f'SUM({i}) AS {i}' for i in [i for i in [i.strip() for i in args.split(
-                    ',')] if i != 'CLASS' and i != 'STAFF']]).lstrip("['").rstrip("']").replace("'", "")
+                args = repr([f'SUM({i}) AS {i}' for i in [i.strip() for i in args.split(
+                    ',')] if i != 'CLASS' and i != 'STAFF']).replace("'","").strip("[]")
                 __res_sel_sy = f"""
                 SELECT CLASS, {args} FROM {Sql_init.TBL_NM}
                 WHERE STUDENT IS NOT NULL
@@ -201,8 +203,8 @@ class Sql_init:
                 ORDER BY CLASS
                 """
             else:
-                args = str([f'SUM({i}) AS {i}' for i in [i for i in [i.strip() for i in args.split(
-                    ',')] if i != 'CLASS' and i != 'STAFF']]).lstrip("['").rstrip("']").replace("'", "")
+                args = repr([f'SUM({i}) AS {i}' for i in [i.strip() for i in args.split(
+                    ',')] if i != 'CLASS' and i != 'STAFF']).replace("'","").strip("[]")
                 __res_sel_sy = f"""
                 SELECT STAFF ,CLASS, {args} FROM {Sql_init.TBL_NM}
                 GROUP BY CLASS
@@ -274,19 +276,20 @@ class Sql_init:
         tbl, vals, = args
         __fnl_sy = f"""CREATE TABLE {Sql_init.TBL_NM} \nAS """
         datype, _ = vals[0]
-        lst = str([f'SUM({j}) AS {j}' for j in [i[0] for i in list(
-            datype)] if j != 'CLASS' and j != 'SEC']).replace("'", '').rstrip(']').lstrip('[')
+        lst = repr([f'SUM({j}) AS {j}' for j in [i[0] for i in list(
+            datype)] if j != 'CLASS' and j != 'SEC']).replace("'","").strip("[]")
         __fnl_sy += f"""SELECT CLASS, SEC, {lst}\nFROM (\n"""
         for i in range(len(tbl)):
             datype, rcrds, = vals[i]
-            datype = str(tuple([(str(i).replace(',', ' ')).rstrip(')').lstrip('(') for i in datype])).replace(
-                '"', "").replace("'", '')
+            #* datype = str(tuple([(repr(i).replace(',', ' ')).strip("()") for i in datype])).replace(
+            #*     '"', "").replace("'", '')
+            datype = repr(tuple([(repr(i).replace(',', ' ')).strip("()").replace("'","") for i in datype])).replace("'","")
             if len(rcrds) > 1:
-                rcrds = ('('+str(tuple([str(b).replace('None', 'NULL').replace(
-                    "'", '"') for b in rcrds])).replace("'", '').rstrip(')').lstrip('(')+')')
+                rcrds = ('('+repr(tuple([repr(b).replace('None', 'NULL').replace(
+                    "'", '"') for b in rcrds])).replace("'", '').strip("()")+')')
             else:
-                rcrds = ('('+str(tuple([str(b).replace('None', 'NULL').replace(
-                    "'", '"') for b in rcrds])).replace("'", '').rstrip(',)').lstrip('(')+')')
+                rcrds = ('('+tuple([repr(b).replace('None', 'NULL').replace(
+                    "'", '"') for b in rcrds])[0].replace("'", '')+')')
             try:
                 __tbl_sy = f"""
                 CREATE TABLE {tbl[i]}{datype}
@@ -313,9 +316,9 @@ class Sql_init:
             cols = [i for i in cols if not i in ['CLASS', 'SEC', 'STAFF', 'STUDENT']]
             val = self.gen_mrg_fle()
             if len(val)>1:
-                val = str(val).replace('None', 'NULL').replace("'",'"').strip('[]')
+                val = repr(val).replace('None', 'NULL').replace("'",'"').strip('[]')
             else:
-                val = str(val).replace('None', 'NULL').replace("'",'"').strip('[]').rstrip(',')
+                val = repr(val[0]).replace('None', 'NULL').replace("'",'"')
             """
             Ot_ways:
             val = [tuple(map(lambda x: "NULL" if x==None else x, i)) for i in self.gen_mrg_fle()]
