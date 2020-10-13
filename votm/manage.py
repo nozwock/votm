@@ -770,23 +770,27 @@ class Posts(tk.Frame):
         )
         pst_add_btn.pack(side="left")
         self.pst_add_ent.bind(
-            "<Enter>",
+            "<ButtonRelease-1>",
             lambda e: (
                 self.pst_add_ent.delete(0, "end"),
+                self.pst_add_tag.delete(0, "end"),
                 self.pst_add_ent.config(
                     validate="key", validatecommand=(pst_reg, "%P")
                 ),
-                self.pst_add_ent.unbind("<Enter>"),
+                self.pst_add_ent.unbind("<ButtonRelease-1>"),
+                self.pst_add_tag.unbind("<ButtonRelease-1>"),
             ),
         )
         self.pst_add_tag.bind(
-            "<Enter>",
+            "<ButtonRelease-1>",
             lambda e: (
                 self.pst_add_tag.delete(0, "end"),
+                self.pst_add_ent.delete(0, "end"),
                 self.pst_add_tag.config(
                     validate="key", validatecommand=(tag_reg, "%P")
                 ),
-                self.pst_add_tag.unbind("<Enter>"),
+                self.pst_add_tag.unbind("<ButtonRelease-1>"),
+                self.pst_add_ent.unbind("<ButtonRelease-1>"),
             ),
         )
         # * _________________________________
