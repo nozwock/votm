@@ -15,23 +15,25 @@ Copyright (C) 2019 Sagar Kumar
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-from Crypto.Cipher import AES
-from Crypto.Hash import SHA256
-from Crypto import Random
+# from Crypto.Cipher import AES
+# from Crypto.Hash import SHA256
+# from Crypto import Random
+import uuid
+import hashlib
 from collections import OrderedDict
 from base64 import b64encode, b64decode
 
-from winreg import (
-    ConnectRegistry,
-    OpenKey,
-    SetValueEx,
-    DeleteKeyEx,
-    QueryValueEx,
-    CloseKey,
-    HKEY_LOCAL_MACHINE,
-    KEY_ALL_ACCESS,
-    REG_EXPAND_SZ,
-)
+# from winreg import (
+#    ConnectRegistry,
+#    OpenKey,
+#    SetValueEx,
+#    DeleteKeyEx,
+#    QueryValueEx,
+#    CloseKey,
+#    HKEY_LOCAL_MACHINE,
+#    KEY_ALL_ACCESS,
+#    REG_EXPAND_SZ,
+# )
 
 import os
 from random import choice
@@ -54,8 +56,6 @@ class Tokens:
 
     def __init__(self, master, entries=None):
         self.master = master
-        self.crypt = Crypt()
-        self.reg = Reg()
 
         if entries != None:
             try:
@@ -74,9 +74,6 @@ class Tokens:
             with open(Tokens.TPath, "r") as f:
                 try:
                     self.tkn_read = eval(f.read())
-                    self.tkn_read = self.crypt.decrypt(
-                        str(self.tkn_read), self.reg.get(SECRET_KEY)
-                    )
                 except:
                     self.tkn_read = []
 
@@ -93,7 +90,6 @@ class Tokens:
                     val = key_gen()
                     if val is not None:
                         tkn.append(val)
-                tkn = self.crypt.encrypt(str(tkn), self.reg.get(SECRET_KEY))
                 f.write(f"{tkn}")
             mg.showinfo(
                 "Voting Master",
@@ -105,12 +101,11 @@ class Tokens:
 
     def get(self, val: str):
         with open(Tokens.TPath, "r") as f:
-            tkn_lst = eval(self.crypt.decrypt(str(f.read()), self.reg.get(SECRET_KEY)))
+            tkn_lst = eval(f.read())
         try:
             ind = tkn_lst.index(val)
             del tkn_lst[ind]
             with open(Tokens.TPath, "w") as f:
-                tkn_lst = self.crypt.encrypt(str(tkn_lst), self.reg.get(SECRET_KEY))
                 f.write(str(tkn_lst))
             return True
         except:
@@ -123,9 +118,7 @@ class Tokens:
         try:
             with open(Tokens.TPath, "r") as f:
                 tkn_lst = f.read()
-                tkn_lst = eval(
-                    self.crypt.decrypt(str(tkn_lst), self.reg.get(SECRET_KEY))
-                )
+                tkn_lst = eval(tkn_lst)
             if len(tkn_lst) == 0:
                 mg.showerror(
                     "Error", "No Tokens in the Token file.", parent=self.master
@@ -136,32 +129,52 @@ class Tokens:
             return False
 
 
+def Base64encode(text: str) -> str:
+    return b64encode(text.encode("ascii")).decode("ascii")
+
+
+def Base64decode(ctext: str) -> str:
+    return b64decode(ctext.encode("ascii")).decode("ascii")
+
+
+def hashTextSHA256(text: str) -> str:
+    salt = uuid.uuid4().hex
+    return hashlib.sha256(salt.encode() + text.encode()).hexdigest() + salt
+
+
+def matchHashedTextSHA256(hashedText: str, providedText: str) -> bool:
+    _hashedText, salt = hashedText[:-32], hashedText[-32:]
+    return (
+        _hashedText == hashlib.sha256(salt.encode() + providedText.encode()).hexdigest()
+    )
+
+
 #! CBC method with PKCS#7 padding
-class Crypt:
-    def __init__(self, salt=Random.new().read(AES.block_size)):
-        self.salt = salt
-        self.enc_dec_method = "latin-1"
-
-    def encrypt(self, src, key, encode=True):
-        src = src.encode()
-        key = SHA256.new(key.encode()).digest()
-        aes_obj = AES.new(key, AES.MODE_CBC, self.salt)
-        padd = AES.block_size - len(src) % AES.block_size
-        src += bytes([padd]) * padd
-        hx_enc = self.salt + aes_obj.encrypt(src)
-        return b64encode(hx_enc).decode(self.enc_dec_method) if encode else hx_enc
-
-    def decrypt(self, src, key, decode=True):
-        if decode:
-            str_tmp = b64decode(src.encode(self.enc_dec_method))
-        key = SHA256.new(key.encode()).digest()
-        salt = str_tmp[: AES.block_size]
-        aes_obj = AES.new(key, AES.MODE_CBC, salt)
-        str_dec = aes_obj.decrypt(str_tmp[AES.block_size :])
-        padd = str_dec[-1]
-        if str_dec[-padd:] != bytes([padd]) * padd:
-            pass
-        return str_dec[:-padd].decode(self.enc_dec_method)
+# class Crypt:
+#    def __init__(self, salt=Random.new().read(AES.block_size)):
+#        self.salt = salt
+#        self.enc_dec_method = "latin-1"
+#
+#    def encrypt(self, src, key, encode=True):
+#        src = src.encode()
+#        key = SHA256.new(key.encode()).digest()
+#        aes_obj = AES.new(key, AES.MODE_CBC, self.salt)
+#        padd = AES.block_size - len(src) % AES.block_size
+#        src += bytes([padd]) * padd
+#        hx_enc = self.salt + aes_obj.encrypt(src)
+#        return b64encode(hx_enc).decode(self.enc_dec_method) if encode else hx_enc
+#
+#    def decrypt(self, src, key, decode=True):
+#        if decode:
+#            str_tmp = b64decode(src.encode(self.enc_dec_method))
+#        key = SHA256.new(key.encode()).digest()
+#        salt = str_tmp[: AES.block_size]
+#        aes_obj = AES.new(key, AES.MODE_CBC, salt)
+#        str_dec = aes_obj.decrypt(str_tmp[AES.block_size :])
+#        padd = str_dec[-1]
+#        if str_dec[-padd:] != bytes([padd]) * padd:
+#            pass
+#        return str_dec[:-padd].decode(self.enc_dec_method)
 
 
 class Dicto:
@@ -222,22 +235,22 @@ class Dicto:
 
 
 # For Windows ONLY
-class Reg:
-    def __init__(self):
-        self.path = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
-        self.reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
-        self.key = OpenKey(self.reg, self.path, 0, KEY_ALL_ACCESS)
-
-    def setx(self, _key, val):
-        SetValueEx(self.key, _key, 0, REG_EXPAND_SZ, val)
-
-    def delx(self, _key):
-        DeleteKeyEx(self.key, _key)
-
-    def get(self, _key):
-        return QueryValueEx(self.key, _key)[0]
-
-    def close(self):
-        CloseKey(self.reg)
-        CloseKey(self.key)
-        del self
+# class Reg:
+#    def __init__(self):
+#        self.path = r"SYSTEM\CurrentControlSet\Control\Session Manager\Environment"
+#        self.reg = ConnectRegistry(None, HKEY_LOCAL_MACHINE)
+#        self.key = OpenKey(self.reg, self.path, 0, KEY_ALL_ACCESS)
+#
+#    def setx(self, _key, val):
+#        SetValueEx(self.key, _key, 0, REG_EXPAND_SZ, val)
+#
+#    def delx(self, _key):
+#        DeleteKeyEx(self.key, _key)
+#
+#    def get(self, _key):
+#        return QueryValueEx(self.key, _key)[0]
+#
+#    def close(self):
+#        CloseKey(self.reg)
+#        CloseKey(self.key)
+#        del self

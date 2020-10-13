@@ -45,7 +45,14 @@ from .config._config import (
 from .config.env import SECRET_KEY, ENV_KEY
 from .core.ui import Ent_Box, About, Tr_View
 from .core.db import Sql_init, Yr_fle
-from .utils.extras import Dicto, Reg, Crypt, Tokens
+from .utils.extras import (
+    Dicto,
+    Tokens,
+    Base64encode,
+    Base64decode,
+    hashTextSHA256,
+    matchHashedTextSHA256,
+)
 from .utils.helpers import cand_check
 from . import __author__, __version__
 
@@ -1589,6 +1596,7 @@ class Result(tk.Frame):
 
     def crt_mrg_fle(self):
         """Creates a merge file through a dialog box."""
+        #! MERGE FILES GENERATOR
         try:
             db_name = Result_Diag(
                 self, txt="Select a Database.", icn=Root.DATAFILE[0], mod=1
@@ -1622,9 +1630,7 @@ class Result(tk.Frame):
                     for i in fle:
                         rd += f"{str(i)},\n"
                     rd += "))"
-                    rd = Reg().get(SECRET_KEY) + Crypt().encrypt(
-                        rd, Reg().get(SECRET_KEY)
-                    )
+                    rd = Base64encode(rd)
                     f.write(rd)
                     mg.showinfo(
                         "Voting Master", "Merge file has been generated.", parent=self
@@ -1695,7 +1701,7 @@ class Result(tk.Frame):
                     for dirc in mrg:
                         with open(dirc, "r") as f:
                             rd = f.read()
-                            mrg_tbl_data.append(eval(Crypt().decrypt(rd[16:], rd[:16])))
+                            mrg_tbl_data.append(eval(Base64decode(rd)))
                 except FileNotFoundError:
                     mg.showerror("Error", "No such file(s) found.", parent=self)
                     return "break"
@@ -1828,7 +1834,7 @@ class Settings(tk.Frame):
         imp_btn.pack(pady=(0, 20), fill="both", expand=1)
         exp_btn.pack(fill="both", expand=1)
 
-        lbl_hed_bse = ttk.LabelFrame(frm_btm, text="Advanced", padding=10)
+        lbl_hed_bse = ttk.LabelFrame(frm_btm, text="Change Pass/Key", padding=10)
         lbl_hed_bse.pack(side="left")
         # ? Database Settings_______________________________
         dtb_yr = ttk.Combobox(lbl_hed_dtb, values=Yr_fle().yr, state="readonly")
@@ -1878,15 +1884,34 @@ class Settings(tk.Frame):
             lbfrm_bse_passwd, validate="key", validatecommand=(spc_reg, "%S")
         )
         bse_passwd.pack(side="left", padx=(0, 10))
-        bse_passwd.insert(0, Access_Config().bse_config["passwd"])
+        # bse_passwd.insert(0, Access_Config().bse_config["passwd"])
+        bse_passwd.insert(0, "Type new Password")
+        bse_passwd.bind(
+            "<ButtonRelease-1>",
+            lambda e: (
+                bse_passwd.delete(0, "end"),
+                bse_passwd.unbind("<ButtonRelease-1>"),
+            ),
+        )
 
         lbfrm_key_passwd = ttk.LabelFrame(lbl_hed_bse, text="SuperKey", padding=10)
         lbfrm_key_passwd.pack(side="top")
         key_passwd = ttk.Entry(
-            lbfrm_key_passwd, validate="key", validatecommand=(spc_reg, "%S"), show="*"
+            lbfrm_key_passwd,
+            validate="key",
+            validatecommand=(spc_reg, "%S"),
         )
+        # show="*",
         key_passwd.pack(side="left", padx=(0, 10))
-        key_passwd.insert(0, Access_Config().bse_config["key"])
+        # key_passwd.insert(0, Access_Config().bse_config["key"])
+        key_passwd.insert(0, "Type new SuperKey")
+        key_passwd.bind(
+            "<ButtonRelease-1>",
+            lambda e: (
+                key_passwd.delete(0, "end"),
+                key_passwd.unbind("<ButtonRelease-1>"),
+            ),
+        )
 
         btn_bse_sub = ttk.Button(
             lbfrm_bse_passwd,
@@ -1999,16 +2024,12 @@ class Settings(tk.Frame):
     def chng_pswd(self, pswd: tk.Entry):
         """Changes the password in base config file."""
         cfg = Access_Config().bse_config
-        if cfg["passwd"] != pswd.get().strip():
+        if not matchHashedTextSHA256(cfg["passwd"], pswd.get().strip()):
             try:
-                cfg["passwd"] = pswd.get().strip()
-                self.reg = Reg()
-                self.reg.setx(
-                    ENV_KEY, Crypt().encrypt(str(cfg), self.reg.get(SECRET_KEY))
-                )
-                self.reg.close()
+                cfg["passwd"] = hashTextSHA256(pswd.get().strip())
+                write_config(2, str(cfg))
                 pswd.delete(0, tk.END)
-                pswd.insert(0, Access_Config().bse_config["passwd"])
+                # pswd.insert(0, Access_Config().bse_config["passwd"])
                 mg.showinfo("Voting Master", "Password has been Changed!", parent=self)
             except:
                 pass
@@ -2027,16 +2048,12 @@ class Settings(tk.Frame):
         if Ent_Box(
             app, "Enter Previous SuperKey to Continue.", Root.DATAFILE[0], "key"
         ).get():
-            if cfg["key"] != pswd.get().strip():
+            if not matchHashedTextSHA256(cfg["key"], pswd.get().strip()):
                 try:
-                    cfg["key"] = pswd.get().strip()
-                    self.reg = Reg()
-                    self.reg.setx(
-                        ENV_KEY, Crypt().encrypt(str(cfg), self.reg.get(SECRET_KEY))
-                    )
-                    self.reg.close()
+                    cfg["key"] = hashTextSHA256(pswd.get().strip())
+                    write_config(2, str(cfg))
                     pswd.delete(0, tk.END)
-                    pswd.insert(0, Access_Config().bse_config["key"])
+                    # pswd.insert(0, Access_Config().bse_config["key"])
                     mg.showinfo("Voting Master", "Key has been Changed!", parent=self)
                 except:
                     pass
@@ -2436,9 +2453,7 @@ class Token_Show(Result_Show_Sep):
             with open(Tokens.TPath, "r") as f:
                 _tkns = ""
                 try:
-                    tkn_lst = eval(
-                        Crypt().decrypt(str(f.read()), Reg().get(SECRET_KEY))
-                    )
+                    tkn_lst = eval(str(f.read()))
                     line = len(tkn_lst) // 8
                     if (len(tkn_lst) / 8) - line > 0:
                         line += 1

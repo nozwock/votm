@@ -26,7 +26,7 @@ from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 
 from votm.config._config import Write_Default, Access_Config
-from votm.utils.extras import Reg
+from votm.utils.extras import matchHashedTextSHA256
 from votm import __version__, __author__, __license__
 
 
@@ -189,8 +189,9 @@ class Ent_Box(tk.Toplevel):
 
     def ok_chk(self, ent: tk.Entry):
         """Validates the passwords, and exits if matched."""
-        pswd = Access_Config().bse_config[self.chk]
-        if ent.get().strip() == pswd.strip():
+        if matchHashedTextSHA256(
+            Access_Config().bse_config[self.chk].strip(), ent.get().strip()
+        ):
             self.destroy()
             self.flag = True
         else:
