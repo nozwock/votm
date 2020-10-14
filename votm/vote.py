@@ -18,17 +18,22 @@ Copyright (C) 2019 Sagar Kumar
 
 import os
 import sys
+import platform
 
-import win32api
-import win32event
-import ctypes
+isWindows = platform.system().lower() == "windows"
+
+if isWindows:
+    import ctypes
+    import win32api
+    import win32event
+    from winerror import ERROR_ALREADY_EXISTS
+
 from os import path
 from datetime import date
 import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox as mg
-from winerror import ERROR_ALREADY_EXISTS
 
 from .locations import ASSETS_PATH
 from .config import Config
@@ -50,17 +55,18 @@ class Root(tk.Tk):
         self.attributes("-alpha", 0.0)
         self.protocol("WM_DELETE_WINDOW", Win.s_cls)
         self.ins_dat([ASSETS_PATH.joinpath(i) for i in ["v_r.ico", "bg.png"]])
-        if not ctypes.windll.shell32.IsUserAnAdmin():
-            self.withdraw()
-            self.attributes("-topmost", 1)
-            self.title("Error")
-            mg.showwarning(
-                "Error",
-                "This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.",
-                parent=self,
-            )
-            self.destroy()
-            sys.exit(0)
+        if isWindows:
+            if not ctypes.windll.shell32.IsUserAnAdmin():
+                self.withdraw()
+                self.attributes("-topmost", 1)
+                self.title("Error")
+                mg.showwarning(
+                    "Error",
+                    "This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.",
+                    parent=self,
+                )
+                self.destroy()
+                sys.exit(0)
         self.iconbitmap(default=Root.DATAFILE[0])
 
     @classmethod
@@ -758,18 +764,19 @@ class Done_1(Done):
 
 def main():
     global app, root
-    mutex = win32event.CreateMutex(None, False, "name")
-    last_error = win32api.GetLastError()
-    if last_error == ERROR_ALREADY_EXISTS:
-        Root.ins_dat([ASSETS_PATH.joinpath("v_r.ico")])
-        msg = tk.Tk()
-        msg.attributes("-topmost", 1)
-        msg.withdraw()
-        msg.title("Error")
-        msg.iconbitmap(Root.DATAFILE[0])
-        mg.showwarning("Error", "App instance already running.", parent=msg)
-        msg.destroy()
-        sys.exit(0)
+    if isWindows:
+        _ = win32event.CreateMutex(None, False, "name")
+        last_error = win32api.GetLastError()
+        if last_error == ERROR_ALREADY_EXISTS:
+            Root.ins_dat([ASSETS_PATH.joinpath("v_r.ico")])
+            msg = tk.Tk()
+            msg.attributes("-topmost", 1)
+            msg.withdraw()
+            msg.title("Error")
+            msg.iconbitmap(Root.DATAFILE[0])
+            mg.showwarning("Error", "App instance already running.", parent=msg)
+            msg.destroy()
+            sys.exit(0)
     root = Root()
     root.lower()
     root.iconify()
