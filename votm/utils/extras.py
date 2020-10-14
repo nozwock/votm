@@ -23,6 +23,7 @@ from base64 import b64encode, b64decode
 import os
 from random import choice
 from string import digits
+from typing import Any
 from platform import system
 from tkinter import messagebox as mg
 
@@ -132,18 +133,20 @@ def matchHashedTextSHA256(hashedText: str, providedText: str) -> bool:
 
 
 class Dicto:
-    """A Class for creating ordered dictionaries."""
+    """A minimal wrapper for OrderedDict with additional insert method"""
 
-    def __init__(self, _dict):
-        self.state = OrderedDict(_dict)
+    def __init__(self, _dict: dict):
+        assert isinstance(_dict, dict)
         self.dict = OrderedDict(_dict)
+        self.state = _dict
 
-    def insert(self, pos, key, val):
+    def insert(self, pos: int, keyPair: tuple) -> None:
+        key, val = keyPair
         self.dict = OrderedDict()
-        keys = list(dict(self.state).keys())
+        keys = list(self.state.keys())
         if pos >= 0:
             flag = 0
-            for i in range(len(dict(self.state))):
+            for i in range(len(self.state)):
                 try:
                     if keys[i] == keys[pos]:
                         pos = keys[i]
@@ -154,11 +157,11 @@ class Dicto:
                     break
         else:
             flag = 1
-            for i in range(-1, -len(dict(self.state)) - 1, -1):
+            for i in range(-1, -len(self.state) - 1, -1):
                 if keys[i] == keys[pos]:
                     pos = keys[i]
                     break
-        for k, v in dict(self.state).items():
+        for k, v in self.state.items():
             if flag == 0:
                 if k == pos:
                     self.dict[key] = val
@@ -167,22 +170,50 @@ class Dicto:
                 self.dict[k] = v
                 if k == pos:
                     self.dict[key] = val
-        del self.state
-        self.state = self.dict
-        return self.dict
+        self.state = dict(self.dict)
 
-    def remove(self, key):
-        self.dict = dict(self.state)
-        try:
-            del self.dict[key]
-            del self.state
-            self.state = self.dict
-            return OrderedDict(self.dict)
-        except:
-            print("Error, No such key exists.")
+    def pop(self, key) -> None:
+        self.dict = OrderedDict(self.state)
+        del self.dict[key]
+        self.state = dict(self.dict)
 
-    def get(self):
-        return dict(self.state)
+    def get(self, key):
+        return self.state[key]
+
+    def items(self):
+        return self.state.items()
+
+    def keys(self):
+        return self.state.keys()
+
+    def values(self):
+        return self.state.values()
+
+    def __call__(self) -> dict:
+        return self.state
+
+    def __setitem__(self, key, value) -> None:
+        self.state[key] = value
+
+    def __getitem__(self, key) -> Any:
+        return self.state[key]
+
+    def __delitem__(self, key) -> None:
+        del self.state[key]
+
+    def __reversed__(self) -> dict:
+        return {
+            key: val
+            for key, val in (
+                keyPair for keyPair in list(reversed(list(self.state.items())))
+            )
+        }
+
+    def __iter__(self):
+        return iter(self.state.items())
+
+    def __len__(self) -> int:
+        return len(self.state)
 
     def __repr__(self):
-        return repr(dict(self.state))
+        return repr(self.state)

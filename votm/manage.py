@@ -827,7 +827,7 @@ class Posts(tk.Frame):
         pst_clr.pack(side="top", fill="y", expand=1, pady=(20, 20))
         # * _________________________________
         self.cfg = Dicto(Config().load("candidate"))
-        keys = list(self.cfg.get().keys())
+        keys = list(self.cfg.keys())
 
         ordr_frm = ttk.LabelFrame(btm_frm, text="Rearrange", padding=10)
         ordr_frm.pack(side="left")
@@ -905,11 +905,11 @@ class Posts(tk.Frame):
                 self.pst_list.insert(pos - 1, val)
                 self.ordr_posts.selection_set(pos - 1)
                 key = str([val.split(";")[0].strip(), val.split(";")[-1].strip()])
-                item = self.cfg.get()[key]
-                self.cfg.remove(key)
-                self.cfg.insert(pos - 1, key, item)
+                item = self.cfg[key]
+                self.cfg.pop(key)
+                self.cfg.insert(pos - 1, (key, item))
 
-                Config().write("candidate", self.cfg.get())
+                Config().write("candidate", self.cfg())
                 self.flpost = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Config().load("candidate").keys())
@@ -936,10 +936,11 @@ class Posts(tk.Frame):
                 self.pst_list.insert(pos + 1, val)
                 self.ordr_posts.selection_set(pos + 1)
                 key = str([val.split(";")[0].strip(), val.split(";")[-1].strip()])
-                item = self.cfg.get()[key]
-                self.cfg.remove(key)
-                self.cfg.insert(pos + 1, key, item)
-                Config().write("candidate", self.cfg.get())
+                item = self.cfg[key]
+                self.cfg.pop(key)
+                self.cfg.insert(pos + 1, (key, item))
+
+                Config().write("candidate", self.cfg())
                 self.flpost = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Config().load("candidate").keys())
@@ -956,7 +957,7 @@ class Posts(tk.Frame):
             cfg = Dicto(Config().load("candidate"))
             _tag = [
                 eval(i)[-1]
-                for i in list(cfg.get().keys())
+                for i in list(cfg.keys())
                 if eval(i)[-1] != key.get().split(";")[-1].strip()
             ]
             if tag.get() not in _tag:
@@ -965,23 +966,22 @@ class Posts(tk.Frame):
                 key = str(
                     [key.get().split(";")[0].strip(), key.get().split(";")[-1].strip()]
                 )
-                con = cfg.get().get(key)
-                ind = list(cfg.get().keys()).index(key)
-                cfg.remove(key)
-                cfg.insert(ind, _key, con)
-                self.cfg = Dicto(cfg.get())
+                con = cfg.get(key)
+                ind = list(cfg.keys()).index(key)
+                cfg.pop(key)
+                cfg.insert(ind, (_key, con))
+                self.cfg = cfg
                 self.pst_list = [
-                    f"{eval(i)[0]}; {eval(i)[-1]}" for i in list(self.cfg.get().keys())
+                    f"{eval(i)[0]}; {eval(i)[-1]}" for i in list(self.cfg.keys())
                 ]
                 self.ordr_posts.delete(ind)
                 self.ordr_posts.insert(
                     ind,
-                    [
-                        f"{eval(i)[0]}; {eval(i)[-1]}"
-                        for i in list(self.cfg.get().keys())
-                    ][ind],
+                    [f"{eval(i)[0]}; {eval(i)[-1]}" for i in list(self.cfg.keys())][
+                        ind
+                    ],
                 )
-                Config().write("candidate", cfg.get())
+                Config().write("candidate", cfg())
                 val = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Config().load("candidate").keys())
@@ -1004,15 +1004,13 @@ class Posts(tk.Frame):
                 if len(cfg) <= 8:
                     self.cfg = Dicto(cfg)
                     self.pst_list = [
-                        f"{eval(i)[0]}; {eval(i)[-1]}"
-                        for i in list(self.cfg.get().keys())
+                        f"{eval(i)[0]}; {eval(i)[-1]}" for i in list(self.cfg.keys())
                     ]
                     self.ordr_posts.insert(
                         "end",
-                        [
-                            f"{eval(i)[0]}; {eval(i)[-1]}"
-                            for i in list(self.cfg.get().keys())
-                        ][-1],
+                        [f"{eval(i)[0]}; {eval(i)[-1]}" for i in list(self.cfg.keys())][
+                            -1
+                        ],
                     )
                     Config().write("candidate", cfg)
                     val = [
@@ -1047,13 +1045,13 @@ class Posts(tk.Frame):
             key = str(
                 [ent.get().split(";")[0].strip(), ent.get().split(";")[-1].strip()]
             )
-            if len(cfg.get()) > 1:
-                ind = list(cfg.get().keys()).index(key)
-                cfg.remove(key)
-                self.cfg = Dicto(cfg.get())
-                self.pst_list = list(self.cfg.get().keys())
+            if len(cfg) > 1:
+                ind = list(cfg.keys()).index(key)
+                cfg.pop(key)
+                self.cfg = cfg
+                self.pst_list = list(self.cfg.keys())
                 self.ordr_posts.delete(ind)
-                Config().write("candidate", cfg.get())
+                Config().write("candidate", cfg())
                 val = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
                     for i in list(Config().load("candidate").keys())
@@ -1162,14 +1160,14 @@ class Classes(tk.Frame):
     def add_clss(self):
         cfg = Dicto(Config().load("class"))
         val = self.clss_add_cls.get()
-        clss = list(cfg.get().keys())
+        clss = list(cfg.keys())
         if val != "":
             if int(val) not in clss:
                 clss.append(int(val))
                 clss.sort()
                 ind = clss.index(int(val))
-                cfg.insert(ind, int(val), ["A", "B", "C", "D"])
-                Config().write("class", cfg.get())
+                cfg.insert(ind, (int(val), ["A", "B", "C", "D"]))
+                Config().write("class", cfg())
                 self.clss_del_clss.config(values=list(Config().load("class").keys()))
                 mg.showinfo("Voting Master", "Class has been added.", parent=self)
             else:
