@@ -47,5 +47,7 @@ votm
 - [ ] maybe redesign password & token system
   - [ ] add prompt option for how long a token is
   - [ ] make where the password is asked optional
+  - [ ] make a dialog appear when clicked on Generate Tokens with two entry box for (no. of tokens, length of a token)
+  - [ ] redesign the ui for pass/key -> shift all this to a new popup window, maybe? So, as to have room for future options to be addded
 
 <!--common.py-->
