@@ -6,7 +6,7 @@
 <a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Version" src="https://img.shields.io/github/release/sgrkmr/votm.svg?style=flat-square&color=blueviolet"></a>
 <a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Downloads" src="https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square"></a>
 <a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>
-<a href="https://www.python.org/downloads/release/python-374/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7-blue?style=flat-square"></a>
+<a href="https://www.python.org/downloads/release/python-373/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7.3-blue?style=flat-square"></a>
 <a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>
 <a href="https://opensource.org/licenses/GPL-3.0"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square"></a>
 </p>
