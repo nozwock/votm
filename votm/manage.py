@@ -22,6 +22,7 @@ import sys
 import win32api
 import xlsxwriter
 import win32event
+import ctypes
 from shutil import copyfile
 from os import path, remove
 from datetime import date
@@ -81,6 +82,17 @@ class Root(tk.Tk):
                 ]
             ]
         )
+        if not ctypes.windll.shell32.IsUserAnAdmin():
+            self.withdraw()
+            self.attributes("-topmost", 1)
+            self.title("Error")
+            mg.showwarning(
+                "Error",
+                "This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.",
+                parent=self,
+            )
+            self.destroy()
+            sys.exit(0)
         self.iconbitmap(Root.DATAFILE[0])
 
     @classmethod
