@@ -1881,6 +1881,7 @@ class Settings(tk.Frame):
             "<ButtonRelease-1>",
             lambda e: (
                 bse_passwd.delete(0, "end"),
+                btn_bse_sub.config(state="enabled"),
                 bse_passwd.unbind("<ButtonRelease-1>"),
             ),
         )
@@ -1900,6 +1901,7 @@ class Settings(tk.Frame):
             "<ButtonRelease-1>",
             lambda e: (
                 key_passwd.delete(0, "end"),
+                btn_key_sub.config(state="enabled"),
                 key_passwd.unbind("<ButtonRelease-1>"),
             ),
         )
@@ -1908,12 +1910,8 @@ class Settings(tk.Frame):
             lbfrm_bse_passwd,
             text="Submit",
             style="m.TButton",
-            command=lambda: (
-                self.pass_key_submit_check(
-                    bse_passwd, key_passwd, _info_pass, _info_key
-                ),
-                self.chng_pswd(bse_passwd),
-            ),
+            command=lambda: self.chng_pswd(bse_passwd),
+            state="disabled",
             takefocus=0,
         )
         btn_bse_sub.pack(side="left")
@@ -1921,12 +1919,8 @@ class Settings(tk.Frame):
             lbfrm_key_passwd,
             text="Submit",
             style="m.TButton",
-            command=lambda: (
-                self.pass_key_submit_check(
-                    bse_passwd, key_passwd, _info_pass, _info_key
-                ),
-                self.chng_key(key_passwd),
-            ),
+            command=lambda: self.chng_key(key_passwd),
+            state="disabled",
             takefocus=0,
         )
         btn_key_sub.pack(side="left")
@@ -1950,13 +1944,6 @@ class Settings(tk.Frame):
             return True
         else:
             return False
-
-    @staticmethod
-    def pass_key_submit_check(epass, ekey, msg_pass, msg_key) -> None:
-        if epass.get() == msg_pass:
-            epass.delete(0, "end")
-        if ekey.get() == msg_key:
-            ekey.delete(0, "end")
 
     def tkn_gen(self, ent: ttk.Entry):
         if Ent_Box(
