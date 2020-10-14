@@ -126,6 +126,7 @@ class Win(tk.Toplevel):
         top_bar.pack(fill="x")
         top_bar.pack_propagate(0)
         top_bar.bind("<Button-1>", self.get_pos)
+        #!ERR: there was some error related to this binding, can't recreate it
         top_bar.bind(
             "<B1-Motion>",
             lambda event: self.geometry(
