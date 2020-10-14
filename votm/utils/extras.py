@@ -51,6 +51,7 @@ class Tokens:
                 raise ValueError("Invalid Input")
 
     def gen(self):
+        #!TODO: add option for how long a token is on a prompt
         def key_gen(size=8, chars=digits):
             with open(Tokens.TPath, "r") as f:
                 try:

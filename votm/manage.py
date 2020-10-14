@@ -1334,9 +1334,9 @@ class Sections(tk.Frame):
         """Adds value to the class file."""
         cfg = Config().load("class")
         if val.get().strip() != "":
-            if val.get() not in cfg[int(key.get())]:
+            if val.get().upper() not in cfg[int(key.get())]:
                 try:
-                    cfg[int(key.get())].append(val.get().upper())
+                    cfg[int(key.get())].append(val.get().upper().upper())
                     cfg[int(key.get())].sort()
                     Config().write("class", cfg)
                     if key.get() == self.clss_vw_clss.get():
