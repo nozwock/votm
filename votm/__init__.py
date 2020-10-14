@@ -1,6 +1,6 @@
 from . import locations
 
 __author__ = "Sagar Kumar"
-__version__ = "1.3.1"
+__version__ = "1.3.2"
 with open(locations.LICNESE_PATH, "r") as f:
     __license__ = f.read()
