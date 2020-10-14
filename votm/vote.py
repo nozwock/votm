@@ -18,7 +18,7 @@ Copyright (C) 2019 Sagar Kumar
 
 import os
 import sys
-import ctypes
+
 import win32api
 import win32event
 from os import path
@@ -30,7 +30,7 @@ from tkinter import messagebox as mg
 from winerror import ERROR_ALREADY_EXISTS
 
 from .locations import ASSETS_PATH
-from .config._config import Write_Default, Access_Config
+from .config import Config
 from .core.db import Sql_init
 from .core.ui import Ent_Box, About
 from .utils.extras import Tokens
@@ -49,17 +49,6 @@ class Root(tk.Tk):
         self.attributes("-alpha", 0.0)
         self.protocol("WM_DELETE_WINDOW", Win.s_cls)
         self.ins_dat([ASSETS_PATH.joinpath(i) for i in ["v_r.ico", "bg.png"]])
-        if not ctypes.windll.shell32.IsUserAnAdmin():
-            self.withdraw()
-            self.attributes("-topmost", 1)
-            self.title("Error")
-            mg.showwarning(
-                "Error",
-                "This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.",
-                parent=self,
-            )
-            self.destroy()
-            sys.exit(0)
         self.iconbitmap(default=Root.DATAFILE[0])
 
     @classmethod
@@ -83,7 +72,7 @@ class Win(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
         self.overrideredirect(1)
-        Write_Default()
+        out = Config().write_default()
 
         self.config(
             background=Win.SM_BG_HEX,
@@ -133,21 +122,26 @@ class Win(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.s_cls)
         self.lift()
 
-        if Write_Default.exist is 1:
-            mg.showinfo(
-                "Voting Master",
-                "Some default configuration files has been saved.",
+        if out is 1:
+            mg.showerror(
+                "Error",
+                (
+                    "error: either config file missing or is corrupted\n"
+                    "falling back to default config..."
+                ),
                 parent=self,
             )
 
         if any(
             [
-                (Access_Config().cand_config[i]) == []
-                for i in list(Access_Config().cand_config.keys())
+                (Config().load("candidate")[i]) == []
+                for i in list(Config().load("candidate").keys())
             ]
         ):
             mg.showerror(
-                "Error", "No Candidate found!, Add Candidate in Main App.", parent=self
+                "Error",
+                "No Candidate found!, Add Candidate in Manage App.",
+                parent=self,
             )
             self.master.destroy()
             sys.exit(0)
@@ -270,7 +264,7 @@ class Win(tk.Toplevel):
         )
         bthlb.pack(side="left", fill="x", expand=1, anchor="s")
         # ? NAVBAR's Content______________________________
-        #!Todo: Just have 1 corresponding Label at a time instead of all 4 on NAVBAR
+        #!Todo: Just have 1 corresponding Label at a time instead of all 4 on NAVBAR, maybe?
         self.home = tk.Label(
             fl,
             text="Category",
@@ -393,7 +387,7 @@ class Class(tk.Frame):
         tk.Frame.__init__(self, parent)
         ttk.Style().configure("1.TButton", font=("Segoe UI", 12))
         self.config(background=Win.SM_BG_HEX)
-        clss_lst = [str(i) for i in list(Access_Config().clss_config.keys())]
+        clss_lst = [str(i) for i in list(Config().load("class").keys())]
 
         btnfrm_class = ttk.LabelFrame(self, text="Class", padding=10)
         btnfrm_class.pack(side="top", pady=(150, 0))
@@ -419,7 +413,7 @@ class Class(tk.Frame):
         btn_class.bind(
             "<<ComboboxSelected>>",
             lambda event: (
-                btn_sec.config(values=Access_Config().clss_config[int(btn_class.get())])
+                btn_sec.config(values=Config().load("class")[int(btn_class.get())])
             ),
         )
         btn_sec.bind(
@@ -445,7 +439,7 @@ class Vote(tk.Frame):
 
         cnd = Sql_init(0).db_cands()
         self.n_val = len(cnd)
-        lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
+        lcl_cnd = [eval(i) for i in list(Config().load("candidate").keys())]
         cn = 1
         self.args = []
 
@@ -666,7 +660,7 @@ class Vote(tk.Frame):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
             if Tokens(self).get(tkn.get()):
                 vte_lst = list(args)
-                x = [eval(i) for i in list(Access_Config().cand_config.keys())]
+                x = [eval(i) for i in list(Config().load("candidate").keys())]
                 for i in range(len(vte_lst)):
                     vte_lst[i] = f"{x[i][-1]}_{vte_lst[i]}"
                 if sel == 0:  #! Staff

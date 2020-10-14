@@ -1,122 +1,132 @@
 import os
-from ast import literal_eval
-from platform import system
+import toml
+from pathlib import Path
+from typing import Optional
 
-from votm.utils.extras import (
-    hashTextSHA256,
-    matchHashedTextSHA256,
-    Base64encode,
-    Base64decode,
-)
-from .env import ENV_KEY, SECRET_KEY
+from votm.utils.extras import hashTextSHA256
+from votm.locations import DATA_PATH
 
 
-class Default_Config:
-    """Contains Default configurations for the application."""
-
-    BASE_CONFIG = "{'passwd' : '%s', 'key': '%s'}" % (
-        hashTextSHA256(""),
-        hashTextSHA256(""),
-    )
-    CANDIDATE_CONFIG = "{\"['HeadBoy', 'HB']\" : [], \"['ViceHeadBoy', 'VHB']\" : [], \"['HeadGirl', 'HG']\" : [], \"['ViceHeadGirl', 'VHG']\" : []}"
-    CLASS_CONFIG = "{6 : ['A', 'B', 'C', 'D'], 7 : ['A', 'B', 'C', 'D'], 8 : ['A', 'B', 'C', 'D'], 9 : ['A', 'B', 'C', 'D'], 10 : ['A', 'B', 'C', 'D'], 11 : ['A', 'B', 'C', 'D'], 12 : ['A', 'B', 'C', 'D']}"
-
-
-class Write_Default:
-    """Writes Default config file which doesn't exist already, in the /ProgramData directory."""
-
-    exist = 0
-    loc = None
-    if system().lower() == "windows":
-        loc = os.path.join(os.getenv("ALLUSERSPROFILE"), "votm-data")
-    else:
-        loc = os.path.join(os.path.expanduser("~"), ".votm-data")
-    #! temp: adding a pswrd.vcon for saving password
-    #! later shift all to toml file format
-    fles = ["cand.vcon", "clss.vcon", "pswrd.vcon"]
-
-    def __init__(self):
-        Write_Default.exist = 0
-        if not os.path.exists(Write_Default.loc):
-            os.mkdir(Write_Default.loc)
-        eval_lst = [
-            os.path.exists(os.path.join(Write_Default.loc, f)) == False
-            for f in Write_Default.fles
-        ]
-
-        # try:
-        #    self.reg.get(SECRET_KEY)
-        # except FileNotFoundError:
-        #    Write_Default.exist = 1
-        #    self.reg.setx(SECRET_KEY, self.rand(16))
-
-        if any(eval_lst):
-            Write_Default.exist = 1
-            j = 0
-            for i in eval_lst:
-                if i is True:
-                    if j is 0:
-                        self.wrt_cand()
-                    elif j is 1:
-                        self.wrt_clss()
-                    else:
-                        self.wrt_pswrd()
-                j += 1
-
-        # try:
-        #    self.reg.get(ENV_KEY)
-        # except FileNotFoundError:
-        #    Write_Default.exist = 1
-        #    self.reg.setx(
-        #        ENV_KEY,
-        #        self.crypt.encrypt(
-        #            Default_Config.BASE_CONFIG, self.reg.get(SECRET_KEY)
-        #        ),
-        #    )
-        #    self.reg.close()
-
-    @staticmethod
-    def rand(
-        size=8,
-        chars=__import__("string").ascii_letters + __import__("string").digits + "@#$&",
-    ):
-        return "".join(__import__("random").choice(chars) for _ in range(size))
-
-    def wrt_cand(self):
-        """Writes Candidate file."""
-        with open(os.path.join(Write_Default.loc, Write_Default.fles[0]), "w") as f:
-            f.write(Default_Config.CANDIDATE_CONFIG)
-
-    def wrt_clss(self):
-        """Writes Class&Sec file."""
-        with open(os.path.join(Write_Default.loc, Write_Default.fles[1]), "w") as f:
-            f.write(Default_Config.CLASS_CONFIG)
-
-    def wrt_pswrd(self):
-        with open(os.path.join(Write_Default.loc, Write_Default.fles[2]), "w") as f:
-            f.write(Default_Config.BASE_CONFIG)
+BASE_CONFIG = {
+    "config": {
+        "security": {
+            "passwd": "%s" % hashTextSHA256(""),
+            "key": "%s" % hashTextSHA256(""),
+        }
+    }
+}
+CANDIDATE_CONFIG = {
+    "config": {
+        "candidate": {
+            "['HeadBoy', 'HB']": [],
+            "['ViceHeadBoy', 'VHB']": [],
+            "['HeadGirl', 'HG']": [],
+            "['ViceHeadGirl', 'VHG']": [],
+        }
+    }
+}
+CLASS_CONFIG = {
+    "config": {
+        "class": {
+            "6": ["A", "B", "C", "D"],
+            "7": ["A", "B", "C", "D"],
+            "8": ["A", "B", "C", "D"],
+            "9": ["A", "B", "C", "D"],
+            "10": ["A", "B", "C", "D"],
+            "11": ["A", "B", "C", "D"],
+            "12": ["A", "B", "C", "D"],
+        }
+    }
+}
 
 
-def write_config(fle: int, cfg):
-    """Writes to config. files."""
-    with open(os.path.join(Write_Default.loc, Write_Default.fles[fle]), "w") as f:
-        f.write(str(cfg))
-        f.flush()
-
-
-class Access_Config:
-    """Access config files located in the /roaming directory."""
+class Config:
+    CONFIG_FILE = "config.toml"
+    CONFIG_PATH = Path(DATA_PATH).joinpath(CONFIG_FILE)
+    _heads = {
+        "security": BASE_CONFIG,
+        "candidate": CANDIDATE_CONFIG,
+        "class": CLASS_CONFIG,
+    }
 
     def __init__(self):
-        loc = Write_Default.loc
-        fles = Write_Default.fles
-        with open(os.path.join(loc, fles[0]), "r") as f:
-            cand_str = f.read()
-        with open(os.path.join(loc, fles[1]), "r") as f:
-            clss_str = f.read()
-        with open(os.path.join(loc, fles[2]), "r") as f:
-            bse_str = f.read()
+        return
 
-        self.bse_config = literal_eval(bse_str)
-        self.cand_config = literal_eval(cand_str)
-        self.clss_config = literal_eval(clss_str)
+    def write_default(self, cfg_head: Optional[str] = None) -> bool:
+        if not DATA_PATH.is_dir():
+            DATA_PATH.mkdir()
+        if not self._check_integrity():
+            with open(self.CONFIG_PATH, "w") as fl:
+                toml.dump(BASE_CONFIG, fl)
+                toml.dump(CANDIDATE_CONFIG, fl)
+                toml.dump(CLASS_CONFIG, fl)
+                return 1
+
+        if cfg_head is not None:
+            if cfg_head not in list(self._heads.keys()):
+                raise KeyError
+            cfg_dict = self.load()
+            with open(self.CONFIG_PATH, "w") as fl:
+                for head in self._heads.items():
+                    if cfg_head == head[0]:
+                        cfg_dict["config"][head[0]] = head[1]["config"][head[0]]
+                        toml.dump(cfg_dict, fl)
+                        break
+        return 0
+
+    def write(self, cfg_head: str, provided_cfg: dict) -> None:
+        cfg_dict = self.load()
+        with open(self.CONFIG_PATH, "w") as fl:
+            if cfg_head not in list(self._heads.keys()):
+                raise KeyError
+            if cfg_head == list(self._heads.keys())[2]:
+                # * "class"
+                cfg_dict["config"][cfg_head] = {
+                    str(x): y for x, y in (i for i in provided_cfg.items())
+                }
+            else:
+                cfg_dict["config"][cfg_head] = provided_cfg
+            toml.dump(cfg_dict, fl)
+
+    def load(self, cfg_head: Optional[str] = None) -> dict:
+        with open(self.CONFIG_PATH, "r") as fl:
+            self.cfg_dict = toml.load(fl)
+
+        self.get_security = self.cfg_dict["config"]["security"]
+        self.get_candidate = self.cfg_dict["config"]["candidate"]
+        self.get_class = {
+            int(x): y for x, y in (i for i in self.cfg_dict["config"]["class"].items())
+        }
+
+        if cfg_head is not None:
+            _heads = list(self._heads.keys())
+            if cfg_head not in _heads:
+                raise KeyError
+            if cfg_head == _heads[0]:
+                return self.get_security
+            elif cfg_head == _heads[1]:
+                return self.get_candidate
+            else:
+                return self.get_class
+
+        return self.cfg_dict
+
+    def _check_integrity(self) -> bool:
+        if not self.CONFIG_PATH.is_file():
+            return False
+        with open(self.CONFIG_PATH, "r") as fl:
+            get = None
+            try:
+                get = toml.load(fl)
+            except toml.TomlDecodeError:
+                return False
+            # trying to fetch data
+            try:
+                get = get["config"]
+                _heads = list(self._heads.keys())
+                for _ in _heads:
+                    get[_]
+            except KeyError:
+                return False
+            #!TODO: Use regex for further checks
+            return True

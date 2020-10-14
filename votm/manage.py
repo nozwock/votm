@@ -18,7 +18,7 @@ Copyright (C) 2019 Sagar Kumar
 
 import os
 import sys
-import ctypes
+
 import win32api
 import xlsxwriter
 import win32event
@@ -33,16 +33,15 @@ from tabulate import tabulate
 from string import ascii_letters
 from winerror import ERROR_ALREADY_EXISTS
 from tkinter.scrolledtext import ScrolledText
-from tkinter.filedialog import asksaveasfilename, askopenfilenames, askdirectory
-
-from .locations import ASSETS_PATH
-from .config._config import (
-    Default_Config,
-    Write_Default,
-    Access_Config,
-    write_config,
+from tkinter.filedialog import (
+    asksaveasfilename,
+    askopenfilenames,
+    askopenfilename,
+    askdirectory,
 )
-from .config.env import SECRET_KEY, ENV_KEY
+
+from .locations import ASSETS_PATH, DATA_PATH
+from .config import Config
 from .core.ui import Ent_Box, About, Tr_View
 from .core.db import Sql_init, Yr_fle
 from .utils.extras import (
@@ -82,17 +81,6 @@ class Root(tk.Tk):
                 ]
             ]
         )
-        if not ctypes.windll.shell32.IsUserAnAdmin():
-            self.withdraw()
-            self.attributes("-topmost", 1)
-            self.title("Error")
-            mg.showwarning(
-                "Error",
-                "This App requires Administrator Privileges to function properly.\nPlease Retry with Run as Administrator.",
-                parent=self,
-            )
-            self.destroy()
-            sys.exit(0)
         self.iconbitmap(Root.DATAFILE[0])
 
     @classmethod
@@ -116,7 +104,7 @@ class Win(tk.Toplevel):
     def __init__(self, master):
         super().__init__(master)
         self.overrideredirect(1)
-        Write_Default()
+        out = Config().write_default()
 
         self.config(
             bg=Win.SM_BG_HEX,
@@ -173,10 +161,13 @@ class Win(tk.Toplevel):
             self.master.destroy()
             sys.exit(0)
 
-        if Write_Default.exist is 1:
-            mg.showinfo(
-                "Voting Master",
-                "Some default configuration files has been saved.",
+        if out is 1:
+            mg.showerror(
+                "Error",
+                (
+                    "error: either config file missing or is corrupted\n"
+                    "falling back to default config..."
+                ),
                 parent=self,
             )
 
@@ -456,7 +447,7 @@ class Candidates(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bg=Win.SM_BG_HEX)
 
-        post = [eval(i)[0] for i in list(Access_Config().cand_config.keys())]
+        post = [eval(i)[0] for i in list(Config().load("candidate").keys())]
         cand_vw_ed = ttk.LabelFrame(self, text="View/Edit", padding=10)
         cand_vw_ed.pack(pady=(48, 10))
         cand_vw_ed_top = tk.Frame(cand_vw_ed, bg=Win.SM_BG_HEX)
@@ -555,7 +546,7 @@ class Candidates(tk.Frame):
             "<<ComboboxSelected>>",
             lambda event: (
                 self.cand_vw_ed_cand.config(
-                    values=Access_Config().cand_config[
+                    values=Config().load("candidate")[
                         cand_check(self.cand_vw_ed_pst.get())
                     ]
                 ),
@@ -584,7 +575,7 @@ class Candidates(tk.Frame):
             "<<ComboboxSelected>>",
             lambda event: (
                 self.cand_del_cand.config(
-                    values=Access_Config().cand_config[
+                    values=Config().load("candidate")[
                         cand_check(self.cand_del_pst.get())
                     ]
                 ),
@@ -603,26 +594,27 @@ class Candidates(tk.Frame):
 
     def clr(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            write_config(0, Default_Config.CANDIDATE_CONFIG)
+            Config().write_default("candidate")
+            #!write_config(0, Default_Config.CANDIDATE_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Cleared, And set to default.", parent=self)
 
     def wrt_edt(self, key: ttk.Combobox, pos: ttk.Combobox, val: tk.Entry):
         """Writes changes to the Candidate file."""
-        cfg = Access_Config().cand_config
+        cfg = Config().load("candidate")
         if val.get().strip() != "":
             try:
                 cfg[cand_check(key.get())][
                     cfg[cand_check(key.get())].index(pos.get())
                 ] = val.get().strip()
-                #!Hell is above
-                write_config(0, cfg)
+                #!Hell is above (i don't remember why i wrote this :-/)
+                Config().write("candidate", cfg)
                 txt_val = pos.get()
                 pos.set(val.get())
-                pos.config(values=Access_Config().cand_config[cand_check(key.get())])
+                pos.config(values=Config().load("candidate")[cand_check(key.get())])
                 if self.cand_vw_ed_pst.get() == self.cand_del_pst.get():
                     self.cand_del_cand.config(
-                        values=Access_Config().cand_config[cand_check(key.get())]
+                        values=Config().load("candidate")[cand_check(key.get())]
                     )
                     if txt_val == self.cand_del_cand.get():
                         self.cand_del_cand.current(0)
@@ -634,16 +626,16 @@ class Candidates(tk.Frame):
 
     def wrt_add(self, key: ttk.Combobox, val: tk.Entry):
         """Adds value to the candidate file."""
-        cfg = Access_Config().cand_config
+        cfg = Config().load("candidate")
         if val.get().strip() != "":
             try:
                 cfg[cand_check(key.get())].append(val.get().strip())
-                write_config(0, cfg)
+                Config().write("candidate", cfg)
                 self.cand_del_cand.config(
-                    values=Access_Config().cand_config[cand_check(key.get())]
+                    values=Config().load("candidate")[cand_check(key.get())]
                 )
                 self.cand_vw_ed_cand.config(
-                    values=Access_Config().cand_config[cand_check(key.get())]
+                    values=Config().load("candidate")[cand_check(key.get())]
                 )
                 mg.showinfo("Voting Master", "Candidate has been added.", parent=self)
             except:
@@ -653,16 +645,16 @@ class Candidates(tk.Frame):
 
     def cand_del(self, key: ttk.Combobox, val: ttk.Combobox):
         """Deletes value from candidate file."""
-        cfg = Access_Config().cand_config
+        cfg = Config().load("candidate")
         try:
             cfg[cand_check(key.get())].remove(val.get())
-            write_config(0, cfg)
+            Config().write("candidate", cfg)
             val.set("")
-            val.config(values=Access_Config().cand_config[cand_check(key.get())])
+            val.config(values=Config().load("candidate")[cand_check(key.get())])
             val.current(0)
             if self.cand_vw_ed_pst.get() == self.cand_del_pst.get():
                 self.cand_vw_ed_cand.config(
-                    values=Access_Config().cand_config[cand_check(key.get())]
+                    values=Config().load("candidate")[cand_check(key.get())]
                 )
                 self.cand_vw_ed_cand.current(0)
                 self.cand_vw_ed_ent.delete(0, "end")
@@ -681,7 +673,7 @@ class Posts(tk.Frame):
 
         self.flpost = [
             f"{eval(i)[0]}; {eval(i)[-1]}"
-            for i in list(Access_Config().cand_config.keys())
+            for i in list(Config().load("candidate").keys())
         ]
         tag_reg = self.register(self.tag_check)
         pst_reg = self.register(self.pst_check)
@@ -735,7 +727,7 @@ class Posts(tk.Frame):
                 self.pst_edt_pst.config(
                     values=[
                         f"{eval(i)[0]}; {eval(i)[-1]}"
-                        for i in list(Access_Config().cand_config.keys())
+                        for i in list(Config().load("candidate").keys())
                     ]
                 ),
                 self.pst_edt_ent.delete(0, "end"),
@@ -818,7 +810,7 @@ class Posts(tk.Frame):
             lambda e: self.pst_del_pst.config(
                 values=[
                     f"{eval(i)[0]}; {eval(i)[-1]}"
-                    for i in list(Access_Config().cand_config.keys())
+                    for i in list(Config().load("candidate").keys())
                 ]
             ),
         )
@@ -833,7 +825,7 @@ class Posts(tk.Frame):
         )
         pst_clr.pack(side="top", fill="y", expand=1, pady=(20, 20))
         # * _________________________________
-        self.cfg = Dicto(Access_Config().cand_config)
+        self.cfg = Dicto(Config().load("candidate"))
         keys = list(self.cfg.get().keys())
 
         ordr_frm = ttk.LabelFrame(btm_frm, text="Rearrange", padding=10)
@@ -892,7 +884,8 @@ class Posts(tk.Frame):
 
     def clr(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            write_config(0, Default_Config.CANDIDATE_CONFIG)
+            Config().write_default("candidate")
+            #!write_config(0, Default_Config.CANDIDATE_CONFIG)
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Cleared, And set to default.", parent=self)
 
@@ -915,10 +908,10 @@ class Posts(tk.Frame):
                 self.cfg.remove(key)
                 self.cfg.insert(pos - 1, key, item)
 
-                write_config(0, self.cfg)
+                Config().write("candidate", self.cfg.get())
                 self.flpost = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
-                    for i in list(Access_Config().cand_config.keys())
+                    for i in list(Config().load("candidate").keys())
                 ]
                 self.pst_edt_pst.config(values=self.flpost)
                 self.pst_edt_pst.current(0)
@@ -945,10 +938,10 @@ class Posts(tk.Frame):
                 item = self.cfg.get()[key]
                 self.cfg.remove(key)
                 self.cfg.insert(pos + 1, key, item)
-                write_config(0, self.cfg)
+                Config().write("candidate", self.cfg.get())
                 self.flpost = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
-                    for i in list(Access_Config().cand_config.keys())
+                    for i in list(Config().load("candidate").keys())
                 ]
                 self.pst_edt_pst.config(values=self.flpost)
                 self.pst_edt_pst.current(0)
@@ -959,7 +952,7 @@ class Posts(tk.Frame):
 
     def post_edt(self, key, ent, tag):
         if ent.get() != "" and tag.get() != "":
-            cfg = Dicto(Access_Config().cand_config)
+            cfg = Dicto(Config().load("candidate"))
             _tag = [
                 eval(i)[-1]
                 for i in list(cfg.get().keys())
@@ -987,10 +980,10 @@ class Posts(tk.Frame):
                         for i in list(self.cfg.get().keys())
                     ][ind],
                 )
-                write_config(0, cfg.get())
+                Config().write("candidate", cfg.get())
                 val = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
-                    for i in list(Access_Config().cand_config.keys())
+                    for i in list(Config().load("candidate").keys())
                 ]
                 self.pst_del_pst.config(values=val)
                 self.pst_del_pst.current(0)
@@ -1002,7 +995,7 @@ class Posts(tk.Frame):
 
     def post_add(self, ent, tag):
         if ent.get() not in ["", self.lbl_ent] and tag.get() not in ["", self.lbl_tag]:
-            cfg = Access_Config().cand_config
+            cfg = Config().load("candidate")
             _tag = [eval(i)[-1] for i in list(cfg.keys())]
             if tag.get() not in _tag:
                 key = f"{[ent.get(), tag.get().upper()]}"
@@ -1020,10 +1013,10 @@ class Posts(tk.Frame):
                             for i in list(self.cfg.get().keys())
                         ][-1],
                     )
-                    write_config(0, cfg)
+                    Config().write("candidate", cfg)
                     val = [
                         f"{eval(i)[0]}; {eval(i)[-1]}"
-                        for i in list(Access_Config().cand_config.keys())
+                        for i in list(Config().load("candidate").keys())
                     ]
                     self.pst_del_pst.config(values=val)
                     self.pst_del_pst.current(0)
@@ -1049,7 +1042,7 @@ class Posts(tk.Frame):
 
     def post_del(self, ent):
         if ent.get() != self.lbl_pst:
-            cfg = Dicto(Access_Config().cand_config)
+            cfg = Dicto(Config().load("candidate"))
             key = str(
                 [ent.get().split(";")[0].strip(), ent.get().split(";")[-1].strip()]
             )
@@ -1059,10 +1052,10 @@ class Posts(tk.Frame):
                 self.cfg = Dicto(cfg.get())
                 self.pst_list = list(self.cfg.get().keys())
                 self.ordr_posts.delete(ind)
-                write_config(0, cfg)
+                Config().write("candidate", cfg.get())
                 val = [
                     f"{eval(i)[0]}; {eval(i)[-1]}"
-                    for i in list(Access_Config().cand_config.keys())
+                    for i in list(Config().load("candidate").keys())
                 ]
                 ent.config(values=val)
                 self.pst_edt_pst.config(values=val)
@@ -1084,7 +1077,7 @@ class Posts(tk.Frame):
 class Classes(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bg=Win.SM_BG_HEX)
-        clss_lst = list(Access_Config().clss_config.keys())
+        clss_lst = list(Config().load("class").keys())
 
         clss_add = ttk.LabelFrame(self, text="Add", padding=10)
         clss_add.pack(pady=(100, 40))
@@ -1161,12 +1154,12 @@ class Classes(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            write_config(1, Default_Config.CLASS_CONFIG)
+            Config().write_default("class")
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Set to Default.", parent=self)
 
     def add_clss(self):
-        cfg = Dicto(Access_Config().clss_config)
+        cfg = Dicto(Config().load("class"))
         val = self.clss_add_cls.get()
         clss = list(cfg.get().keys())
         if val != "":
@@ -1175,24 +1168,21 @@ class Classes(tk.Frame):
                 clss.sort()
                 ind = clss.index(int(val))
                 cfg.insert(ind, int(val), ["A", "B", "C", "D"])
-                write_config(1, str(cfg.get()))
-                self.clss_del_clss.config(
-                    values=list(Access_Config().clss_config.keys())
-                )
+                Config().write("class", cfg.get())
+                self.clss_del_clss.config(values=list(Config().load("class").keys()))
                 mg.showinfo("Voting Master", "Class has been added.", parent=self)
             else:
                 mg.showerror("Error", "Class already exists.", parent=self)
 
     def del_clss(self):
-        cfg = Access_Config().clss_config
+        cfg = Config().load("class")
         val = self.clss_del_clss.get()
         if val != "Class":
+            #!TODO: make limit to min 1 class rather than 4
             if len(cfg) > 4:
                 del cfg[int(val)]
-                write_config(1, str(cfg))
-                self.clss_del_clss.config(
-                    values=list(Access_Config().clss_config.keys())
-                )
+                Config().write("class", cfg)
+                self.clss_del_clss.config(values=list(Config().load("class").keys()))
                 self.clss_del_clss.current(0)
                 mg.showinfo("Voting Master", "Class has been Deleted.", parent=self)
             else:
@@ -1206,7 +1196,7 @@ class Classes(tk.Frame):
 class Sections(tk.Frame):
     def __init__(self, master):
         super().__init__(master, bg=Win.SM_BG_HEX)
-        clss_lst = list(Access_Config().clss_config.keys())
+        clss_lst = list(Config().load("class").keys())
 
         clss_vw = ttk.LabelFrame(self, text="View", padding=10)
         clss_vw.pack(pady=(30, 10))
@@ -1280,7 +1270,7 @@ class Sections(tk.Frame):
                 self.clss_vw_sec.config(state="normal"),
                 self.clss_vw_sec.delete(0.0, tk.END),
                 self.clss_vw_sec.insert(
-                    0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())]
+                    0.0, Config().load("class")[int(self.clss_vw_clss.get())]
                 ),
                 self.clss_vw_sec.config(state="disabled"),
             ),
@@ -1298,7 +1288,7 @@ class Sections(tk.Frame):
             "<<ComboboxSelected>>",
             lambda event: (
                 self.clss_del_sec.config(
-                    values=Access_Config().clss_config[int(self.clss_del_clss.get())]
+                    values=Config().load("class")[int(self.clss_del_clss.get())]
                 ),
                 self.clss_del_sec.set(""),
                 Edit.cur(self.clss_del_sec),
@@ -1314,24 +1304,24 @@ class Sections(tk.Frame):
 
     def set_dft(self):
         if mg.askokcancel("Confirm", "Are you sure?", parent=self):
-            write_config(1, Default_Config.CLASS_CONFIG)
+            Config().write_default("class")
             app.replace_frame(Edit)
             mg.showinfo("Voting Master", "Set to Default.", parent=self)
 
     def clss_del(self, key: ttk.Combobox, val: ttk.Combobox):
         """Deletes value from class file."""
-        cfg = Access_Config().clss_config
+        cfg = Config().load("class")
         try:
             cfg[int(key.get())].remove(val.get())
-            write_config(1, cfg)
+            Config().write("class", cfg)
             val.set("")
-            val.config(values=Access_Config().clss_config[int(key.get())])
+            val.config(values=Config().load("class")[int(key.get())])
             val.current(0)
             if key.get() == self.clss_vw_clss.get():
                 self.clss_vw_sec.config(state="normal")
                 self.clss_vw_sec.delete(0.0, "end")
                 self.clss_vw_sec.insert(
-                    0.0, Access_Config().clss_config[int(self.clss_vw_clss.get())]
+                    0.0, Config().load("class")[int(self.clss_vw_clss.get())]
                 )
                 self.clss_vw_sec.config(state="disabled")
         except (ValueError, KeyError):
@@ -1342,26 +1332,24 @@ class Sections(tk.Frame):
 
     def clss_add(self, key: ttk.Combobox, val: tk.Entry):
         """Adds value to the class file."""
-        cfg = Access_Config().clss_config
+        cfg = Config().load("class")
         if val.get().strip() != "":
             if val.get() not in cfg[int(key.get())]:
                 try:
                     cfg[int(key.get())].append(val.get().upper())
                     cfg[int(key.get())].sort()
-                    write_config(1, cfg)
+                    Config().write("class", cfg)
                     if key.get() == self.clss_vw_clss.get():
                         self.clss_vw_sec.config(state="normal")
                         self.clss_vw_sec.delete(0.0, "end")
                         self.clss_vw_sec.insert(
                             0.0,
-                            Access_Config().clss_config[int(self.clss_vw_clss.get())],
+                            Config().load("class")[int(self.clss_vw_clss.get())],
                         )
                         self.clss_vw_sec.config(state="disabled")
                     if key.get() == self.clss_del_sec.get():
                         self.clss_del_sec.config(
-                            values=Access_Config().clss_config[
-                                int(self.clss_del_clss.get())
-                            ]
+                            values=Config().load("class")[int(self.clss_del_clss.get())]
                         )
                         self.clss_del_sec.current(0)
                 except:
@@ -1542,7 +1530,7 @@ class Result(tk.Frame):
     def do_upd(self):
         self.mrg_lblfrm.pack(pady=(40, 10))
         cnd = Sql_init(0, yr=self.shw_db.get()).db_cands()
-        lcl_cnd = [eval(i) for i in list(Access_Config().cand_config.keys())]
+        lcl_cnd = [eval(i) for i in list(Config().load("candidate").keys())]
         cn = 1
 
         try:
@@ -1888,8 +1876,8 @@ class Settings(tk.Frame):
             lbfrm_bse_passwd, validate="key", validatecommand=(spc_reg, "%S")
         )
         bse_passwd.pack(side="left", padx=(0, 10))
-        # bse_passwd.insert(0, Access_Config().bse_config["passwd"])
-        bse_passwd.insert(0, "Type new Password")
+        _info_pass = "Type new Password"
+        bse_passwd.insert(0, _info_pass)
         bse_passwd.bind(
             "<ButtonRelease-1>",
             lambda e: (
@@ -1907,8 +1895,8 @@ class Settings(tk.Frame):
         )
         # show="*",
         key_passwd.pack(side="left", padx=(0, 10))
-        # key_passwd.insert(0, Access_Config().bse_config["key"])
-        key_passwd.insert(0, "Type new SuperKey")
+        _info_key = "Type new SuperKey"
+        key_passwd.insert(0, _info_key)
         key_passwd.bind(
             "<ButtonRelease-1>",
             lambda e: (
@@ -1921,7 +1909,12 @@ class Settings(tk.Frame):
             lbfrm_bse_passwd,
             text="Submit",
             style="m.TButton",
-            command=lambda: self.chng_pswd(bse_passwd),
+            command=lambda: (
+                self.pass_key_submit_check(
+                    bse_passwd, key_passwd, _info_pass, _info_key
+                ),
+                self.chng_pswd(bse_passwd),
+            ),
             takefocus=0,
         )
         btn_bse_sub.pack(side="left")
@@ -1929,7 +1922,12 @@ class Settings(tk.Frame):
             lbfrm_key_passwd,
             text="Submit",
             style="m.TButton",
-            command=lambda: self.chng_key(key_passwd),
+            command=lambda: (
+                self.pass_key_submit_check(
+                    bse_passwd, key_passwd, _info_pass, _info_key
+                ),
+                self.chng_key(key_passwd),
+            ),
             takefocus=0,
         )
         btn_key_sub.pack(side="left")
@@ -1954,6 +1952,13 @@ class Settings(tk.Frame):
         else:
             return False
 
+    @staticmethod
+    def pass_key_submit_check(epass, ekey, msg_pass, msg_key) -> None:
+        if epass.get() == msg_pass:
+            epass.delete(0, "end")
+        if ekey.get() == msg_key:
+            ekey.delete(0, "end")
+
     def tkn_gen(self, ent: ttk.Entry):
         if Ent_Box(
             self, "Enter SuperKey & Confirm to Continue.", Root.DATAFILE[0], "key"
@@ -1965,11 +1970,8 @@ class Settings(tk.Frame):
         dest = askdirectory(parent=self, initialdir=fdir)
         if dest != "":
             try:
-                src = Write_Default.loc
-                fles = Write_Default.fles
-                for i in fles:
-                    fsrc = os.path.join(src, i)
-                    copyfile(fsrc, os.path.join(dest, i))
+                src = Config.CONFIG_PATH
+                copyfile(src, os.path.join(dest, Config.CONFIG_FILE))
                 mg.showinfo(
                     "Voting Master",
                     f"Settings Exported successfuly to-\n{dest}",
@@ -1980,23 +1982,19 @@ class Settings(tk.Frame):
 
     def imp_set(self):
         fdir = path.dirname(__file__)
-        fnmes = askopenfilenames(
-            parent=self, initialdir=fdir, filetypes=(("Settings Files", "*.vcon"),)
+        fnmes = askopenfilename(
+            parent=self, initialdir=fdir, filetypes=(("Config file", "*.toml"),)
         )
         if fnmes != "":
             try:
-                dest = Write_Default.loc
-                # eg. ('D:/cand.vcon', 'D:/clss.vcon')
-                fsrc = [i for i in fnmes if i.split("/")[-1] in Write_Default.fles]
-                for i in fsrc:
-                    copyfile(i, os.path.join(dest, i.split("/")[-1]))
-                if fsrc != []:
-                    repr_dir = "".join(fsrc[0].split("/")[:-1]) + "/"
-                    mg.showinfo(
-                        "Voting Master",
-                        f"Settings Imported successfuly from-\n{repr_dir}",
-                        parent=self,
-                    )
+                #! handle other cases
+                # eg. ('D:\config.toml')
+                copyfile(fnmes, Config.CONFIG_PATH)
+                mg.showinfo(
+                    "Voting Master",
+                    f"Settings Imported successfuly from-\n{fnmes}",
+                    parent=self,
+                )
             except:
                 pass
 
@@ -2016,7 +2014,7 @@ class Settings(tk.Frame):
             btn.config(state="disabled")
             ind = yr.index(sel_yr)
             fl_dl = fle[ind]
-            remove(os.path.join(Write_Default.loc, fl_dl))
+            remove(os.path.join(DATA_PATH, fl_dl))
             bx_up.config(values=Yr_fle().yr)
 
     def tkn_del(self):
@@ -2027,11 +2025,11 @@ class Settings(tk.Frame):
 
     def chng_pswd(self, pswd: tk.Entry):
         """Changes the password in base config file."""
-        cfg = Access_Config().bse_config
+        cfg = Config().load("security")
         if not matchHashedTextSHA256(cfg["passwd"], pswd.get().strip()):
             try:
                 cfg["passwd"] = hashTextSHA256(pswd.get().strip())
-                write_config(2, str(cfg))
+                Config().write("security", cfg)
                 pswd.delete(0, tk.END)
                 # pswd.insert(0, Access_Config().bse_config["passwd"])
                 mg.showinfo("Voting Master", "Password has been Changed!", parent=self)
@@ -2048,14 +2046,14 @@ class Settings(tk.Frame):
 
     def chng_key(self, pswd: tk.Entry):
         """Changes the key in base config file."""
-        cfg = Access_Config().bse_config
+        cfg = Config().load("security")
         if Ent_Box(
             app, "Enter Previous SuperKey to Continue.", Root.DATAFILE[0], "key"
         ).get():
             if not matchHashedTextSHA256(cfg["key"], pswd.get().strip()):
                 try:
                     cfg["key"] = hashTextSHA256(pswd.get().strip())
-                    write_config(2, str(cfg))
+                    Config().write("security", cfg)
                     pswd.delete(0, tk.END)
                     # pswd.insert(0, Access_Config().bse_config["key"])
                     mg.showinfo("Voting Master", "Key has been Changed!", parent=self)

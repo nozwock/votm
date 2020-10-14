@@ -25,7 +25,7 @@ from datetime import date
 from tkinter import messagebox as mg
 from tkinter.scrolledtext import ScrolledText
 
-from votm.config._config import Write_Default, Access_Config
+from votm.config import Config
 from votm.utils.extras import matchHashedTextSHA256
 from votm import __version__, __author__, __license__
 
@@ -190,7 +190,7 @@ class Ent_Box(tk.Toplevel):
     def ok_chk(self, ent: tk.Entry):
         """Validates the passwords, and exits if matched."""
         if matchHashedTextSHA256(
-            Access_Config().bse_config[self.chk].strip(), ent.get().strip()
+            Config().load("security")[self.chk].strip(), ent.get().strip()
         ):
             self.destroy()
             self.flag = True
@@ -236,9 +236,6 @@ class About(tk.Toplevel):
             "assets",
             "logo.png",
         )
-        #!###################################################################
-        #!## Change above to 'assets\\logo.png' while using with pyinstaller ###
-        #!###################################################################
         if not hasattr(sys, "frozen"):
             DATAFILE = os.path.join(os.path.dirname(__file__), DATAFILE)
         else:
@@ -315,7 +312,7 @@ if __name__ == "__main__":
         win.destroy()
         sys.exit(0)
 
-    Write_Default()
+    Config().write_default()
     root = tk.Tk()
     root.attributes("-alpha", 0.0)
     ab = About(root)

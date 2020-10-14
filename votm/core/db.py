@@ -21,7 +21,8 @@ import sqlite3 as sql
 from datetime import date
 from tkinter import messagebox as mg
 
-from votm.config._config import Write_Default, Access_Config
+from votm.config import Config
+from votm.locations import DATA_PATH
 
 
 class Sql_init:
@@ -35,9 +36,9 @@ class Sql_init:
         Sql_init.NXT = 1
         self.yr = date.today().strftime("%Y")
         if yr:
-            self.db = os.path.join(Write_Default.loc, f"votm_{yr}.db")
+            self.db = os.path.join(DATA_PATH, f"votm_{yr}.db")
         else:
-            self.db = os.path.join(Write_Default.loc, f"votm_{self.yr}.db")
+            self.db = os.path.join(DATA_PATH, f"votm_{self.yr}.db")
 
         self.con = sql.connect(self.db, isolation_level=None)
         if _key:
@@ -59,8 +60,8 @@ class Sql_init:
                 STUDENT INT DEFAULT(NULL))"""
             self.cur.execute(__tbl_sy)
             cand_lst = [
-                [eval(x)[-1], Access_Config().cand_config[x]]
-                for x in list(Access_Config().cand_config.keys())
+                [eval(x)[-1], Config().load("candidate")[x]]
+                for x in list(Config().load("candidate").keys())
             ]
             tbl_cand = Sql_init(0).cols(self.yr)[0]
             tbl_cand = tbl_cand[4 : len(tbl_cand)]
@@ -291,7 +292,7 @@ class Sql_init:
         """Return list of columns, and table description."""
         (yr,) = args
         self.con.close()
-        db = os.path.join(Write_Default.loc, f"votm_{yr}.db")
+        db = os.path.join(DATA_PATH, f"votm_{yr}.db")
         con = sql.connect(db, isolation_level=None)
         cur = con.cursor()
         __dsc_sy = f"PRAGMA table_info({Sql_init.TBL_NM})"
@@ -477,7 +478,7 @@ class Yr_fle:
     def __init__(self):
         fle = []
         Yr_fle.fle = fle
-        for _, _, f in os.walk(Write_Default.loc):
+        for _, _, f in os.walk(DATA_PATH):
             for file in f:
                 if ".db" in file:
                     if "votm_" in file:
