@@ -12,7 +12,7 @@ _author_alias = "sgrkmr"
 # sys.prefix -> path for python installation. If bundled -> bundled dir location
 
 PKG_DIR = pathlib.Path(__file__).resolve().parent
-ROOT_DIR = PKG_DIR.parent
-LICNESE_PATH = ROOT_DIR.joinpath("LICENSE")
+# ROOT_DIR = PKG_DIR.parent
+# LICNESE_PATH = ROOT_DIR.joinpath("LICENSE")
 ASSETS_PATH = PKG_DIR.joinpath(_resource_dir)
 DATA_PATH = pathlib.Path(AppDirs(_appname, _author_alias).site_data_dir)

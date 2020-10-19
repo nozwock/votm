@@ -27,7 +27,8 @@ from tkinter.scrolledtext import ScrolledText
 
 from votm.config import Config
 from votm.utils.extras import matchHashedTextSHA256
-from votm import __version__, __author__, __license__
+from votm import __version__, __author__
+from votm._license import __license__
 
 
 class Tr_View(tk.Frame):
