@@ -9,7 +9,7 @@
 <a href="https://www.python.org/downloads/release/python-373/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7.3-blue?style=flat-square"></a>
 <!--<a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>-->
 <a href="https://opensource.org/licenses/GPL-3.0"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square"></a>
-<a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>
 </p>
 
 <p align="center">
