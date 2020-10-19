@@ -34,7 +34,7 @@ exe = EXE(
     + [
         DATA_FILES[i]
         for i in DATA_FILES
-        if i in ["v_r.ico", "bg.png", "logo.png", "LICENSE"]
+        if i in ["app.gif", "bg.png", "logo.png", "LICENSE"]
     ],
     a.zipfiles,
     a.datas,

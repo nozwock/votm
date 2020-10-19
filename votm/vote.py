@@ -21,6 +21,7 @@ import sys
 import platform
 
 isWindows = platform.system().lower() == "windows"
+isLinux = platform.system().lower() == "linux"
 
 if isWindows:
     import ctypes
@@ -32,6 +33,10 @@ from os import path
 from datetime import date
 import tkinter as tk
 from tkinter import ttk
+
+if isLinux:
+    from ttkthemes import ThemedStyle
+
 from tkinter import messagebox as mg
 
 from .locations import ASSETS_PATH
@@ -55,6 +60,8 @@ class Win(tk.Tk):
 
         if isWindows:
             ttk.Style().theme_use("vista")
+        elif isLinux:
+            ThemedStyle().theme_use("breeze")
 
         ICON_IMG = getImg("app.gif", imgDATA)
 

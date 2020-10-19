@@ -22,6 +22,7 @@ import platform
 from typing import Optional
 
 isWindows = platform.system().lower() == "windows"
+isLinux = platform.system().lower() == "linux"
 
 if isWindows:
     import ctypes
@@ -35,6 +36,10 @@ from os import path, remove
 from datetime import date
 import tkinter as tk
 from tkinter import ttk
+
+if isLinux:
+    from ttkthemes import ThemedStyle
+
 from tkinter import messagebox as mg
 from tabulate import tabulate
 from string import ascii_letters
@@ -75,6 +80,8 @@ class Win(tk.Tk):
 
         if isWindows:
             ttk.Style().theme_use("vista")
+        elif isLinux:
+            ThemedStyle().theme_use("breeze")
 
         ICON_IMG = getImg("app.gif", imgDATA)
 

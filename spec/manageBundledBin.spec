@@ -29,7 +29,12 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries + DATA_FILES_ALL,
+    a.binaries
+    + [
+        DATA_FILES[i]
+        for i in DATA_FILES
+        if i != "v_r.ico"
+    ],
     a.zipfiles,
     a.datas,
     [],

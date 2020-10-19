@@ -43,7 +43,12 @@ exe = EXE(
 )
 coll = COLLECT(
     exe,
-    a.binaries + DATA_FILES_ALL,
+    a.binaries
+    + [
+        DATA_FILES[i]
+        for i in DATA_FILES
+        if i != "v_r.ico"
+    ],
     a.zipfiles,
     a.datas,
     strip=False,
