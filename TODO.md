@@ -35,11 +35,11 @@ votm
   - [X] which in turn means depreciation of `Reg` as password will no more be stored in an enviroment variable, so remove `Reg` too
   - [X] handle **config and merge files** read/write code accordingly after removing encryption system. Also maybe use toml or other config format for merge files too.
 - [x] `feat:` make config interface better with toml `config.toml` (all config in a single toml file, password too) <kbd>1.3.0</kbd>
-- [ ] support for linux <kbd>1.4.0</kbd>
-  - [ ] path related issues
-  - [ ] `.ico` (icon) issue
+- [x] support for linux <kbd>1.4.0</kbd>
+  - [x] path related issues
+  - [x] `.ico` (icon) issue
   - [x] removal of windows sepcific `Reg`
-  - [ ] handle some winapi stuff
+  - [x] handle some winapi stuff
 - [ ] add these features: <kbd>1.5.0</kbd>
   - [ ] a `combobox` for selection of the database in which the data of the voting session will be stored, at the start screen. Maybe a dialog box to type a custom name for the database too?
   - [ ] make `token` & `password` system optional by adding checkbox's maybe? Might as well put all the password management into a new  popup window?
@@ -49,5 +49,3 @@ votm
   - [ ] make where the password is asked optional
   - [ ] make a dialog appear when clicked on Generate Tokens with two entry box for (no. of tokens, length of a token)
   - [ ] redesign the ui for pass/key -> shift all this to a new popup window, maybe? So, as to have room for future options to be addded
-
-<!--common.py-->

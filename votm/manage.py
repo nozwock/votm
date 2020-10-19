@@ -19,6 +19,7 @@ Copyright (C) 2019 Sagar Kumar
 import os
 import sys
 import platform
+from typing import Optional
 
 isWindows = platform.system().lower() == "windows"
 
@@ -34,7 +35,6 @@ from os import path, remove
 from datetime import date
 import tkinter as tk
 from tkinter import ttk
-from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 from tabulate import tabulate
 from string import ascii_letters
@@ -59,70 +59,24 @@ from .utils.extras import (
     matchHashedTextSHA256,
 )
 from .utils.helpers import cand_check
+from .common import getImg, _checkInstance
 from . import __author__, __version__
 
 
-class Root(tk.Tk):
-    """Root Dummy Window."""
-
-    DATAFILE = []
-
-    def __init__(self):
-        super().__init__()
-        ttk.Style().theme_use("vista")
-        self.title("Voting Master-Edit")
-        self.attributes("-alpha", 0.0)
-        self.ins_dat(
-            [
-                ASSETS_PATH.joinpath(i)
-                for i in [
-                    "v_r.ico",
-                    "ttle.png",
-                    "edtw.png",
-                    "rslw.png",
-                    "sttw.png",
-                    "edtb.png",
-                    "rslb.png",
-                    "sttb.png",
-                ]
-            ]
-        )
-        if isWindows:
-            if not ctypes.windll.shell32.IsUserAnAdmin():
-                self.withdraw()
-                self.attributes("-topmost", 1)
-                self.title("Error")
-                mg.showwarning(
-                    "Error",
-                    "This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.",
-                    parent=self,
-                )
-                self.destroy()
-                sys.exit(0)
-        self.iconbitmap(Root.DATAFILE[0])
-
-    @classmethod
-    def ins_dat(cls, iter_fle):
-        """Instantiates Data files."""
-        cls.DATAFILE.extend(iter_fle)
-        for DATA in range(len(cls.DATAFILE)):
-            if not hasattr(sys, "frozen"):
-                cls.DATAFILE[DATA] = path.join(
-                    path.dirname(__file__), cls.DATAFILE[DATA]
-                )
-            else:
-                cls.DATAFILE[DATA] = path.join(sys.prefix, cls.DATAFILE[DATA])
-
-
-class Win(tk.Toplevel):
+class Win(tk.Tk):
     """Main Window container."""
 
     SM_BG_HEX = "#F0F0F0"
 
-    def __init__(self, master):
-        super().__init__(master)
-        self.overrideredirect(1)
+    def __init__(self):
+        global ICON_IMG
+        super().__init__()
         out = Config().write_default()
+
+        if isWindows:
+            ttk.Style().theme_use("vista")
+
+        ICON_IMG = getImg("app.gif", imgDATA)
 
         self.config(
             bg=Win.SM_BG_HEX,
@@ -131,56 +85,59 @@ class Win(tk.Toplevel):
             highlightcolor="#000000",
             highlightthickness=1,
         )
+
         x = self.winfo_screenwidth() / 2 - 400
         y = self.winfo_screenheight() / 2 - 240
         self.geometry("800x480+%d+%d" % (x, y))
         self.resizable(0, 0)
-        self.iconbitmap(Root.DATAFILE[0])
+        self.iconphoto(False, ICON_IMG)
+        self.title("VOTM - manage")
+
         ttk.Style().configure("TButton", focuscolor=self.cget("bg"))
         ttk.Style().configure("TCheckbutton", focuscolor=self.cget("bg"))
         ttk.Style().configure("TRadiobutton", focuscolor=self.cget("bg"))
 
-        top_bar = tk.Frame(self, bg="#6A00FF", height=5)
-        top_bar.pack(fill="x")
-        top_bar.pack_propagate(0)
-        top_bar.bind("<Button-1>", self.get_pos)
+        # top_bar = tk.Frame(self, bg="#6A00FF", height=5)
+        # top_bar.pack(fill="x")
+        # top_bar.pack_propagate(0)
+        # top_bar.bind("<Button-1>", self.get_pos)
         #!ERR: there was some error related to this binding, can't recreate it
-        top_bar.bind(
-            "<B1-Motion>",
-            lambda event: self.geometry(
-                f"+{event.x_root+self.xwin}+{event.y_root+self.ywin}"
-            ),
-        )
-        min_btn = tk.Label(
-            top_bar, text="█", bg="#6A00FF", fg="#9E5EFF", font="Consolas 25"
-        )
-        min_btn.pack(side="right")
-        min_btn.bind("<Enter>", lambda event: min_btn.config(foreground="#C39EFF"))
-        min_btn.bind("<Leave>", lambda event: min_btn.config(foreground="#9E5EFF"))
-        min_btn.bind(
-            "<ButtonRelease-1>", lambda event: (self.master.iconify(), self.withdraw())
-        )
-        self.bind("<Alt-F4>", lambda event: (self.master.destroy(), sys.exit(0)))
-        self.master.bind("<FocusIn>", lambda event: self.lift())
-        self.master.bind(
-            "<Map>",
-            lambda event: (self.master.deiconify(), self.deiconify(), self.lift()),
-        )
-        self.master.bind(
-            "<Unmap>", lambda event: (self.master.iconify(), self.withdraw())
-        )
+        # top_bar.bind(
+        #    "<B1-Motion>",
+        #    lambda event: self.geometry(
+        #        f"+{event.x_root+self.xwin}+{event.y_root+self.ywin}"
+        #    ),
+        # )
+        # min_btn = tk.Label(
+        #    top_bar, text="█", bg="#6A00FF", fg="#9E5EFF", font="Consolas 25"
+        # )
+        # min_btn.pack(side="right")
+        # min_btn.bind("<Enter>", lambda event: min_btn.config(foreground="#C39EFF"))
+        # min_btn.bind("<Leave>", lambda event: min_btn.config(foreground="#9E5EFF"))
+        # min_btn.bind(
+        #    "<ButtonRelease-1>", lambda event: (self.master.iconify(), self.withdraw())
+        # )
+        # self.bind("<Alt-F4>", lambda event: (self.master.destroy(), sys.exit(0)))
+        # self.master.bind("<FocusIn>", lambda event: self.lift())
+        # self.master.bind(
+        #    "<Map>",
+        #    lambda event: (self.master.deiconify(), self.deiconify(), self.lift()),
+        # )
+        # self.master.bind(
+        #    "<Unmap>", lambda event: (self.master.iconify(), self.withdraw())
+        # )
 
         self.navbar()
         self.frame_n = None
         self.replace_frame(Edit)
 
-        if Ent_Box(self, icn=Root.DATAFILE[0]).get():
+        if Ent_Box(self, icn=ICON_IMG).get():
             pass
         else:
-            self.master.destroy()
+            self.destroy()
             sys.exit(0)
 
-        if out is 1:
+        if out == 1:
             mg.showerror(
                 "Error",
                 (
@@ -220,16 +177,18 @@ class Win(tk.Toplevel):
         fl.pack(side="left", expand=0, fill="y")
         fl.pack_propagate(0)
         # ? items_____________________________
+        #! this frame height i.e. logo height
         flt = tk.Frame(fl)
-        flt.pack(side="top", fill="both", expand=1)
-        flt.pack_propagate(0)
-        self.lg_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[1]))
+        flt.pack(side="top", fill="both", expand=0)
+        # flt.pack_propagate(0)
+        self.lg_img = getImg("ttle.png", imgDATA)
+        flt.config(height=self.lg_img.height())
         lg_canv = tk.Canvas(flt, bd=0, highlightthickness=0)
         lg_canv.place(x=0, y=0, relheight=1, relwidth=1, anchor="nw")
         lg_canv.create_image(0, 0, image=self.lg_img, anchor="nw")
 
         flb = tk.Frame(fl, bg="#0077CC")
-        flb.pack(side="bottom", fill="x", expand=1, anchor="s", pady=(1, 0))
+        flb.pack(side="bottom", fill="x", expand=1, anchor="s")
 
         btxlb = tk.Button(
             flb,
@@ -258,15 +217,17 @@ class Win(tk.Toplevel):
             bd=1,
             fg="#EFEFEF",
             height=2,
-            command=lambda: About(self, Root.DATAFILE[0]),
+            command=lambda: About(self, ICON_IMG),
             font=("Segoe UI", 10, "bold"),
         )
         bthlb.pack(side="left", fill="x", expand=1, anchor="s")
         # ? contents_____________________________
-        self.edt_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[2]))
-        self.edtb_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[5]))
+        flm = tk.Frame(fl, bg="#0077CC")
+        flm.pack(side="top", fill="both", expand=1)
+        self.edt_img = getImg("edtw.png", imgDATA)
+        self.edtb_img = getImg("edtb.png", imgDATA)
         self.edit = tk.Button(
-            fl,
+            flm,
             text="  Edit      ",
             image=self.edt_img,
             compound="left",
@@ -283,10 +244,10 @@ class Win(tk.Toplevel):
         )
         self.edit.pack(side="top", ipady=20, fill="x")
 
-        self.rsl_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[3]))
-        self.rslb_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[6]))
+        self.rsl_img = getImg("rslw.png", imgDATA)
+        self.rslb_img = getImg("rslb.png", imgDATA)
         self.result = tk.Button(
-            fl,
+            flm,
             text="  Result   ",
             image=self.rsl_img,
             compound="left",
@@ -303,10 +264,10 @@ class Win(tk.Toplevel):
         )
         self.result.pack(side="top", ipady=20, fill="x")
 
-        self.stt_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[4]))
-        self.sttb_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[7]))
+        self.stt_img = getImg("sttw.png", imgDATA)
+        self.sttb_img = getImg("sttb.png", imgDATA)
         self.settings = tk.Button(
-            fl,
+            flm,
             text="  Settings",
             image=self.stt_img,
             compound="left",
@@ -367,7 +328,7 @@ class Win(tk.Toplevel):
 
     def desexit(self):
         try:
-            self.master.destroy()
+            self.destroy()
             sys.exit(0)
         except:
             pass
@@ -1608,7 +1569,7 @@ class Result(tk.Frame):
         #! MERGE FILES GENERATOR
         try:
             db_name = Result_Diag(
-                self, txt="Select a Database.", icn=Root.DATAFILE[0], mod=1
+                self, txt="Select a Database.", icn=ICON_IMG, mod=1
             ).get()
             if not db_name:
                 return -1
@@ -1729,7 +1690,7 @@ class Result(tk.Frame):
                 mrg_nm = Result_Diag(
                     self,
                     txt="Type a name for merged database.",
-                    icn=Root.DATAFILE[0],
+                    icn=ICON_IMG,
                     mod=2,
                 ).get()
                 if not mrg_nm:
@@ -1965,7 +1926,7 @@ class Settings(tk.Frame):
 
     def tkn_gen(self, ent: ttk.Entry):
         if Ent_Box(
-            self, "Enter SuperKey & Confirm to Continue.", Root.DATAFILE[0], "key"
+            self, "Enter SuperKey & Confirm to Continue.", ICON_IMG, "key"
         ).get():
             Tokens(app, ent.get()).gen()
 
@@ -2051,9 +2012,7 @@ class Settings(tk.Frame):
     def chng_key(self, pswd: tk.Entry):
         """Changes the key in base config file."""
         cfg = Config().load("security")
-        if Ent_Box(
-            app, "Enter Previous SuperKey to Continue.", Root.DATAFILE[0], "key"
-        ).get():
+        if Ent_Box(app, "Enter Previous SuperKey to Continue.", ICON_IMG, "key").get():
             if not matchHashedTextSHA256(cfg["key"], pswd.get().strip()):
                 try:
                     cfg["key"] = hashTextSHA256(pswd.get().strip())
@@ -2084,7 +2043,8 @@ class Result_Diag(tk.Toplevel):
         self.geometry("300x100+%d+%d" % (x, y))
         self.resizable(0, 0)
         self.config(background="#F5F6F7")
-        self.iconbitmap(icn)
+        # delete this due to True
+        # self.iconphoto(True, ICON_IMG)
         self.grab_set()
         self.lift()
         self.focus_force()
@@ -2173,7 +2133,9 @@ class Result_Show_Sep(tk.Tk):
         y = self.winfo_screenheight() / 2 - 300 - 40
         self.title("Result")
         self.geometry("800x600+%d+%d" % (x, y))
-        self.iconbitmap(Root.DATAFILE[0])
+        # print(type(ICON_IMG))
+        # delete this due to True
+        # self.iconphoto(True, ICON_IMG)
         self.minsize(800, 600)
 
         menu_bar = tk.Menu(self)
@@ -2513,25 +2475,23 @@ class Token_Show(Result_Show_Sep):
 
 
 def main():
-    global app
-    if isWindows:
-        _ = win32event.CreateMutex(None, False, "name")
-        last_error = win32api.GetLastError()
-        if last_error == ERROR_ALREADY_EXISTS:
-            Root.ins_dat([ASSETS_PATH.joinpath("v_r.ico")])
-            msg = tk.Tk()
-            msg.attributes("-topmost", 1)
-            msg.withdraw()
-            msg.title("Error")
-            msg.iconbitmap(Root.DATAFILE[0])
-            mg.showwarning("Error", "App instance already running.", parent=msg)
-            msg.destroy()
-            sys.exit(0)
-    root = Root()
-    root.lower()
-    root.iconify()
+    global app, imgDATA
+    imgDATA = {
+        i: [ASSETS_PATH.joinpath(i), None]
+        for i in [
+            "app.gif",
+            "ttle.png",
+            "edtw.png",
+            "rslw.png",
+            "sttw.png",
+            "edtb.png",
+            "rslb.png",
+            "sttb.png",
+        ]
+    }
+    _checkInstance()
 
-    app = Win(root)
+    app = Win()
     app.mainloop()
 
 

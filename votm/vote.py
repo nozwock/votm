@@ -32,7 +32,6 @@ from os import path
 from datetime import date
 import tkinter as tk
 from tkinter import ttk
-from PIL import Image, ImageTk
 from tkinter import messagebox as mg
 
 from .locations import ASSETS_PATH
@@ -40,57 +39,24 @@ from .config import Config
 from .core.db import Sql_init
 from .core.ui import Ent_Box, About
 from .utils.extras import Tokens
+from .common import getImg, _checkInstance
 from . import __author__, __version__
 
 
-class Root(tk.Tk):
-    """Root Dummy Window."""
-
-    DATAFILE = []
-
-    def __init__(self):
-        super().__init__()
-        ttk.Style().theme_use("vista")
-        self.title("Voting Master-Vote")
-        self.attributes("-alpha", 0.0)
-        self.protocol("WM_DELETE_WINDOW", Win.s_cls)
-        self.ins_dat([ASSETS_PATH.joinpath(i) for i in ["v_r.ico", "bg.png"]])
-        if isWindows:
-            if not ctypes.windll.shell32.IsUserAnAdmin():
-                self.withdraw()
-                self.attributes("-topmost", 1)
-                self.title("Error")
-                mg.showwarning(
-                    "Error",
-                    "This App requires Administrator Privileges to function properly.\nPlease Retry with Run As Administrator.",
-                    parent=self,
-                )
-                self.destroy()
-                sys.exit(0)
-        self.iconbitmap(default=Root.DATAFILE[0])
-
-    @classmethod
-    def ins_dat(cls, iter_fle):
-        """Instantiates Data files."""
-        cls.DATAFILE.extend(iter_fle)
-        for DATA in range(len(cls.DATAFILE)):
-            if not hasattr(sys, "frozen"):
-                cls.DATAFILE[DATA] = path.join(
-                    path.dirname(__file__), cls.DATAFILE[DATA]
-                )
-            else:
-                cls.DATAFILE[DATA] = path.join(sys.prefix, cls.DATAFILE[DATA])
-
-
-class Win(tk.Toplevel):
+class Win(tk.Tk):
     """Main Window container."""
 
     SM_BG_HEX = "#F0F0F0"
 
-    def __init__(self, master):
-        super().__init__(master)
-        self.overrideredirect(1)
+    def __init__(self):
+        global ICON_IMG
+        super().__init__()
         out = Config().write_default()
+
+        if isWindows:
+            ttk.Style().theme_use("vista")
+
+        ICON_IMG = getImg("app.gif", imgDATA)
 
         self.config(
             background=Win.SM_BG_HEX,
@@ -99,48 +65,51 @@ class Win(tk.Toplevel):
             highlightcolor="#000000",
             highlightthickness=1,
         )
-        ttk.Style().configure("TButton", focuscolor=self.cget("background"))
-
-        top_bar = tk.Frame(self, bg="#6A00FF", height=5)
-        top_bar.pack(fill="x")
-        top_bar.pack_propagate(0)
-        top_bar.bind("<Button-1>", self.get_pos)
-        top_bar.bind(
-            "<B1-Motion>",
-            lambda event: self.geometry(
-                f"+{event.x_root+self.xwin}+{event.y_root+self.ywin}"
-            ),
-        )
-        min_btn = tk.Label(
-            top_bar, text="█", bg="#6A00FF", fg="#9E5EFF", font="Consolas 25"
-        )
-        min_btn.pack(side="right")
-        min_btn.bind("<Enter>", lambda event: min_btn.config(foreground="#C39EFF"))
-        min_btn.bind("<Leave>", lambda event: min_btn.config(foreground="#9E5EFF"))
-        min_btn.bind(
-            "<ButtonRelease-1>", lambda event: (self.master.iconify(), self.withdraw())
-        )
-        self.master.bind("<FocusIn>", lambda event: self.lift())
-        self.master.bind(
-            "<Map>",
-            lambda event: (self.master.deiconify(), self.deiconify(), self.lift()),
-        )
-        self.master.bind(
-            "<Unmap>", lambda event: (self.master.iconify(), self.withdraw())
-        )
 
         x = self.winfo_screenwidth() / 2 - 400
         y = self.winfo_screenheight() / 2 - 240
         self.geometry("800x480+%d+%d" % (x, y))
         self.resizable(0, 0)
-        self.iconbitmap(default=Root.DATAFILE[0])
+        self.iconphoto(True, ICON_IMG)
+        self.title("VOTM - vote")
+
+        ttk.Style().configure("TButton", focuscolor=self.cget("background"))
+
+        # top_bar = tk.Frame(self, bg="#6A00FF", height=5)
+        # top_bar.pack(fill="x")
+        # top_bar.pack_propagate(0)
+        # top_bar.bind("<Button-1>", self.get_pos)
+        # top_bar.bind(
+        #    "<B1-Motion>",
+        #    lambda event: self.geometry(
+        #        f"+{event.x_root+self.xwin}+{event.y_root+self.ywin}"
+        #    ),
+        # )
+        # min_btn = tk.Label(
+        #    top_bar, text="█", bg="#6A00FF", fg="#9E5EFF", font="Consolas 25"
+        # )
+        # min_btn.pack(side="right")
+        # min_btn.bind("<Enter>", lambda event: min_btn.config(foreground="#C39EFF"))
+        # min_btn.bind("<Leave>", lambda event: min_btn.config(foreground="#9E5EFF"))
+        # min_btn.bind(
+        #    "<ButtonRelease-1>", lambda event: (self.master.iconify(), self.withdraw())
+        # )
+        # self.master.bind("<FocusIn>", lambda event: self.lift())
+        # self.master.bind(
+        #    "<Map>",
+        #    lambda event: (self.master.deiconify(), self.deiconify(), self.lift()),
+        # )
+        # self.master.bind(
+        #    "<Unmap>", lambda event: (self.master.iconify(), self.withdraw())
+        # )
+
         self.navbar()
         self.frame_n = None
         self.replace_frame(Home)
         self.protocol("WM_DELETE_WINDOW", self.s_cls)
         self.lift()
 
-        if out is 1:
+        if out == 1:
             mg.showerror(
                 "Error",
                 (
@@ -161,7 +130,7 @@ class Win(tk.Toplevel):
                 "No Candidate found!, Add Candidate in Manage App.",
                 parent=self,
             )
-            self.master.destroy()
+            self.destroy()
             sys.exit(0)
         else:
             pass
@@ -211,8 +180,8 @@ class Win(tk.Toplevel):
         self.frame_n.pack(side="right", expand=True, fill="both")
 
     def ext(self):
-        if Ent_Box(self, icn=Root.DATAFILE[0]).get():
-            self.master.destroy()
+        if Ent_Box(self, icn=ICON_IMG).get():
+            self.destroy()
             sys.exit(0)
 
     @staticmethod
@@ -229,10 +198,11 @@ class Win(tk.Toplevel):
         fl.pack(side="left", expand=0, fill="y")
         fl.pack_propagate(0)
         # ? NAVBAR's internal items______________________________
-        flt = tk.Frame(fl, height=55)
-        flt.pack(side="top", fill="both", expand=1)
-        flt.pack_propagate(0)
-        self.lg_img = ImageTk.PhotoImage(Image.open(Root.DATAFILE[1]))
+        flt = tk.Frame(fl)
+        flt.pack(side="top", fill="both", expand=0)
+        # flt.pack_propagate(0)
+        self.lg_img = getImg("bg.png", imgDATA)
+        flt.config(height=self.lg_img.height())
         lg_canv = tk.Canvas(flt, borderwidth=0, highlightthickness=0)
         lg_canv.place(x=0, y=0, relheight=1, relwidth=1, anchor="nw")
         lg_canv.create_image(0, 0, image=self.lg_img, anchor="nw")
@@ -277,7 +247,7 @@ class Win(tk.Toplevel):
             borderwidth=1,
             foreground="#EFEFEF",
             height=2,
-            command=lambda: About(self, icn=Root.DATAFILE[0]),
+            command=lambda: About(self, icn=ICON_IMG),
             font=("Segoe UI", 10, "bold"),
         )
         bthlb.pack(side="left", fill="x", expand=1, anchor="s")
@@ -358,12 +328,12 @@ class Home(tk.Frame):
         btn1.config(state="disabled")
         btn2.config(state="disabled")
         if Tokens(self).check() is False:
-            root.destroy()
+            app.destroy()
             sys.exit(0)
         Sql_init(1, master=self).tbl()
         if (
             Ent_Box(
-                self, "Enter SuperKey & Confirm to Continue.", Root.DATAFILE[0], "key"
+                self, "Enter SuperKey & Confirm to Continue.", ICON_IMG, "key"
             ).get()
             and Sql_init.NXT == 1
         ):
@@ -383,12 +353,12 @@ class Home(tk.Frame):
         btn1.config(state="disabled")
         btn2.config(state="disabled")
         if Tokens(self).check() is False:
-            root.destroy()
+            app.destroy()
             sys.exit(0)
         Sql_init(1, master=self).tbl()
         if (
             Ent_Box(
-                self, "Enter SuperKey & Confirm to Continue.", Root.DATAFILE[0], "key"
+                self, "Enter SuperKey & Confirm to Continue.", ICON_IMG, "key"
             ).get()
             and Sql_init.NXT == 1
         ):
@@ -647,7 +617,7 @@ class Vote(tk.Frame):
 
     def tkn_check(self, inp: str) -> bool:
         """Restricts all but numbers and that too upto 5 digits only."""
-        if (inp.isdigit() or inp is "") and len(inp) <= 8:
+        if (inp.isdigit() or inp == "") and len(inp) <= 8:
             return True
         else:
             return False
@@ -728,7 +698,7 @@ class Done(tk.Frame):
     @staticmethod
     def bck_chng_clss_save():
         """Moves to Class frame from calling on in the Close/Continue Dialog box which requires passsword."""
-        if Ent_Box(app, icn=Root.DATAFILE[0]).get():
+        if Ent_Box(app, icn=ICON_IMG).get():
             app.replace_frame(Class)
 
 
@@ -763,25 +733,11 @@ class Done_1(Done):
 
 
 def main():
-    global app, root
-    if isWindows:
-        _ = win32event.CreateMutex(None, False, "name")
-        last_error = win32api.GetLastError()
-        if last_error == ERROR_ALREADY_EXISTS:
-            Root.ins_dat([ASSETS_PATH.joinpath("v_r.ico")])
-            msg = tk.Tk()
-            msg.attributes("-topmost", 1)
-            msg.withdraw()
-            msg.title("Error")
-            msg.iconbitmap(Root.DATAFILE[0])
-            mg.showwarning("Error", "App instance already running.", parent=msg)
-            msg.destroy()
-            sys.exit(0)
-    root = Root()
-    root.lower()
-    root.iconify()
+    global app, imgDATA
+    imgDATA = {i: [ASSETS_PATH.joinpath(i), None] for i in ["app.gif", "bg.png"]}
+    _checkInstance()
 
-    app = Win(root)
+    app = Win()
     app.mainloop()
 
 
