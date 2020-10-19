@@ -53,8 +53,7 @@ class Config:
         return
 
     def write_default(self, cfg_head: Optional[str] = None) -> bool:
-        if not DATA_PATH.is_dir():
-            DATA_PATH.mkdir()
+        DATA_PATH.mkdir(parents=True, exist_ok=True)
         if not self._check_integrity():
             with open(self.CONFIG_PATH, "w") as fl:
                 toml.dump(BASE_CONFIG, fl)

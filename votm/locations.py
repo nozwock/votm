@@ -1,9 +1,10 @@
 import os
 import pathlib
-from platform import system
+from appdirs import AppDirs
 
 _resource_dir = "assets"
-_data_dir = "votm-data"
+_appname = "votm"
+_author_alias = "sgrkmr"
 
 # if hasattr(sys, "frozen") -> if bundled/packaged
 # sys.executable -> path for executable
@@ -14,8 +15,4 @@ PKG_DIR = pathlib.Path(__file__).resolve().parent
 ROOT_DIR = PKG_DIR.parent
 LICNESE_PATH = ROOT_DIR.joinpath("LICENSE")
 ASSETS_PATH = PKG_DIR.joinpath(_resource_dir)
-DATA_PATH = None
-if system().lower() == "windows":
-    DATA_PATH = pathlib.Path(os.getenv("ALLUSERSPROFILE")).joinpath(_data_dir)
-else:
-    DATA_PATH = pathlib.Path(os.path.expanduser("~")).joinpath(".{}".format(_data_dir))
+DATA_PATH = pathlib.Path(AppDirs(_appname, _author_alias).site_data_dir)
