@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-<a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Version" src="https://img.shields.io/github/release/sgrkmr/votm.svg?style=flat-square&color=blueviolet"></a>
+<a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Version" src="https://img.shields.io/github/v/tag/sgrkmr/votm.svg?label=version&style=flat-square&color=blueviolet"></a>
 <a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Downloads" src="https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square"></a>
 <a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>
 <a href="https://www.python.org/downloads/release/python-373/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7.3-blue?style=flat-square"></a>
