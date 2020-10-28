@@ -13,9 +13,9 @@
 </p>
 
 <p align="center">
-<b><code>VOTM</code> is a full-featured voting manager desktop app for school use</b><br/>
+<b><i>VOTM</i> is a full-featured Voting Manager, Desktop App for School use.</b><br/>
 <sub>
-It also happens to be my first project to ever work on, It's developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some specific posts (for eg. let's say for selection of Student Council, HeadBoy/Girl, etc.) which are appointed to those students with the most votes attained in the respective posts they're competing for, earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <code>VOTM</code> or automation can offer with ease.
+It's developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, HeadBoy/Girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on.
 </sub>
 </p>
 
