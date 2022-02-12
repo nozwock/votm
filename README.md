@@ -6,7 +6,7 @@
 <a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Version" src="https://img.shields.io/github/v/tag/sgrkmr/votm.svg?label=version&style=flat-square&color=blueviolet"></a>
 <a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Downloads" src="https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square"></a>
 <a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>
-<a href="https://www.python.org/downloads/release/python-373/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7.3-blue?style=flat-square"></a>
+<a href="https://www.python.org/downloads/release/python-373/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7 | 3.10-blue?style=flat-square"></a>
 <!--<a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>-->
 <a href="https://opensource.org/licenses/GPL-3.0"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square"></a>
 <a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>
@@ -90,10 +90,16 @@ source venv/Scripts/activate
 3. To install prerequisites, do:
 
 ```sh
-pip install -r requirements.txt
+pip install .
 ```
 
-**Note:** ⚠️ Dependency management with `poetry` seems to have issues
+**Or** you could just use `poetry` instead via:
+
+```sh
+poetry install
+```
+
+**Note:** ⚠️ ~~Dependency management with `poetry` seems to have issues~~(fixed)
 
 
 ## License
