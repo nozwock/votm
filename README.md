@@ -14,9 +14,7 @@
 
 <p align="center">
 <b><i>VOTM</i> is a full-featured Voting Manager, Desktop App for School use.</b><br/>
-<sub>
-It's developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, HeadBoy/Girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on.
-</sub>
+It's developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yay! 🎉.
 </p>
 
 <p align="center">
@@ -29,46 +27,73 @@ It's developed to automate the laborious procedure of voting which happens once 
 
 ---
 
-# Preview
+
+## 🖼️ Preview
 
 ![scrn_a](https://user-images.githubusercontent.com/57829219/76254956-57155b80-6273-11ea-82ec-984872c89c4a.png)
 ![scrn_b](https://user-images.githubusercontent.com/57829219/76254969-5f6d9680-6273-11ea-9eb9-6dee2628f1f0.png)
 
-## Download
 
+## 😕 It Doesn't Work
+There are many possibilities on why it may not be working. You may not have the runtime requirements mentioned below installed (if you're doing it from source). Other than that some known issues you might've encountered could be:
+- Failed to launch `manage`/`vote`? It's likely due to incompatibility between the dependencies & python version.
+
+
+## 📥 Download Binaries
+
+⚠️ **Not recommended; Outdated binary** ⚠️
 
 | Platform | Version | Download |
 | :-: | :-: | :-: |
 | Windows_x86 | `1.3.2` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.3.2/votm_x86_32_1.3.2.exe">Download</a></kbd></br> |
 
-## Development
 
-- Clone the repo, and checkout to `./votm`:
+## 📚 Usage
 
-```console
-$ git clone https://github.com/sgrkmr/votm.git
-$ cd votm
-```
+### ⚙️ Configuration
 
-- To install dependencies, use:
+Run the `manage` app for configuration (such as Candidate Names, Tokens generation, etc).
 
-```console
-$ pip install -r requirements.txt
-```
-
-### Usage
-
-#### Configuration
-
-Run `manage.py` for configuration (such as Candidate Names, Tokens generation, etc.), using:
+or run `manage.py`, via:
 
 `python -m votm.manage` **or** `python manage.py`
 
-#### Voting
+### 📄 Voting
 
-Now, you may run `vote.py` to start voting, using:
+Now, you may run the `vote` app to start voting.
+
+or run `vote.py`, via:
 
 `python -m votm.vote` **or** `python vote.py`
+
+
+## 🏗️ Get it from Source
+
+1. Clone the repository, and checkout to `./votm`:
+
+```sh
+git clone https://github.com/nozwock/votm.git
+cd votm
+```
+
+### 📋 Runtime Requirements
+
+2. To setup a virtual environment, do:
+```sh
+python -m venv venv
+source venv/Scripts/activate
+```
+
+**Note:** It's `venv/bin/activate` on Linux/MacOS
+
+3. To install prerequisites, do:
+
+```sh
+pip install -r requirements.txt
+```
+
+**Note:** ⚠️ Dependency management with `poetry` seems to have issues
+
 
 ## License
 
