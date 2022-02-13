@@ -9,6 +9,10 @@ repository = "https://github.com/nozwock/votm"
 homepage = "https://github.com/nozwock/votm"
 documentation = "https://github.com/nozwock/votm"
 
+[tool.poetry.scripts]
+manage = 'votm.manage:main'
+vote = 'votm.vote:main'
+
 [tool.poetry.dependencies]
 python = "^3.7.3"
 tabulate = "^0.8.9"
@@ -24,10 +28,6 @@ typed-ast = "^1.5.2"
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
 pyinstaller = "^4.0"
-
-[tool.poetry.scripts]
-votm-manage = 'votm.manage:main'
-votm-vote = 'votm.vote:main'
 
 [tool.black]
 line-length = 88
