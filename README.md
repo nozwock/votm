@@ -35,9 +35,9 @@ It's developed to automate the laborious procedure of voting which happens once 
 
 
 ## 😕 It Doesn't Work
-There are many possibilities on why it may not be working. You may not have the runtime requirements mentioned below installed (if you're doing it from source). Other than that some known issues you might've encountered could be:
-- Failed to launch `manage`/`vote`?
-  - It could be due to incompatibility between the dependencies & python version.
+There are many possibilities on why it may not be working. You may not have the runtime requirements mentioned below installed (if you're doing it from source). Other than that some known reasons for issues you might've encountered might be:
+- due to incompatibility between the dependencies & python version.
+- due to incompatibile version of python; This has been tested only on Python 3.7 & 3.10
 
 
 ## 📥 Download Binaries
