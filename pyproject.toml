@@ -14,7 +14,7 @@ manage = 'votm.manage:main'
 vote = 'votm.vote:main'
 
 [tool.poetry.dependencies]
-python = ">=3.7 <=3.10"
+python = ">=3.7 <3.11"
 tabulate = "^0.8.9"
 XlsxWriter = "^3.0.2"
 appdirs = "^1.4.4"
