@@ -2,7 +2,7 @@
 
 # VOTM
 
-**A full-featured Voting Manager**, Desktop App for School use. <kbd>school-project</kbd>
+**A full-featured Voting Manager**, Desktop App for School use.
 
 <!--
 <p align="center">
