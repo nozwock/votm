@@ -4,6 +4,8 @@
 
 **A full-featured Voting Manager**, Desktop App for School use.
 
+<!-- just in case, that img used above(atleast the source of it) is not mine, at this point in time idk where I had gotten it from -->
+
 <!--
 <p align="center">
 <a href="https://github.com/sgrkmr/votm"><img alt="votm" src="https://user-images.githubusercontent.com/57829219/76256135-6d241b80-6275-11ea-96dc-f512f4a0c91a.png"></a>
@@ -12,8 +14,8 @@
 
 <!--<p align="center">-->
 ![Maintenance](https://img.shields.io/maintenance/no/2021.svg?color=red&style=flat-square)
-[![Version](https://img.shields.io/github/v/tag/sgrkmr/votm.svg?label=version&style=flat-square&color=blueviolet)](https://GitHub.com/sgrkmr/votm/releases/)
-[![Downloads](https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
+[![Version](https://img.shields.io/github/v/tag/nozwock/votm.svg?label=version&style=flat-square&color=blueviolet)](https://GitHub.com/sgrkmr/votm/releases/)
+[![Downloads](https://img.shields.io/github/downloads/nozwock/votm/total.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
 <img alt="python3" src="https://img.shields.io/badge/Python-3.7 | 3.10-blue?style=flat-square">
 <!--<a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>-->
 <!--<a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>-->
@@ -26,7 +28,7 @@ It was developed to automate the laborious procedure of voting which happens onc
 </p>
 
 <p align="center">
-<a href="https://github.com/sgrkmr/votm/issues/new/choose">Report Bug</a> · <a href="https://github.com/sgrkmr/votm/issues/new/choose">Request Feature</a>
+<a href="https://github.com/nozwock/votm/issues/new/choose">Report Bug</a> · <a href="https://github.com/nozwock/votm/issues/new/choose">Request Feature</a>
 </p>
 
 <p align="center">
@@ -54,7 +56,7 @@ There are many possibilities on why it may not be working. You may not have the 
 
 | Platform | Version | Download |
 | :-: | :-: | :-: |
-| Windows_x86 | `1.3.2` | <kbd><a href="https://github.com/sgrkmr/votm/releases/download/1.3.2/votm_x86_32_1.3.2.exe">Download</a></kbd></br> |
+| Windows_x86 | `1.3.2` | <kbd><a href="https://github.com/nozwock/votm/releases/download/1.3.2/votm_x86_32_1.3.2.exe">Download</a></kbd></br> |
 
 
 ## 📚 Usage
