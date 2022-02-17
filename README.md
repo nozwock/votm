@@ -1,22 +1,28 @@
+<img src="https://user-images.githubusercontent.com/57829219/154505391-b8b8d7d4-7e0a-4e80-a5bf-87f91b90cd24.png" align="left" height="107px" hspace="0px" vspace="20px">
+
+# VOTM <kbd>school-project</kbd>
+
+**A full-featured Voting Manager**, Desktop App for School use.
+
+<!--
 <p align="center">
 <a href="https://github.com/sgrkmr/votm"><img alt="votm" src="https://user-images.githubusercontent.com/57829219/76256135-6d241b80-6275-11ea-96dc-f512f4a0c91a.png"></a>
 </p>
+-->
 
-<p align="center">
-<a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Version" src="https://img.shields.io/github/v/tag/sgrkmr/votm.svg?label=version&style=flat-square&color=blueviolet"></a>
-<a href="https://GitHub.com/sgrkmr/votm/releases/"><img alt="Downloads" src="https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square"></a>
+<!--<p align="center">-->
+![Maintenance](https://img.shields.io/maintenance/no/2021.svg?color=red&style=flat-square)
+[![Version](https://img.shields.io/github/v/tag/sgrkmr/votm.svg?label=version&style=flat-square&color=blueviolet)](https://GitHub.com/sgrkmr/votm/releases/)
+[![Downloads](https://img.shields.io/github/downloads/sgrkmr/votm/total.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
+<img alt="python3" src="https://img.shields.io/badge/Python-3.7 | 3.10-blue?style=flat-square">
 <!--<a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>-->
-<a href="https://www.python.org/downloads/release/python-373/"><img alt="python3" src="https://img.shields.io/badge/Python-3.7 | 3.10-blue?style=flat-square"></a>
 <!--<a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>-->
 <!--<a href="https://opensource.org/licenses/GPL-3.0"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square"></a>-->
 <!--<a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>-->
-<br>
-<img alt="Maintenance" src="https://img.shields.io/maintenance/no/2021.svg?color=red&style=for-the-badge">
-</p>
+<!--</p>-->
 
-<p align="center">
-<b><i>VOTM</i> is a full-featured Voting Manager, Desktop App for School use.</b><br/>
-It's developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yay! 🎉.
+<p align="left">
+It was developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yay! 🎉.
 </p>
 
 <p align="center">
