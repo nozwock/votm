@@ -1,8 +1,8 @@
 <img src="https://user-images.githubusercontent.com/57829219/154505391-b8b8d7d4-7e0a-4e80-a5bf-87f91b90cd24.png" align="left" height="107px" hspace="0px" vspace="20px">
 
-# VOTM <kbd>school-project</kbd>
+# VOTM
 
-**A full-featured Voting Manager**, Desktop App for School use.
+**A full-featured Voting Manager**, Desktop App for School use. <kbd>school-project</kbd>
 
 <!--
 <p align="center">
@@ -21,7 +21,7 @@
 <!--<a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-000000.svg?style=flat-square"></a>-->
 <!--</p>-->
 
-<p align="left">
+<p align="center">
 It was developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yay! 🎉.
 </p>
 
