@@ -13,10 +13,11 @@
 -->
 
 <!--<p align="center">-->
-![Maintenance](https://img.shields.io/maintenance/no/2021.svg?color=red&style=flat-square)
+![Maintenance - No](https://img.shields.io/maintenance/no/2021.svg?color=red&style=flat-square)
 [![Version](https://img.shields.io/github/v/tag/nozwock/votm.svg?label=version&style=flat-square&color=blueviolet)](https://GitHub.com/sgrkmr/votm/releases/)
 [![Downloads](https://img.shields.io/github/downloads/nozwock/votm/total.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
-<img alt="python3" src="https://img.shields.io/badge/Python-3.7 | 3.10-blue?style=flat-square">
+![python3](https://img.shields.io/badge/Python-3.7%20|%203.10-blue?style=flat-square)
+![Platform - Linux and Windows](https://img.shields.io/badge/Platfrom-Linux%20|%20Windows-lightgrey?style=flat-square)
 <!--<a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>-->
 <!--<a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>-->
 <!--<a href="https://opensource.org/licenses/GPL-3.0"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square"></a>-->
