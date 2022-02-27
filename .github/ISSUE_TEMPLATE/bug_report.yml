@@ -38,6 +38,7 @@ body:
       description: If this issue is occurring on more than 1 version of the app, select the appropriate versions.
       multiple: true
       options:
+       - Other
        - 1.3.2
        - 1.4.0
        - 1.4.1
