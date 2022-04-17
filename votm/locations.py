@@ -4,7 +4,7 @@ from appdirs import AppDirs
 
 _resource_dir = "assets"
 _appname = "votm"
-_author_alias = "sgrkmr"
+_author_alias = "nozwock"
 
 # if hasattr(sys, "frozen") -> if bundled/packaged
 # sys.executable -> path for executable
@@ -15,4 +15,4 @@ PKG_DIR = pathlib.Path(__file__).resolve().parent
 # ROOT_DIR = PKG_DIR.parent
 # LICNESE_PATH = ROOT_DIR.joinpath("LICENSE")
 ASSETS_PATH = PKG_DIR.joinpath(_resource_dir)
-DATA_PATH = pathlib.Path(AppDirs(_appname, _author_alias).site_data_dir)
+DATA_PATH = pathlib.Path(AppDirs(_appname, _author_alias).user_data_dir)
