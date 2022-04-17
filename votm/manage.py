@@ -24,11 +24,11 @@ from typing import Optional
 isWindows = platform.system().lower() == "windows"
 isLinux = platform.system().lower() == "linux"
 
-if isWindows:
-    import ctypes
-    import win32api
-    import win32event
-    from winerror import ERROR_ALREADY_EXISTS
+# if isWindows:
+#     import ctypes
+#     import win32api
+#     import win32event
+#     from winerror import ERROR_ALREADY_EXISTS
 
 import xlsxwriter
 from shutil import copyfile
@@ -2496,7 +2496,8 @@ def main():
             "sttb.png",
         ]
     }
-    _checkInstance()
+    # Disabling UAC req(permanently) and Single instance check (win; temp?)
+    # _checkInstance()
 
     app = Win()
     app.mainloop()
