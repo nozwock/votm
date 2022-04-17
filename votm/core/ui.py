@@ -1,5 +1,5 @@
 """
-Copyright (C) 2022 nozwock
+Copyright (C) 2019-2022 nozwock
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -253,7 +253,7 @@ class About(tk.Toplevel):
         label.pack(side="top", anchor="nw")
         ver = tk.Label(about_tp, text=f"Version {__version__}")
         ver.pack(side="top", anchor="nw")
-        auth = tk.Label(about_tp, text=f"Copyright (C) 2019 {__author__}")
+        auth = tk.Label(about_tp, text=f"Copyright (C) 2019-2022 {__author__}")
         auth.pack(side="top", anchor="nw", pady=(10, 0))
         bug_ttl = tk.Label(about_tp, text="Report bugs or request enhancements at:")
         bug_ttl.pack(side="top", anchor="nw", pady=(10, 0))
