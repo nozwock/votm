@@ -48,5 +48,5 @@ exe = EXE(
     runtime_tmpdir=None,
     console=False,
     icon=ICON_PATH,
-    uac_admin=True,
+    uac_admin=False,
 )

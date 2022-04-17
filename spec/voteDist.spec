@@ -38,7 +38,7 @@ exe = EXE(
     upx=True,
     console=False,
     icon=ICON_PATH,
-    uac_admin=True,
+    uac_admin=False,
 )
 coll = COLLECT(
     exe,
