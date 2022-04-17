@@ -1,5 +1,5 @@
 """
-Copyright (C) 2019 Sagar Kumar
+Copyright (C) 2022 nozwock
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -257,7 +257,7 @@ class About(tk.Toplevel):
         auth.pack(side="top", anchor="nw", pady=(10, 0))
         bug_ttl = tk.Label(about_tp, text="Report bugs or request enhancements at:")
         bug_ttl.pack(side="top", anchor="nw", pady=(10, 0))
-        url = "https://github.com/sgrkmr/votm/issues"
+        url = "https://github.com/nozwock/votm/issues"
         bug_lnk = tk.Label(about_tp, text=url, fg="#6A00FF")
         bug_lnk.pack(side="top", anchor="nw")
         url_fnt = font.Font(bug_lnk, bug_lnk.cget("font"))
