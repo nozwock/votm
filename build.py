@@ -4,7 +4,7 @@ import shutil
 import subprocess
 from sys import argv
 from pathlib import Path
-from spec._data import BASE_DIR
+from build_aux._data import BASE_DIR
 from votm import __version__
 
 
@@ -12,17 +12,17 @@ start = time.time()
 argv = " ".join(argv[1:])
 
 SPEC_FILE = [
-    "manageDist.spec",
-    "voteDist.spec",
-    "manageBundledBin.spec",
-    "voteBundledBin.spec",
+    "manageDist.build_aux",
+    "voteDist.build_aux",
+    "manageBundledBin.build_aux",
+    "voteBundledBin.build_aux",
 ]
 
-TEMP_FILE = [f"TEMP_{i}.spec" for i, _ in enumerate(SPEC_FILE)]
+TEMP_FILE = [f"TEMP_{i}.build_aux" for i, _ in enumerate(SPEC_FILE)]
 
 for i, j in enumerate(SPEC_FILE):
     try:
-        shutil.copy(BASE_DIR.joinpath(f"spec/{j}"), BASE_DIR.joinpath(TEMP_FILE[i]))
+        shutil.copy(BASE_DIR.joinpath(f"build_aux/{j}"), BASE_DIR.joinpath(TEMP_FILE[i]))
     except:
         for i in TEMP_FILE:
             try:
