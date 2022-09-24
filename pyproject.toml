@@ -2,7 +2,7 @@
 name = "votm"
 version = "1.4.2"
 description = "A full-featured Voting Manager - desktop app for school use"
-authors = ["Sagar <57829219+nozwock@users.noreply.github.com>"]
+authors = ["nozwock <57829219+nozwock@users.noreply.github.com>"]
 license = "GPL-3.0"
 readme = "README.md"
 repository = "https://github.com/nozwock/votm"
@@ -21,8 +21,8 @@ appdirs = "^1.4.4"
 Pillow = "^9.0.1"
 toml = "^0.10.2"
 ttkthemes = "^3.2.2"
-pywin32 = {version = "*", platform = "windows"}
-pywin32-ctypes = {version = "*", platform = "windows"}
+pywin32 = { version = "*", platform = "windows" }
+pywin32-ctypes = { version = "*", platform = "windows" }
 typed-ast = "^1.5.2"
 
 [tool.poetry.dev-dependencies]
