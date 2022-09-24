@@ -45,12 +45,6 @@ It was developed to automate the laborious procedure of voting which happens onc
 ![scrn_b](https://user-images.githubusercontent.com/57829219/76254969-5f6d9680-6273-11ea-9eb9-6dee2628f1f0.png)
 
 
-## 😕 It Doesn't Work?
-There are many possibilities on why it may not be working. You may not have the runtime requirements mentioned below installed (if you're doing it from source). Other than that some known reasons for issues you might've encountered might be:
-- due to incompatibility between the dependencies & python version.
-- due to incompatible version of python; This has been tested only on Python 3.7 & 3.10
-
-
 ## 📥 Download Binaries
 
 ⚠️ **Not recommended; Outdated binary** ⚠️
@@ -76,13 +70,21 @@ Or if you've gotten it directly from source:
     
     `python -m votm.vote` **or** `python vote.py`
 
+|           |                                                                                                                       |
+| --------- | :-------------------------------------------------------------------------------------------------------------------- |
 | **Note:** | 1. Default password is a blank field (i.e. ""). <br>2. Password/key are simply stored as sha256 hashes (not salted!). |
-| --------- | --------------------------------------------------------------------------------------------------------------------- |
 
 ### ⚙️ Configuration file
 Configuration file is stored at these following paths-
 - Windows: `%USERPROFILE%\AppData\Local\nozwock\votm`
 - Linux: `$HOME/.local/share/votm`
+
+
+## 😕 It Doesn't Work?
+There are many possibilities on why it may not be working. You may not have the runtime requirements mentioned below installed (if you're doing it from source). Other than that some known reasons for issues you might've encountered might be:
+- due to incompatibility between the dependencies & python version.
+- due to incompatible version of python; This has been tested only on Python 3.7 & 3.10
+
 
 ## 🏗️ Get it from Source
 
