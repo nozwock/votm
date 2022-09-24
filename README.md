@@ -33,7 +33,7 @@ It was developed to automate the laborious procedure of voting which happens onc
 </p>
 
 <p align="center">
-<sub><code>Sorry for the terrible grammer, I guess?</code></sub>
+<sub><code>Sorry for the terrible grammar, I guess?</code></sub>
 </p>
 
 ---
