@@ -12,13 +12,13 @@ start = time.time()
 argv = " ".join(argv[1:])
 
 SPEC_FILE = [
-    "manageDist.build_aux",
-    "voteDist.build_aux",
-    "manageBundledBin.build_aux",
-    "voteBundledBin.build_aux",
+    "manageDist.spec",
+    "voteDist.spec",
+    "manageBundledBin.spec",
+    "voteBundledBin.spec",
 ]
 
-TEMP_FILE = [f"TEMP_{i}.build_aux" for i, _ in enumerate(SPEC_FILE)]
+TEMP_FILE = [f"TEMP_{i}.spec" for i, _ in enumerate(SPEC_FILE)]
 
 for i, j in enumerate(SPEC_FILE):
     try:
