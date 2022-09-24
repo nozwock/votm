@@ -21,13 +21,13 @@ appdirs = "^1.4.4"
 Pillow = "^9.0.1"
 toml = "^0.10.2"
 ttkthemes = "^3.2.2"
-pywin32 = {version = "^301", platform = "windows"}
-pywin32-ctypes = {version = "^0.2.0", platform = "windows"}
+pywin32 = {version = "*", platform = "windows"}
+pywin32-ctypes = {version = "*", platform = "windows"}
 typed-ast = "^1.5.2"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
-pyinstaller = "^4.9"
+pyinstaller = "^4.10"
 
 [tool.black]
 line-length = 88
