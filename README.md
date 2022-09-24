@@ -17,7 +17,7 @@
 [![Version](https://img.shields.io/github/v/tag/nozwock/votm.svg?label=version&style=flat-square&color=blueviolet)](https://GitHub.com/sgrkmr/votm/releases/)
 [![Downloads](https://img.shields.io/github/downloads/nozwock/votm/total.svg?style=flat-square)](https://GitHub.com/sgrkmr/votm/releases/)
 ![python3](https://img.shields.io/badge/Python-3.7%20|%203.10-blue?style=flat-square)
-![Platform - Linux and Windows](https://img.shields.io/badge/Platfrom-Linux%20|%20Windows-lightgrey?style=flat-square)
+![Platform - Linux and Windows](https://img.shields.io/badge/Platfrom-Linux%20|%20Windows-darkgreen?style=flat-square)
 <!--<a href="https://github.com/sgrkmr/votm/commits/master"><img alt="Commits" src="https://img.shields.io/github/last-commit/sgrkmr/votm?style=flat-square"></a>-->
 <!--<a href="https://GitHub.com/sgrkmr/votm/graphs/contributors/"><img alt="Contributors" src="https://img.shields.io/github/contributors/sgrkmr/votm.svg?style=flat-square"></a>-->
 <!--<a href="https://opensource.org/licenses/GPL-3.0"><img alt="License: GPL-3.0" src="https://img.shields.io/github/license/sgrkmr/votm.svg?style=flat-square"></a>-->
@@ -47,11 +47,9 @@ It was developed to automate the laborious procedure of voting which happens onc
 
 ## 📥 Download Binaries
 
-⚠️ **Not recommended; Outdated binary** ⚠️
-
 |  Platform   | Version |                                     Download                                     |
 | :---------: | :-----: | :------------------------------------------------------------------------------: |
-| Windows_x86 | `1.3.2` | <kbd><a href="https://github.com/nozwock/votm/releases/">Download</a></kbd></br> |
+| Windows_x86 | `1.5.0` | <kbd><a href="https://github.com/nozwock/votm/releases/">Download</a></kbd></br> |
 
 
 ## 📚 Usage
