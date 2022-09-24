@@ -25,7 +25,7 @@
 <!--</p>-->
 
 <p align="center">
-It was developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yay! 🎉.
+It was developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yaya! :octocat:
 </p>
 
 <p align="center">
@@ -47,9 +47,9 @@ It was developed to automate the laborious procedure of voting which happens onc
 
 ## 📥 Download Binaries
 
-|  Platform   | Version |                                     Download                                     |
-| :---------: | :-----: | :------------------------------------------------------------------------------: |
-| Windows_x86 | `1.5.0` | <kbd><a href="https://github.com/nozwock/votm/releases/">Download</a></kbd></br> |
+|  Platform   | Version |                                         Links                                          |
+| :---------: | :-----: | :------------------------------------------------------------------------------------: |
+| Windows_x86 | `1.5.0` | <kbd><a href="https://github.com/nozwock/votm/releases/latest">Download</a></kbd></br> |
 
 
 ## 📚 Usage
