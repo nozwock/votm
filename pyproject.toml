@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "votm"
-version = "1.4.2"
+version = "1.5.0"
 description = "A full-featured Voting Manager - desktop app for school use"
 authors = ["nozwock <57829219+nozwock@users.noreply.github.com>"]
 license = "GPL-3.0"
