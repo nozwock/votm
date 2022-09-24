@@ -854,7 +854,7 @@ class Posts(tk.Frame):
         dn_btn.pack(side="left", fill="x", expand=1)
 
     def tag_check(self, inp):
-        if ((inp.isalpha() or inp is "") and len(inp) <= 3) or inp in [
+        if ((inp.isalpha() or inp == "") and len(inp) <= 3) or inp in [
             i.split(";")[-1].strip() for i in self.flpost
         ]:
             return True
@@ -862,7 +862,7 @@ class Posts(tk.Frame):
             return False
 
     def pst_check(self, inp):
-        if ((inp.isalpha() or inp is "") and len(inp) <= 15) or inp in [
+        if ((inp.isalpha() or inp == "") and len(inp) <= 15) or inp in [
             i.split(";")[0].strip() for i in self.flpost
         ]:
             return True
@@ -1118,13 +1118,13 @@ class Classes(tk.Frame):
         try:
             if list(inp)[0] != "0":
                 if len(inp) == 1:
-                    if (inp.isdigit() or inp is "") and len(inp) <= 2:
+                    if (inp.isdigit() or inp == "") and len(inp) <= 2:
                         return True
                     else:
                         return False
-                elif list(inp)[0] == "1" and len(inp) == 2 or inp is "":
+                elif list(inp)[0] == "1" and len(inp) == 2 or inp == "":
                     if list(inp)[-1] in ["1", "2", "0"]:
-                        if (inp.isdigit() or inp is "") and len(inp) <= 2:
+                        if (inp.isdigit() or inp == "") and len(inp) <= 2:
                             return True
                         else:
                             return False
@@ -1282,7 +1282,7 @@ class Sections(tk.Frame):
 
     def one_check(self, inp: str) -> bool:
         """Check to allow only 1 alphabet."""
-        if len(inp + self.clss_add_sec.get()) <= 1 and (inp.isalpha()) or inp is "":
+        if len(inp + self.clss_add_sec.get()) <= 1 and (inp.isalpha()) or inp == "":
             return True
         else:
             return False
@@ -1926,7 +1926,7 @@ class Settings(tk.Frame):
     @staticmethod
     def tkn_check(inp: str) -> bool:
         """Restricts all but numbers and that too upto 5 digits only."""
-        if (inp.isdigit() or inp is "") and len(inp) <= 5:
+        if (inp.isdigit() or inp == "") and len(inp) <= 5:
             return True
         else:
             return False
