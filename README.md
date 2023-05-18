@@ -25,15 +25,11 @@
 <!--</p>-->
 
 <p align="center">
-It was developed to automate the laborious procedure of voting which happens once every year in schools (at least in my school) for some posts (for eg. let's say for selection of Student Council, Head-boy/girl, etc.), earlier this was used to be done through the ballot box system which used to take a lot of time and effort of the school staff to yield the results which would normally take weeks, contrary to what <i>VOTM</i> or automation can offer with ease. It also happens to be my first project to ever work on, so yaya! :octocat:
+This project was created to automate the time-consuming voting process that occurs annually in schools (at least in my school) for various positions, such as Student Council and Head Boy/Girl. Previously, this was done manually using a ballot box system, which required significant time and effort from the school staff to tally the results, often taking weeks. In contrast, <i>VOTM</i> (Voting Manager) offers efficient automation, providing results with ease. It holds a special place as my very first project. Yaya! :octocat:
 </p>
 
 <p align="center">
 <a href="https://github.com/nozwock/votm/issues/new/choose">Report Bug</a> · <a href="https://github.com/nozwock/votm/issues/new/choose">Request Feature</a>
-</p>
-
-<p align="center">
-<sub><code>Sorry for the terrible grammar, I guess?</code></sub>
 </p>
 
 ---
